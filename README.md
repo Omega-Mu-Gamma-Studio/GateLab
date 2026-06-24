@@ -253,9 +253,9 @@ GateLab/
 
 GateLab is built by two people.
 
-**Alberto** ([@albertoct](https://github.com/albertoct)) — Project Lead & Creative Lead. Product vision, interaction design, unit architecture, lesson design, and the guy who will absolutely pivot the tech stack at 11pm the night before development starts.
+**Alberto Felix** ([@albertofelix](https://github.com/albertofelix08)) — Project Lead & Creative Lead. Product vision, interaction design, unit architecture, lesson design, and the guy who will absolutely pivot the tech stack at 11pm the night before development starts.
 
-**Aaron** ([@aaronmcgeo](https://github.com/aaronmcgeo)) — Co-Lead. Implementation partner, co-architect, and the reason things actually ship.
+**Aaron Mcgeo** ([@aaronmcgeo](https://github.com/aaronmcgeo)) — Co-Lead. Implementation partner, co-architect, and the reason things actually ship.
 
 ---
 
