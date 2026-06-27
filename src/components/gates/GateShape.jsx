@@ -206,6 +206,8 @@ export default function GateShape({
           x={geo.output.x} y={geo.output.y}
           radius={PIN_HIT_RADIUS}
           fill="transparent"
+          onMouseDown={handleOutputPinClick}
+          onTouchStart={handleOutputPinClick}
           onClick={handleOutputPinClick}
           onTap={handleOutputPinClick}
         />

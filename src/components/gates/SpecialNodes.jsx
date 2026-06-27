@@ -125,6 +125,8 @@ export function InputNode({ node, value, onClick, onOutputPinClick, theme, selec
         <Circle
           x={pinX} y={pinY} radius={PIN_HIT}
           fill="transparent"
+          onMouseDown={handlePinClick}
+          onTouchStart={handlePinClick}
           onClick={handlePinClick} onTap={handlePinClick}
         />
       )}
@@ -280,6 +282,8 @@ export function ConstNode({ node, onOutputPinClick, theme }) {
         <Circle
           x={pinX} y={pinY} radius={PIN_HIT}
           fill="transparent"
+          onMouseDown={handlePinClick}
+          onTouchStart={handlePinClick}
           onClick={handlePinClick} onTap={handlePinClick}
         />
       )}
