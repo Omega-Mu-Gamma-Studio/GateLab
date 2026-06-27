@@ -1,42 +1,41 @@
-import { useState } from 'react'
+/**
+ * App.jsx
+ *
+ * Root layout.
+ *
+ * Home page:  TopBar + Home (full width, no panels)
+ * Workspace:  TopBar + [Sidebar | ControlPanel+Canvas | InfoPanel]
+ *
+ * InfoPanel is a permanent right column — always visible in the workspace.
+ * No open/close state needed.
+ */
 import { useLessonStore } from './store/lessonStore'
 import TopBar from './components/ui/TopBar'
 import Sidebar from './components/ui/Sidebar'
 import ControlPanel from './components/ui/ControlPanel'
-import InfoDrawer from './components/ui/InfoDrawer'
+import InfoPanel from './components/ui/InfoDrawer'
 import GateCanvas from './components/canvas/GateCanvas'
 import Home from './pages/Home'
 import './index.css'
 
 function WorkspaceView() {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      overflow: 'hidden',
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <TopBar />
 
-      {/* Below topbar */}
-      <div style={{
-        display: 'flex',
-        flex: 1,
-        overflow: 'hidden',
-        marginTop: '52px',
-      }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', marginTop: '52px' }}>
+        {/* Left nav */}
         <Sidebar />
 
-        {/* Main area: control strip + canvas */}
+        {/* Centre: control strip + canvas */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-          <ControlPanel onOpenDrawer={() => setDrawerOpen(true)} />
+          <ControlPanel />
           <GateCanvas />
         </div>
-      </div>
 
-      <InfoDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+        {/* Right info panel — always visible */}
+        <InfoPanel />
+      </div>
     </div>
   )
 }

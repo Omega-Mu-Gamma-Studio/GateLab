@@ -1,6 +1,17 @@
+/**
+ * lessonStore.js
+ *
+ * Navigation state: unit → lesson → phase.
+ * On every navigation action, pushes the new phase snapshot into canvasStore.
+ *
+ * Circular import note: lessonStore imports canvasStore, and GateCanvas
+ * imports both. Vite handles this fine because by the time any action is
+ * called both modules are fully initialised. No lazy import needed.
+ */
 import { create } from 'zustand'
+import { getLesson } from '../lessons/index'
+import { useCanvasStore } from './canvasStore'
 
-// Units manifest — source of truth for Home + Sidebar
 export const UNITS = [
   {
     id: 1,
@@ -10,7 +21,6 @@ export const UNITS = [
     description: 'From primitive AND/OR/NOT gates through NAND/NOR universality, Boolean laws, and K-Map simplification. The foundation everything else is built on.',
     lessons: 10,
     status: 'dev',
-    // Which right-panel tabs are available in this unit
     panels: [],
   },
   {
@@ -28,7 +38,7 @@ export const UNITS = [
     roman: 'III',
     title: 'Sequential Circuits',
     sub: 'Flip-Flops, Latches, Counters',
-    description: 'SR, JK, D, T flip-flops with live timing diagrams that grow as you interact. State diagrams pulse on every clock edge. The ripple counter shows why ripple means ripple.',
+    description: 'SR, JK, D, T flip-flops with live timing diagrams that grow as you interact. State diagrams pulse on every clock edge.',
     lessons: 9,
     status: 'dev',
     panels: ['timing', 'state', 'verilog'],
@@ -38,7 +48,7 @@ export const UNITS = [
     roman: 'IV',
     title: 'Asynchronous Circuits',
     sub: 'Race Conditions & Hazards',
-    description: 'Per-gate delay sliders, live glitch visualization, event-driven simulation with a timeline scrubber. Add the consensus term and watch the glitch disappear.',
+    description: 'Per-gate delay sliders, live glitch visualisation, event-driven simulation with a timeline scrubber.',
     lessons: 6,
     status: 'dev',
     panels: ['timing', 'verilog'],
@@ -48,24 +58,50 @@ export const UNITS = [
     roman: 'V',
     title: 'Memory & Programmable Logic',
     sub: 'SRAM, ROM, PLA, PAL, Hamming',
-    description: 'Memory grid visualizer, clickable PLA/PAL dot matrix, and Hamming code error injection. Inject a bit flip, watch the syndrome point at it, hit Correct.',
+    description: 'Memory grid visualiser, clickable PLA/PAL dot matrix, and Hamming code error injection.',
     lessons: 7,
     status: 'dev',
     panels: [],
   },
 ]
 
-export const useLessonStore = create((set, get) => ({
-  // null = on home page
-  activeUnitId: null,
-  activeLessonIdx: 0,
-  // 'work' | 'break' | 'try'
-  phase: 'work',
+// Push a lesson phase into the canvas store.
+// Called after every navigation action.
+function syncCanvas(unitId, lessonIdx, phase) {
+  const canvas = useCanvasStore.getState()
+  const lesson = getLesson(unitId, lessonIdx)
+  if (!lesson) { canvas.reset(); return }
+  const phaseData = lesson.phases?.[phase]
+  if (!phaseData) { canvas.reset(); return }
+  canvas.loadPhase(phaseData, phase)
+}
 
-  goToUnit: (unitId) => set({ activeUnitId: unitId, activeLessonIdx: 0, phase: 'work' }),
-  goHome: () => set({ activeUnitId: null, activeLessonIdx: 0, phase: 'work' }),
-  goToLesson: (idx) => set({ activeLessonIdx: idx, phase: 'work' }),
-  setPhase: (phase) => set({ phase }),
+export const useLessonStore = create((set, get) => ({
+  activeUnitId:    null,
+  activeLessonIdx: 0,
+  phase:           'work',
+
+  goToUnit(unitId) {
+    set({ activeUnitId: unitId, activeLessonIdx: 0, phase: 'work' })
+    syncCanvas(unitId, 0, 'work')
+  },
+
+  goHome() {
+    set({ activeUnitId: null, activeLessonIdx: 0, phase: 'work' })
+    useCanvasStore.getState().reset()
+  },
+
+  goToLesson(idx) {
+    const { activeUnitId } = get()
+    set({ activeLessonIdx: idx, phase: 'work' })
+    syncCanvas(activeUnitId, idx, 'work')
+  },
+
+  setPhase(phase) {
+    const { activeUnitId, activeLessonIdx } = get()
+    set({ phase })
+    syncCanvas(activeUnitId, activeLessonIdx, phase)
+  },
 
   activeUnit: () => UNITS.find(u => u.id === get().activeUnitId) || null,
 }))
