@@ -1,13 +1,5 @@
 /**
  * Unit I · Lesson 01 — AND Gate
- *
- * Teaches: the AND gate computes logical conjunction.
- * Output is HIGH only when ALL inputs are HIGH.
- *
- * Phases:
- *   work  — both inputs HIGH, output HIGH, fully wired
- *   break — one wire broken (input B disconnected), output undefined → LOW
- *   try   — student wires two inputs to an AND gate, must make output HIGH
  */
 
 const NODES_FULL = [
@@ -31,20 +23,28 @@ export default {
     lessonIndex: 0,
     concept:     'AND',
     panels:      [],
+    workOrder:   'WO-0047',
+    location:    'Deck 7 · Bay 4',
+    shift:       'Alpha Shift',
+  },
+
+  narrative: {
+    briefing: 'Bay 4 environmental controls nominal. Both pressure sensors read HIGH — the AND gate confirms joint confirmation before venting.',
+    fault:    'INCIDENT REPORT: Sensor B feed disconnected at junction J-14. AND gate receiving floating input. Vent circuit locked LOW. Bay pressure rising.',
+    dispatch: 'Restore the sensor feeds. Wire both inputs to the AND gate and connect the gate to the vent relay. Both sensors must read HIGH to authorize vent.',
+    success:  'Vent circuit restored. Bay 4 pressure normalizing. WO-0047 closed by Alpha Shift.',
+    lore:     'The AND gate is the simplest form of consensus logic. Two signals must agree before any action is authorized. Every airlock on the ship uses this principle.',
   },
 
   phases: {
-    // ── See It Work ──────────────────────────────────────────────────────
     work: {
       hint: 'Both inputs are HIGH. The AND gate outputs HIGH — all inputs must agree.',
       nodes: NODES_FULL,
       wires: WIRES_FULL,
       inputs: { inA: true, inB: true },
     },
-
-    // ── See It Break ─────────────────────────────────────────────────────
     break: {
-      hint: 'Input B is disconnected. The AND gate sees a floating input — output collapses to LOW. Click the broken wire to inspect it.',
+      hint: 'Input B is disconnected. The AND gate sees a floating input — output collapses to LOW.',
       faultNodeId: 'g1',
       nodes: NODES_FULL,
       inputs: { inA: true, inB: false },
@@ -54,10 +54,8 @@ export default {
         { id: 'w3', from: { nodeId: 'g1',  pin: 'output' }, to: { nodeId: 'out', pin: 'input', index: 0 } },
       ],
     },
-
-    // ── You Try ──────────────────────────────────────────────────────────
     try: {
-      hint: 'Wire input A and input B to the AND gate. Then wire the AND gate to the output. Toggle the inputs — can you make the output go HIGH?',
+      hint: 'Wire input A and input B to the AND gate. Then wire the AND gate to the output.',
       nodes: [
         { id: 'inA',  type: 'INPUT',  x: 80,  y: 120, scale: 1,   locked: false },
         { id: 'inB',  type: 'INPUT',  x: 80,  y: 240, scale: 1,   locked: false },

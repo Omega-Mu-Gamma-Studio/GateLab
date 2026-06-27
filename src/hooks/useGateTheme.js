@@ -21,6 +21,7 @@ function readTokens() {
     textMuted:    get('--text-muted')   || '#4a5248',
     textH:        get('--text-h')       || '#eef2ee',
     bg:           get('--bg')           || '#0a0d0a',
+    accentRgb:    get('--accent-rgb')   || '0, 255, 136',
   }
 }
 

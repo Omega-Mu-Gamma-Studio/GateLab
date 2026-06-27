@@ -22,7 +22,7 @@
 import { Group, Path, Circle, Line, Text } from 'react-konva'
 import { GATE_GEOMETRY } from './gateGeometry'
 
-const SIG_HIGH   = '#00ff88'
+// SIG_HIGH is now read from theme.accent — see sigColor()
 const SIG_LOW    = '#1a2e1a'
 const SIG_UNDEF  = '#4a5248'
 const ERROR_GLOW = '#ff3b3b'
@@ -32,8 +32,8 @@ const PIN_RADIUS_SM = 3.5
 // Slightly enlarged hit area on output pin to make it easy to click
 const PIN_HIT_RADIUS = 10
 
-function sigColor(val) {
-  if (val === true)  return SIG_HIGH
+function sigColor(val, theme) {
+  if (val === true)  return theme?.accent || '#00ff88'
   if (val === false) return SIG_LOW
   return SIG_UNDEF
 }
@@ -82,6 +82,7 @@ export default function GateShape({
   if (!geo) return null
 
   const t = theme || {}
+  const sigHigh = t.accent || '#00ff88'
 
   const bodyFill   = error    ? 'rgba(255,59,59,0.12)'
                    : selected ? (t.accentDim || 'rgba(0,255,136,0.12)')
@@ -95,7 +96,7 @@ export default function GateShape({
                    : selected ? (t.accent    || '#00ff88')
                    : null
 
-  const outColor   = sigColor(outputValue)
+  const outColor   = sigColor(outputValue, t)
 
   function handleDragEnd(e) {
     onDragEnd?.({ x: e.target.x(), y: e.target.y() })
@@ -121,7 +122,7 @@ export default function GateShape({
         <Line
           key={`istub-${i}`}
           points={[stub.x1, stub.y1, stub.x2, stub.y2]}
-          stroke={sigColor(inputValues[i])}
+          stroke={sigColor(inputValues[i], t)}
           strokeWidth={2} lineCap="round"
         />
       ))}
@@ -168,8 +169,8 @@ export default function GateShape({
           key={`ipin-${i}`}
           x={pin.x} y={pin.y}
           radius={PIN_RADIUS_SM}
-          fill={sigColor(inputValues[i])}
-          shadowColor={inputValues[i] === true ? SIG_HIGH : undefined}
+          fill={sigColor(inputValues[i], t)}
+          shadowColor={inputValues[i] === true ? sigHigh : undefined}
           shadowBlur={inputValues[i] === true ? 8 : 0}
           shadowOpacity={0.8}
         />
@@ -180,10 +181,25 @@ export default function GateShape({
         x={geo.output.x} y={geo.output.y}
         radius={PIN_RADIUS}
         fill={outColor}
-        shadowColor={outputValue === true ? SIG_HIGH : undefined}
+        shadowColor={outputValue === true ? sigHigh : undefined}
         shadowBlur={outputValue === true ? 10 : 0}
         shadowOpacity={0.9}
       />
+
+      {/* Pulsing glow ring on output pin — only visible in Try phase (when onOutputPinClick is defined) and no wire in flight */}
+      {onOutputPinClick && (
+        <Circle
+          x={geo.output.x} y={geo.output.y}
+          radius={10}
+          fill="transparent"
+          stroke={sigHigh}
+          strokeWidth={1.5}
+          opacity={0.5}
+          className="pin-pulse"
+          listening={false}
+        />
+      )}
+
       {/* Invisible enlarged hit area over output pin */}
       {onOutputPinClick && (
         <Circle

@@ -3,7 +3,7 @@
  *
  * Main Konva Stage. Three modes:
  *   - No unit active      → GateGallery
- *   - Lesson not built    → ComingSoon
+ *   - Lesson not built    → ComingSoon (ShipOS reskin)
  *   - Lesson loaded       → Full circuit render
  *
  * Wire drawing (try phase only):
@@ -22,6 +22,7 @@ import GateShape from '../gates/GateShape'
 import { InputNode, OutputNode, ConstNode } from '../gates/SpecialNodes'
 import WireLayer from './WireLayer'
 import GateGallery from './GateGallery'
+import SuccessCard from '../ui/SuccessCard'
 import { useGateTheme } from '../../hooks/useGateTheme'
 import { useCanvasStore } from '../../store/canvasStore'
 import { useLessonStore } from '../../store/lessonStore'
@@ -43,8 +44,51 @@ const LESSON_NAMES = {
 // Sub-components
 // ─────────────────────────────────────────────────────────────────────────────
 
-function HintBar({ hint, canvasW, canvasH, theme }) {
-  if (!hint) return null
+/**
+ * DispatchTerminal (was: HintBar)
+ * - Work/Break phase: subtle, 12px, bottom strip
+ * - Try phase: 56px tall, 14px, accent colour, unmissable
+ */
+function DispatchTerminal({ hint, narrative, phase, canvasW, canvasH, theme }) {
+  const isTry = phase === 'try'
+
+  // Prefer narrative text for this phase, fall back to hint
+  let displayText = hint
+  if (narrative) {
+    if (phase === 'work'  && narrative.briefing) displayText = narrative.briefing
+    if (phase === 'break' && narrative.fault)    displayText = narrative.fault
+    if (phase === 'try'   && narrative.dispatch) displayText = narrative.dispatch
+  }
+
+  if (!displayText) return null
+
+  if (isTry) {
+    return (
+      <>
+        <Rect
+          x={0} y={canvasH - 56}
+          width={canvasW} height={56}
+          fill={`rgba(0,0,0,0.72)`}
+          shadowColor={theme?.accent || '#00ff88'}
+          shadowBlur={18}
+          shadowOpacity={0.12}
+          listening={false}
+        />
+        <Text
+          x={20} y={canvasH - 56}
+          width={canvasW - 40} height={56}
+          text={`▸ ${displayText}`}
+          fontSize={14}
+          fontFamily="'JetBrains Mono', monospace"
+          fill={theme?.accentText || '#4dffac'}
+          verticalAlign="middle"
+          listening={false}
+        />
+      </>
+    )
+  }
+
+  // Work / Break — subtle
   return (
     <>
       <Rect
@@ -56,10 +100,10 @@ function HintBar({ hint, canvasW, canvasH, theme }) {
       <Text
         x={20} y={canvasH - 44}
         width={canvasW - 40} height={44}
-        text={hint}
+        text={displayText}
         fontSize={12}
         fontFamily="'JetBrains Mono', monospace"
-        fill={theme?.accentText || '#4dffac'}
+        fill={theme?.textMuted || '#4a5248'}
         verticalAlign="middle"
         listening={false}
       />
@@ -70,8 +114,26 @@ function HintBar({ hint, canvasW, canvasH, theme }) {
 function ComingSoon({ name, canvasW, canvasH, theme }) {
   return (
     <>
+      <Rect
+        x={canvasW / 2 - 160} y={canvasH / 2 - 60}
+        width={320} height={120}
+        cornerRadius={12}
+        fill="rgba(10,13,10,0.6)"
+        stroke={(theme?.accentBorder) || 'rgba(0,255,136,0.15)'}
+        strokeWidth={1}
+        listening={false}
+      />
       <Text
-        x={0} y={canvasH / 2 - 22} width={canvasW}
+        x={0} y={canvasH / 2 - 28} width={canvasW}
+        text="◈  SHIPBOARD SYSTEMS"
+        fontSize={10}
+        fontFamily="'JetBrains Mono', monospace"
+        fill={theme?.textMuted || '#4a5248'}
+        align="center" letterSpacing={4}
+        listening={false}
+      />
+      <Text
+        x={0} y={canvasH / 2 - 8} width={canvasW}
         text={name || 'Lesson'}
         fontSize={20}
         fontFamily="'Space Grotesk', sans-serif"
@@ -80,9 +142,9 @@ function ComingSoon({ name, canvasW, canvasH, theme }) {
         align="center" listening={false}
       />
       <Text
-        x={0} y={canvasH / 2 + 14} width={canvasW}
-        text="COMING SOON"
-        fontSize={10}
+        x={0} y={canvasH / 2 + 22} width={canvasW}
+        text="MODULE PENDING INSTALLATION"
+        fontSize={9}
         fontFamily="'JetBrains Mono', monospace"
         fill={theme?.textMuted || '#4a5248'}
         align="center" letterSpacing={3}
@@ -101,11 +163,12 @@ export default function GateCanvas() {
   const containerRef = useRef(null)
   const stageRef     = useRef(null)
   const [size, setSize] = useState({ w: 800, h: 500 })
+  const [showSuccess, setShowSuccess] = useState(false)
 
   // Track pointer position for snap feedback on OutputNode
   const [pointerPos, setPointerPos] = useState(null)
 
-  const { activeUnitId, activeLessonIdx } = useLessonStore()
+  const { activeUnitId, activeLessonIdx, narrative, meta, nextLesson } = useLessonStore()
 
   const nodes          = useCanvasStore(s => s.nodes)
   const wires          = useCanvasStore(s => s.wires)
@@ -116,6 +179,7 @@ export default function GateCanvas() {
   const selectedNodeId = useCanvasStore(s => s.selectedNodeId)
   const dragWire       = useCanvasStore(s => s.dragWire)
   const phase          = useCanvasStore(s => s.phase)
+  const lessonSolved   = useCanvasStore(s => s.lessonSolved)
 
   const toggleInput    = useCanvasStore(s => s.toggleInput)
   const moveNode       = useCanvasStore(s => s.moveNode)
@@ -126,6 +190,7 @@ export default function GateCanvas() {
   const commitDragWire = useCanvasStore(s => s.commitDragWire)
   const cancelDragWire = useCanvasStore(s => s.cancelDragWire)
   const removeWire     = useCanvasStore(s => s.removeWire)
+  const setSolved      = useCanvasStore(s => s.setSolved)
 
   const isTryPhase = phase === 'try'
 
@@ -150,6 +215,23 @@ export default function GateCanvas() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [dragWire, cancelDragWire])
+
+  // ── Success detection (Group 2.2) ────────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'try') return
+    if (lessonSolved) return  // already triggered
+    const outputNode = nodes.find(n => n.type === 'OUTPUT')
+    if (outputNode && signals[outputNode.id]?.output === true) {
+      const lessonId = meta?.id || null
+      setSolved(lessonId)
+      setShowSuccess(true)
+    }
+  }, [signals, phase, nodes, lessonSolved, setSolved])
+
+  // Hide success card when phase changes
+  useEffect(() => {
+    setShowSuccess(false)
+  }, [phase, activeLessonIdx])
 
   // ── Collect all input pins for snap hit-testing ──────────────────────────
   const allInputPins = useCallback(() => {
@@ -219,7 +301,7 @@ export default function GateCanvas() {
           theme={theme}
           selected={selectedNodeId === node.id}
           onClick={() => { selectNode(node.id); toggleInput(node.id) }}
-          onOutputPinClick={isTryPhase ? () => handleOutputPinClick(node.id) : undefined}
+          onOutputPinClick={isTryPhase && !dragWire ? () => handleOutputPinClick(node.id) : undefined}
         />
       )
     }
@@ -242,7 +324,7 @@ export default function GateCanvas() {
           key={node.id}
           node={node}
           theme={theme}
-          onOutputPinClick={isTryPhase ? () => handleOutputPinClick(node.id) : undefined}
+          onOutputPinClick={isTryPhase && !dragWire ? () => handleOutputPinClick(node.id) : undefined}
         />
       )
     }
@@ -261,7 +343,7 @@ export default function GateCanvas() {
           draggable={isTryPhase && !node.locked}
           theme={theme}
           onClick={() => selectNode(node.id)}
-          onOutputPinClick={isTryPhase ? () => handleOutputPinClick(node.id) : undefined}
+          onOutputPinClick={isTryPhase && !dragWire ? () => handleOutputPinClick(node.id) : undefined}
           onDragEnd={({ x, y }) => moveNode(node.id, x, y)}
         />
       )
@@ -270,15 +352,16 @@ export default function GateCanvas() {
     return null
   }
 
-  // ── Background ───────────────────────────────────────────────────────────
+  // ── Background — oscilloscope-tinted grid ────────────────────────────────
+  const accentRgb = theme?.accentRgb || '0,255,136'
   const bgStyle = {
     flex: 1,
     position: 'relative',
     overflow: 'hidden',
     background: `
       radial-gradient(ellipse at 50% 30%, ${theme?.accentGlow || 'rgba(0,255,136,0.08)'} 0%, transparent 60%),
-      repeating-linear-gradient(0deg,  transparent, transparent 31px, ${theme?.border || 'rgba(255,255,255,0.05)'} 31px, ${theme?.border || 'rgba(255,255,255,0.05)'} 32px),
-      repeating-linear-gradient(90deg, transparent, transparent 31px, ${theme?.border || 'rgba(255,255,255,0.05)'} 31px, ${theme?.border || 'rgba(255,255,255,0.05)'} 32px)
+      repeating-linear-gradient(0deg,  transparent, transparent 31px, rgba(${accentRgb},0.06) 31px, rgba(${accentRgb},0.06) 32px),
+      repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(${accentRgb},0.06) 31px, rgba(${accentRgb},0.06) 32px)
     `,
   }
 
@@ -318,11 +401,26 @@ export default function GateCanvas() {
                 onWireClick={isTryPhase ? removeWire : undefined}
               />
               {nodes.map(renderNode)}
-              <HintBar hint={hint} canvasW={size.w} canvasH={size.h} theme={theme} />
+              <DispatchTerminal
+                hint={hint}
+                narrative={narrative}
+                phase={phase}
+                canvasW={size.w}
+                canvasH={size.h}
+                theme={theme}
+              />
             </>
           )}
         </Layer>
       </Stage>
+
+      {/* Success overlay — rendered as HTML above the canvas */}
+      {showSuccess && (
+        <SuccessCard
+          onNext={() => { setShowSuccess(false); nextLesson() }}
+          onDismiss={() => setShowSuccess(false)}
+        />
+      )}
     </div>
   )
 }

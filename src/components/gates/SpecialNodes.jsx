@@ -19,7 +19,7 @@
 
 import { Group, Rect, Circle, Text, Line } from 'react-konva'
 
-const SIG_HIGH  = '#00ff88'
+// SIG_HIGH now read from theme.accent
 const SIG_LOW   = '#1a2e1a'
 const SIG_UNDEF = '#4a5248'
 
@@ -29,8 +29,8 @@ const INPUT_H  = 32
 const LED_R    = 16
 const PIN_HIT  = 10   // invisible enlarged hit radius on pins
 
-function sigColor(val) {
-  if (val === true)  return SIG_HIGH
+function sigColor(val, theme) {
+  if (val === true)  return theme?.accent || '#00ff88'
   if (val === false) return SIG_LOW
   return SIG_UNDEF
 }
@@ -38,8 +38,9 @@ function sigColor(val) {
 // ── INPUT node ─────────────────────────────────────────────────────────────
 // Pill with driven value. Click body to toggle. Click output pin to draw wire.
 export function InputNode({ node, value, onClick, onOutputPinClick, theme, selected }) {
-  const col    = sigColor(value)
-  const fill   = value ? 'rgba(0,255,136,0.12)' : (theme?.surface || '#111411')
+  const sigHigh = theme?.accent || '#00ff88'
+  const col    = sigColor(value, theme)
+  const fill   = value ? `${sigHigh}1e` : (theme?.surface || '#111411')
   const stroke = selected ? (theme?.accent || '#00ff88') : (theme?.border || 'rgba(255,255,255,0.18)')
   const label  = node.label || node.id.toUpperCase()
 
@@ -59,7 +60,7 @@ export function InputNode({ node, value, onClick, onOutputPinClick, theme, selec
         x={0} y={0} width={INPUT_W} height={INPUT_H}
         cornerRadius={6}
         fill={fill} stroke={stroke} strokeWidth={1.5}
-        shadowColor={value ? SIG_HIGH : undefined}
+        shadowColor={value ? sigHigh : undefined}
         shadowBlur={value ? 10 : 0}
         shadowOpacity={0.5}
         hitStrokeWidth={6}
@@ -99,11 +100,25 @@ export function InputNode({ node, value, onClick, onOutputPinClick, theme, selec
       <Circle
         x={pinX} y={pinY} radius={4}
         fill={col}
-        shadowColor={value ? SIG_HIGH : undefined}
+        shadowColor={value ? sigHigh : undefined}
         shadowBlur={value ? 8 : 0}
         shadowOpacity={0.9}
         listening={false}
       />
+
+      {/* Pulsing glow ring — only in try phase (onOutputPinClick defined) */}
+      {onOutputPinClick && (
+        <Circle
+          x={pinX} y={pinY}
+          radius={10}
+          fill="transparent"
+          stroke={sigHigh}
+          strokeWidth={1.5}
+          opacity={0.5}
+          className="pin-pulse"
+          listening={false}
+        />
+      )}
 
       {/* Output pin — enlarged invisible hit area */}
       {onOutputPinClick && (
@@ -132,9 +147,10 @@ export function InputNode({ node, value, onClick, onOutputPinClick, theme, selec
 // ── OUTPUT node ────────────────────────────────────────────────────────────
 // LED circle. Glows green when signal HIGH. Input pin visible for snap feedback.
 export function OutputNode({ node, value, theme, snapTarget }) {
-  const col    = sigColor(value)
-  const fill   = value ? 'rgba(0,255,136,0.20)' : (theme?.surface || '#111411')
-  const stroke = value ? SIG_HIGH : (theme?.border || 'rgba(255,255,255,0.18)')
+  const sigHigh = theme?.accent || '#00ff88'
+  const col    = sigColor(value, theme)
+  const fill   = value ? `${sigHigh}33` : (theme?.surface || '#111411')
+  const stroke = value ? sigHigh : (theme?.border || 'rgba(255,255,255,0.18)')
   const label  = node.label || node.id.toUpperCase()
 
   // Input pin position (world-relative to group origin)
@@ -155,8 +171,8 @@ export function OutputNode({ node, value, theme, snapTarget }) {
       {/* Input pin dot — glows accent when it's a snap target during drag */}
       <Circle
         x={pinX} y={pinY} radius={4}
-        fill={snapTarget ? (theme?.accent || SIG_HIGH) : col}
-        shadowColor={snapTarget ? (theme?.accent || SIG_HIGH) : (value ? SIG_HIGH : undefined)}
+        fill={snapTarget ? (theme?.accent || sigHigh) : col}
+        shadowColor={snapTarget ? (theme?.accent || sigHigh) : (value ? sigHigh : undefined)}
         shadowBlur={snapTarget ? 14 : value ? 8 : 0}
         shadowOpacity={0.9}
         listening={false}
@@ -166,7 +182,7 @@ export function OutputNode({ node, value, theme, snapTarget }) {
       <Circle
         x={0} y={0} radius={LED_R}
         fill={fill} stroke={stroke} strokeWidth={2}
-        shadowColor={value ? SIG_HIGH : undefined}
+        shadowColor={value ? sigHigh : undefined}
         shadowBlur={value ? 18 : 0}
         shadowOpacity={0.8}
       />
@@ -178,7 +194,7 @@ export function OutputNode({ node, value, theme, snapTarget }) {
         fontSize={13}
         fontFamily="'JetBrains Mono', monospace"
         fontStyle="500"
-        fill={value ? SIG_HIGH : (theme?.textMuted || '#4a5248')}
+        fill={value ? sigHigh : (theme?.textMuted || '#4a5248')}
         align="center" verticalAlign="middle"
         listening={false}
       />
@@ -200,7 +216,8 @@ export function OutputNode({ node, value, theme, snapTarget }) {
 // Hardwired VCC (1) or GND (0). Output pin clickable for wiring.
 export function ConstNode({ node, onOutputPinClick, theme }) {
   const val   = !!node.value
-  const col   = sigColor(val)
+  const sigHigh = theme?.accent || '#00ff88'
+  const col   = sigColor(val, theme)
   const label = val ? 'VCC' : 'GND'
 
   const pinX = 50
@@ -243,6 +260,20 @@ export function ConstNode({ node, onOutputPinClick, theme }) {
         fill={col}
         listening={false}
       />
+
+      {/* Pulsing glow ring — only in try phase */}
+      {onOutputPinClick && (
+        <Circle
+          x={pinX} y={pinY}
+          radius={10}
+          fill="transparent"
+          stroke={sigHigh}
+          strokeWidth={1.5}
+          opacity={0.5}
+          className="pin-pulse"
+          listening={false}
+        />
+      )}
 
       {/* Enlarged hit area */}
       {onOutputPinClick && (

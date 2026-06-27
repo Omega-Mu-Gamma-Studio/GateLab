@@ -16,6 +16,7 @@
 
 import { create } from 'zustand'
 import { evaluate } from '../engine/GraphEvaluator'
+import useProgressStore from './progressStore.js'
 
 function runEval(nodes, wires, inputs) {
   const brokenIds = new Set(
@@ -37,6 +38,14 @@ export const useCanvasStore = create((set, get) => ({
   phase:           'work',  // mirrors lessonStore.phase
   hint:            '',
 
+  // ── Success state (Group 2.2) ─────────────────────────────────────────
+  lessonSolved:    false,
+
+  // ── Speed Run (Group 5.2) ─────────────────────────────────────────────
+  timerActive:     false,
+  timerStart:      null,
+  bestTimes:       {},    // { [lessonId]: ms }
+
   // Drag-wire state
   dragWire: null,  // null | { fromNodeId, fromPos: {x,y}, currentPos: {x,y} }
 
@@ -57,6 +66,7 @@ export const useCanvasStore = create((set, get) => ({
       faultNodeId:    phaseData.faultNodeId || null,
       selectedNodeId: null,
       dragWire:       null,
+      lessonSolved:   false,
     })
   },
 
@@ -128,12 +138,41 @@ export const useCanvasStore = create((set, get) => ({
     set({ wires, signals })
   },
 
+  // ── Mark lesson as solved ─────────────────────────────────────────────
+  setSolved(lessonId) {
+    set({ lessonSolved: true })
+    if (lessonId) {
+      useProgressStore.getState().completeLesson(lessonId, 50)
+    }
+  },
+  clearSolved() {
+    set({ lessonSolved: false })
+  },
+
+  // ── Speed Run ─────────────────────────────────────────────────────────
+  startTimer() {
+    set({ timerActive: true, timerStart: Date.now() })
+  },
+  stopTimer(lessonId) {
+    const { timerStart, bestTimes } = get()
+    if (!timerStart) return
+    const elapsed = Date.now() - timerStart
+    const prev = bestTimes[lessonId]
+    const next = prev === undefined || elapsed < prev ? elapsed : prev
+    set({
+      timerActive: false,
+      timerStart: null,
+      bestTimes: { ...bestTimes, [lessonId]: next },
+    })
+  },
+
   // ── Reset ─────────────────────────────────────────────────────────────
   reset() {
     set({
       nodes: [], wires: [], inputs: {}, signals: {},
       selectedNodeId: null, faultNodeId: null,
       phase: 'work', hint: '', dragWire: null,
+      lessonSolved: false, timerActive: false, timerStart: null,
     })
   },
 }))

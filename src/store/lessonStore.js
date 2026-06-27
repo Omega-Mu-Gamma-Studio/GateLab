@@ -80,20 +80,35 @@ export const useLessonStore = create((set, get) => ({
   activeUnitId:    null,
   activeLessonIdx: 0,
   phase:           'work',
+  narrative:       null,  // { briefing, fault, dispatch, success, lore } | null
+  meta:            null,  // { workOrder, location, shift } | null
 
   goToUnit(unitId) {
-    set({ activeUnitId: unitId, activeLessonIdx: 0, phase: 'work' })
+    const lesson = getLesson(unitId, 0)
+    set({
+      activeUnitId: unitId,
+      activeLessonIdx: 0,
+      phase: 'work',
+      narrative: lesson?.narrative || null,
+      meta: lesson?.meta || null,
+    })
     syncCanvas(unitId, 0, 'work')
   },
 
   goHome() {
-    set({ activeUnitId: null, activeLessonIdx: 0, phase: 'work' })
+    set({ activeUnitId: null, activeLessonIdx: 0, phase: 'work', narrative: null, meta: null })
     useCanvasStore.getState().reset()
   },
 
   goToLesson(idx) {
     const { activeUnitId } = get()
-    set({ activeLessonIdx: idx, phase: 'work' })
+    const lesson = getLesson(activeUnitId, idx)
+    set({
+      activeLessonIdx: idx,
+      phase: 'work',
+      narrative: lesson?.narrative || null,
+      meta: lesson?.meta || null,
+    })
     syncCanvas(activeUnitId, idx, 'work')
   },
 
@@ -101,6 +116,36 @@ export const useLessonStore = create((set, get) => ({
     const { activeUnitId, activeLessonIdx } = get()
     set({ phase })
     syncCanvas(activeUnitId, activeLessonIdx, phase)
+  },
+
+  // Advance work → break → try. Called by WorkOrderBar "Next →" button.
+  nextPhase() {
+    const { phase, activeUnitId, activeLessonIdx } = get()
+    const order = ['work', 'break', 'try']
+    const idx = order.indexOf(phase)
+    if (idx < order.length - 1) {
+      const next = order[idx + 1]
+      set({ phase: next })
+      syncCanvas(activeUnitId, activeLessonIdx, next)
+    }
+  },
+
+  // Advance to the next lesson (wraps to first in unit when exhausted).
+  nextLesson() {
+    const { activeUnitId, activeLessonIdx } = get()
+    const unit = UNITS.find(u => u.id === activeUnitId)
+    if (!unit) return
+    const nextIdx = activeLessonIdx + 1 < unit.lessons ? activeLessonIdx + 1 : 0
+    const lesson = getLesson(activeUnitId, nextIdx)
+    set({
+      activeLessonIdx: nextIdx,
+      phase: 'work',
+      narrative: lesson?.narrative || null,
+      meta: lesson?.meta || null,
+    })
+    syncCanvas(activeUnitId, nextIdx, 'work')
+    // Reset solved state
+    useCanvasStore.getState().clearSolved()
   },
 
   activeUnit: () => UNITS.find(u => u.id === get().activeUnitId) || null,

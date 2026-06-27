@@ -7,20 +7,26 @@ const THEMES = [
   { id: 'blue',  label: 'Signal',  color: '#0099ff', attr: 'blue' },
 ]
 
-const PHASE_META = {
-  work:  { label: 'See It Work', cls: 'phase-work'  },
-  break: { label: 'See It Break', cls: 'phase-break' },
-  try:   { label: 'You Try',      cls: 'phase-try'   },
-}
-
 export default function TopBar() {
   const saved = localStorage.getItem('gatelab-theme') || 'green'
   const [active, setActive] = useState(saved)
   const [open, setOpen] = useState(false)
   const popRef = useRef(null)
 
-  const { activeUnitId, phase, goHome } = useLessonStore()
-  const phaseMeta = PHASE_META[phase]
+  const { activeUnitId, activeLessonIdx, goHome } = useLessonStore()
+
+  // Get current unit info for breadcrumb
+  const activeUnit = UNITS.find(u => u.id === activeUnitId)
+
+  const LESSON_NAMES = {
+    1: ['AND Gate','OR Gate','NOT Gate','NAND & NOR','XOR & XNOR','Boolean Laws','SOP & POS','K-Map 2-Var','K-Map 3-Var','K-Map 4-Var'],
+    2: ['Half Adder','Full Adder','Ripple Carry Adder','Subtractor','Encoder','Decoder','Multiplexer','Demultiplexer','Comparator'],
+    3: ['SR Latch','SR Flip-Flop','JK Flip-Flop','D Flip-Flop','T Flip-Flop','Ripple Counter','Mod-N Counter','Ring Counter','Johnson Counter'],
+    4: ['Async Intro','Race Conditions','Static Hazards','Dynamic Hazards','Hazard Elimination','Delay Model'],
+    5: ['SRAM','DRAM','ROM','EPROM & Flash','PLA','PAL','Hamming Code'],
+  }
+  const lessonName = activeUnitId ? (LESSON_NAMES[activeUnitId]?.[activeLessonIdx] || '') : ''
+  const totalLessons = activeUnit?.lessons || 0
 
   useEffect(() => {
     const theme = THEMES.find(t => t.id === active)
@@ -71,15 +77,26 @@ export default function TopBar() {
         </span>
       </button>
 
-      {/* Center: phase indicator — only visible inside a unit */}
+      {/* Center: lesson breadcrumb — only visible inside a unit */}
       <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-        {activeUnitId && (
-          <span
-            className={`badge ${phaseMeta.cls}`}
-            style={{ fontSize: '10px', letterSpacing: '0.08em' }}
-          >
-            {phaseMeta.label}
-          </span>
+        {activeUnitId && lessonName && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontFamily: 'var(--mono)',
+            fontSize: '11px',
+            color: 'var(--text-muted)',
+            letterSpacing: '0.04em',
+          }}>
+            <span style={{ color: 'var(--accent-text)', fontWeight: 500 }}>
+              Unit {activeUnit?.roman}
+            </span>
+            <span style={{ opacity: 0.4 }}>·</span>
+            <span>Lesson {activeLessonIdx + 1} of {totalLessons}</span>
+            <span style={{ opacity: 0.4 }}>·</span>
+            <span style={{ color: 'var(--text-h)' }}>{lessonName}</span>
+          </div>
         )}
       </div>
 

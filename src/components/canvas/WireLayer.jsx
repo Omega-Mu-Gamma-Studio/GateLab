@@ -5,7 +5,7 @@
  * Each wire is a Konva Line using routeWire() for its points.
  *
  * Wire visual states:
- *   HIGH    → bright green (#00ff88), 2px solid
+ *   HIGH    → theme accent colour, 2px solid
  *   LOW     → dark dead green, 2px solid
  *   UNDEF   → muted grey, 2px dashed
  *   BROKEN  → red (#ff3b3b), 2px dashed
@@ -16,14 +16,13 @@ import { Line, Circle } from 'react-konva'
 import { routeWire } from '../../engine/WireRouter'
 import { getPinWorldPos } from '../gates/GatePin'
 
-const SIG_HIGH   = '#00ff88'
 const SIG_LOW    = '#1a2e1a'
 const SIG_UNDEF  = '#4a5248'
 const SIG_BROKEN = '#ff3b3b'
 
-function getWireColor(value, broken) {
+function getWireColor(value, broken, theme) {
   if (broken)           return SIG_BROKEN
-  if (value === true)   return SIG_HIGH
+  if (value === true)   return theme?.accent || '#00ff88'
   if (value === false)  return SIG_LOW
   return SIG_UNDEF
 }
@@ -46,6 +45,8 @@ function resolveWireEndpoints(wire, nodes) {
 }
 
 export default function WireLayer({ nodes, wires, signals, dragWire, theme, onWireClick }) {
+  const sigHigh = theme?.accent || '#00ff88'
+
   return (
     <>
       {/* ── Committed wires ──────────────────────────────────────────── */}
@@ -57,7 +58,7 @@ export default function WireLayer({ nodes, wires, signals, dragWire, theme, onWi
         const sigValue = signals[wire.from.nodeId]?.output
         const broken   = !!wire.broken
 
-        const color  = getWireColor(sigValue, broken)
+        const color  = getWireColor(sigValue, broken, theme)
         const dash   = getWireDash(sigValue, broken)
         const points = routeWire(fromPos, toPos, wire.waypoints)
 
@@ -70,7 +71,7 @@ export default function WireLayer({ nodes, wires, signals, dragWire, theme, onWi
             lineCap="round"
             lineJoin="round"
             dash={dash}
-            shadowColor={sigValue === true && !broken ? SIG_HIGH : undefined}
+            shadowColor={sigValue === true && !broken ? sigHigh : undefined}
             shadowBlur={sigValue === true && !broken ? 6 : 0}
             shadowOpacity={0.5}
             hitStrokeWidth={10}
@@ -84,7 +85,7 @@ export default function WireLayer({ nodes, wires, signals, dragWire, theme, onWi
       {dragWire && (
         <Line
           points={routeWire(dragWire.fromPos, dragWire.currentPos)}
-          stroke={theme?.accent || SIG_HIGH}
+          stroke={theme?.accent || sigHigh}
           strokeWidth={1.5}
           lineCap="round"
           lineJoin="round"
