@@ -49,68 +49,6 @@ const LESSON_NAMES = {
  * - Work/Break phase: subtle, 12px, bottom strip
  * - Try phase: 56px tall, 14px, accent colour, unmissable
  */
-function DispatchTerminal({ hint, narrative, phase, canvasW, canvasH, theme }) {
-  const isTry = phase === 'try'
-
-  // Prefer narrative text for this phase, fall back to hint
-  let displayText = hint
-  if (narrative) {
-    if (phase === 'work'  && narrative.briefing) displayText = narrative.briefing
-    if (phase === 'break' && narrative.fault)    displayText = narrative.fault
-    if (phase === 'try'   && narrative.dispatch) displayText = narrative.dispatch
-  }
-
-  if (!displayText) return null
-
-  if (isTry) {
-    return (
-      <>
-        <Rect
-          x={0} y={canvasH - 56}
-          width={canvasW} height={56}
-          fill={`rgba(0,0,0,0.72)`}
-          shadowColor={theme?.accent || '#00ff88'}
-          shadowBlur={18}
-          shadowOpacity={0.12}
-          listening={false}
-        />
-        <Text
-          x={20} y={canvasH - 56}
-          width={canvasW - 40} height={56}
-          text={`▸ ${displayText}`}
-          fontSize={14}
-          fontFamily="'JetBrains Mono', monospace"
-          fill={theme?.accentText || '#4dffac'}
-          verticalAlign="middle"
-          listening={false}
-        />
-      </>
-    )
-  }
-
-  // Work / Break — subtle
-  return (
-    <>
-      <Rect
-        x={0} y={canvasH - 44}
-        width={canvasW} height={44}
-        fill="rgba(10,13,10,0.88)"
-        listening={false}
-      />
-      <Text
-        x={20} y={canvasH - 44}
-        width={canvasW - 40} height={44}
-        text={displayText}
-        fontSize={12}
-        fontFamily="'JetBrains Mono', monospace"
-        fill={theme?.textMuted || '#4a5248'}
-        verticalAlign="middle"
-        listening={false}
-      />
-    </>
-  )
-}
-
 function ComingSoon({ name, canvasW, canvasH, theme }) {
   return (
     <>
@@ -401,14 +339,6 @@ export default function GateCanvas() {
                 onWireClick={isTryPhase ? removeWire : undefined}
               />
               {nodes.map(renderNode)}
-              <DispatchTerminal
-                hint={hint}
-                narrative={narrative}
-                phase={phase}
-                canvasW={size.w}
-                canvasH={size.h}
-                theme={theme}
-              />
             </>
           )}
         </Layer>

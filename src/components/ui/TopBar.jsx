@@ -45,7 +45,8 @@ export default function TopBar() {
   return (
     <header style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
-      height: '52px',
+      height: '5vh',
+      minHeight: '40px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 20px',
       background: 'rgba(10,13,10,0.90)',

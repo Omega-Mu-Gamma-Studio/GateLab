@@ -18,8 +18,9 @@
 
 import { useState, useEffect } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
+import OperatorStatus from './OperatorStatus'
 
-const PANEL_W = 260
+const PANEL_W = '20vw'
 
 /* ── Trivia ────────────────────────────────────────────────────────────── */
 const TRIVIA = [
@@ -123,7 +124,9 @@ export default function InfoPanel() {
 
   return (
     <aside style={{
-      width: `${PANEL_W}px`,
+      width: PANEL_W,
+      minWidth: '220px',
+      maxWidth: '360px',
       flexShrink: 0,
       background: 'var(--surface)',
       borderLeft: '1px solid var(--border-strong)',
@@ -181,6 +184,10 @@ export default function InfoPanel() {
           />
         )}
       </div>
+
+      {/* Persistent footer — visible under every tab, fills the space
+          that used to sit blank below short trivia/placeholder content */}
+      <OperatorStatus />
     </aside>
   )
 }

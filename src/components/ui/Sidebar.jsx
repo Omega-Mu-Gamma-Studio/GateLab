@@ -33,11 +33,13 @@ export default function Sidebar() {
     localStorage.setItem('gatelab-sidebar-collapsed', collapsed)
   }, [collapsed])
 
-  const width = collapsed ? '40px' : '220px'
+  const width = collapsed ? '10vw' : '20vw'
 
   return (
     <aside style={{
       width,
+      minWidth: collapsed ? '90px' : '180px',
+      maxWidth: collapsed ? '160px' : '320px',
       flexShrink: 0,
       background: 'var(--surface)',
       borderRight: '1px solid var(--border)',
@@ -91,19 +93,22 @@ export default function Sidebar() {
             onClick={() => goToUnit(unit.id)}
             title={collapsed ? `Unit ${unit.roman}: ${unit.title}` : undefined}
             style={{
-              display: 'flex', alignItems: 'center', gap: collapsed ? 0 : '10px',
-              padding: collapsed ? '7px 0' : '7px 10px',
+              display: 'flex',
+              flexDirection: collapsed ? 'column' : 'row',
+              alignItems: 'center',
+              gap: collapsed ? '2px' : '10px',
+              padding: collapsed ? '9px 4px' : '7px 10px',
               justifyContent: collapsed ? 'center' : 'flex-start',
               borderRadius: '8px',
               border: 'none',
               background: activeUnitId === unit.id ? 'var(--accent-dim)' : 'transparent',
               cursor: 'pointer',
-              textAlign: 'left', width: '100%',
+              textAlign: collapsed ? 'center' : 'left', width: '100%',
               transition: 'background 0.15s',
             }}
           >
             <span style={{
-              fontFamily: 'var(--mono)', fontSize: '11px', fontWeight: 500,
+              fontFamily: 'var(--mono)', fontSize: collapsed ? '14px' : '11px', fontWeight: 500,
               color: activeUnitId === unit.id ? 'var(--accent-text)' : 'var(--text-muted)',
               width: collapsed ? 'auto' : '20px',
               flexShrink: 0,
@@ -111,7 +116,17 @@ export default function Sidebar() {
             }}>
               {unit.roman}
             </span>
-            {!collapsed && (
+            {collapsed ? (
+              <span style={{
+                fontSize: '9px',
+                lineHeight: 1.25,
+                color: activeUnitId === unit.id ? 'var(--text-h)' : 'var(--text-muted)',
+                fontWeight: activeUnitId === unit.id ? 500 : 400,
+                whiteSpace: 'normal',
+              }}>
+                {unit.title.split(',')[0].split(' ').slice(0, 2).join(' ')}
+              </span>
+            ) : (
               <span style={{
                 fontSize: '12px',
                 color: activeUnitId === unit.id ? 'var(--text-h)' : 'var(--text)',
