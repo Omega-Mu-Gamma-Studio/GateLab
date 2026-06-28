@@ -1,71 +1,93 @@
 /**
  * PlotBox.jsx
  *
- * Retired as a standalone overlay. The work order content now lives in
- * the PDA's TASKS app (TasksApp.jsx), fed by pdaStore.currentTask.
+ * Canvas-corner PDA trigger button. Always visible when a lesson is active.
+ * Opens the full PDA home screen (not just TASKS) — the PDA is the primary
+ * way to access work orders, messages, and crew comms.
  *
- * This file now renders only a persistent canvas-corner shortcut button
- * that opens the PDA directly to TASKS — so the player always has a
- * one-tap path to their current work order from the circuit canvas.
+ * Positioned top-left of the canvas area. zIndex 100 ensures it sits above
+ * the Konva Stage which captures pointer events across its full surface.
  *
- * Shows a yellow pulse dot when there's an active task.
- * Hidden when no lesson is loaded.
+ * Shows a red unread badge when there are unread messages.
+ * Pulses when there are unread messages or a new task is loaded.
  */
 import usePdaStore from '../../store/pdaStore'
+import { useLessonStore } from '../../store/lessonStore'
 
 export default function PlotBox() {
-  const { currentTask, openApp } = usePdaStore()
+  const { openPda, totalUnread, currentTask } = usePdaStore()
+  const { activeUnitId } = useLessonStore()
+  const unread = totalUnread()
+  const hasActivity = unread > 0 || !!currentTask
 
-  if (!currentTask) return null
+  // Only show when inside a lesson
+  if (!activeUnitId) return null
 
   return (
     <button
-      onClick={() => openApp('tasks')}
-      title="Open work order"
+      onClick={() => openPda()}
+      title="Open PDA"
       style={{
-        position: 'absolute', top: '16px', left: '16px', zIndex: 60,
-        width: '38px', height: '38px', borderRadius: '10px',
-        background: 'rgba(10,13,10,0.85)',
-        border: '1px solid rgba(245,196,0,0.35)',
+        position: 'absolute', top: '16px', left: '16px', zIndex: 100,
+        width: '44px', height: '44px', borderRadius: '12px',
+        background: 'rgba(10,13,10,0.90)',
+        border: '1px solid rgba(255,77,94,0.45)',
         cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        boxShadow: '0 4px 16px rgba(245,196,0,0.12)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        boxShadow: '0 4px 20px rgba(255,77,94,0.18), 0 0 0 1px rgba(255,255,255,0.03)',
         transition: 'all 0.2s',
+        // Force above Konva canvas
+        pointerEvents: 'all',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(245,196,0,0.65)'
-        e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,196,0,0.22)'
+        e.currentTarget.style.borderColor = 'rgba(255,77,94,0.8)'
+        e.currentTarget.style.boxShadow = '0 4px 24px rgba(255,77,94,0.32), 0 0 0 1px rgba(255,255,255,0.05)'
+        e.currentTarget.style.background = 'rgba(255,77,94,0.12)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(245,196,0,0.35)'
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(245,196,0,0.12)'
+        e.currentTarget.style.borderColor = 'rgba(255,77,94,0.45)'
+        e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,77,94,0.18), 0 0 0 1px rgba(255,255,255,0.03)'
+        e.currentTarget.style.background = 'rgba(10,13,10,0.90)'
       }}
     >
-      {/* Clipboard / task icon */}
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-        stroke="#f5c400" strokeWidth="1.8"
-        strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-        <rect x="9" y="3" width="6" height="4" rx="1"/>
-        <line x1="9" y1="12" x2="15" y2="12"/>
-        <line x1="9" y1="16" x2="13" y2="16"/>
+      {/* Phone icon */}
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+        stroke="#ff4d5e" strokeWidth="1.9"
+        strokeLinecap="round" strokeLinejoin="round"
+        style={{ filter: 'drop-shadow(0 0 5px rgba(255,77,94,0.5))' }}
+      >
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+        <line x1="12" y1="18" x2="12.01" y2="18"/>
       </svg>
 
-      {/* Active pulse dot */}
-      <div style={{
-        position: 'absolute', top: '7px', right: '7px',
-        width: '5px', height: '5px', borderRadius: '50%',
-        background: '#f5c400',
-        boxShadow: '0 0 5px #f5c400',
-        animation: 'pda-pulse 2s ease-in-out infinite',
-      }}/>
+      {/* Unread badge */}
+      {unread > 0 && (
+        <div style={{
+          position: 'absolute', top: '6px', right: '6px',
+          width: '8px', height: '8px', borderRadius: '50%',
+          background: '#ff4d5e',
+          boxShadow: '0 0 7px rgba(255,77,94,0.9)',
+          animation: 'pda-btn-pulse 1.8s ease-in-out infinite',
+        }}/>
+      )}
+
+      {/* Pulse ring when active but no unread */}
+      {unread === 0 && hasActivity && (
+        <div style={{
+          position: 'absolute', top: '8px', right: '8px',
+          width: '6px', height: '6px', borderRadius: '50%',
+          background: '#f5c400',
+          boxShadow: '0 0 5px rgba(245,196,0,0.7)',
+          animation: 'pda-btn-pulse 2.4s ease-in-out infinite',
+        }}/>
+      )}
 
       <style>{`
-        @keyframes pda-pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.3; }
+        @keyframes pda-btn-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.4; transform: scale(0.85); }
         }
       `}</style>
     </button>
