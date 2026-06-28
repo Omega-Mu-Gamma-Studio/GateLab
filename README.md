@@ -1,118 +1,123 @@
 # GateLab
 
-**A 2D interactive logic circuit playground for CS22303 — Digital Principles and System Design**
+**A browser-based digital logic learning environment for CS22303 — Digital Principles and System Design**
 
-Built by [Omega Mu Gamma Studio](https://github.com/Omega-Mu-Gamma-Studio) · the team behind [SeeDS](https://see-ds.vercel.app), [Java-chan](https://java-chan.vercel.app), [KMapX](https://kmapx.vercel.app), and [EG Suite](https://eg-suite.vercel.app)
+Built by [Omega Mu Gamma Studio](https://github.com/Omega-Mu-Gamma-Studio) · an eight-tool student-built open-source studio
 
 ---
 
 ## What is GateLab?
 
-GateLab is a browser-based interactive schematic editor and circuit simulator, built to cover every unit of the CS22303 — Digital Principles and System Design syllabus. It is not a textbook companion — it is a replacement for the moment when a diagram stops making sense.
+GateLab is an interactive logic circuit simulator built to cover the full CS22303 syllabus. It is not a textbook companion. It is a replacement for the moment when a diagram stops making sense.
 
-Every module is built around one idea:
+Every lesson is built around one idea:
 
 > **The broken circuit is the explanation.**
 
-A floating AND input glowing red teaches more than ten rows of a truth table. A race condition glitch animating through a wire teaches hazards better than any paragraph. GateLab builds the failure first, then the fix.
-
-Digital logic is inherently flat. So is GateLab. Every gate, wire, IC layout, PLA grid, and memory array is rendered on a 2D Konva canvas — because a schematic **is** the correct representation, and fighting a 3D camera to show fundamentally flat information helps no one.
+A floating AND input glowing red teaches more than ten rows of a truth table. A race condition glitch animating through a wire teaches hazards better than any paragraph. GateLab shows the failure first, then the fix.
 
 ---
 
-## What It Will Cover
+## The Setting
 
-GateLab ships in five units, each corresponding directly to the CS22303 syllabus. Each unit is a self-contained interactive module deployed as a live update.
+GateLab is framed as an intergalactic spaceship maintenance simulation. You play as a mechanic aboard the **AETHER-9**, working through shift assignments that happen to map exactly to the CS22303 syllabus. Each lesson is a work order. Each unit is a chapter of a thriller narrative that builds across the semester.
 
-| Unit | Topic | Status |
-|------|-------|--------|
-| I | Boolean Algebra, Logic Gates, K-Maps | 🔧 In Development |
-| II | Combinational Circuits | 🔧 Planned |
-| III | Sequential Circuits, Flip-Flops, Counters | 🔧 Planned |
-| IV | Asynchronous Circuits, Race Conditions, Hazards | 🔧 Planned |
-| V | Memory, ROM, PLA, PAL | 🔧 Planned |
-
-Unit I ships first as soon as it is complete. Each subsequent unit is added as a deployed update.
+Your shift partner **Ada** talks you through each task. **Engineer Reyes** dispatches fault alerts. The ship's automated system, **MAINT-SYS**, generates the work logs. None of this is decoration — the narrative framing gives the failure-first pedagogy a reason to exist in-world.
 
 ---
 
-## Unit Breakdown
+## Learning Structure
 
-### Unit I — Boolean Algebra, Logic Gates, K-Maps
+Every lesson runs three phases:
 
-The foundation. Three interactive tools live side by side.
+| Phase | Label | What Happens |
+|-------|-------|--------------|
+| 1 | **OBSERVE** | The circuit runs correctly. Understand nominal behaviour. |
+| 2 | **FAULT** | A fault is injected — a broken wire, a floating input, a race condition. Study the failure. |
+| 3 | **REPAIR** | The canvas is cleared. Wire the correct circuit from scratch. |
 
-**The Gate Canvas** is an infinite, zoomable, pannable Konva workspace. Drag AND, OR, NOT, NAND, NOR, XOR, and XNOR gates from the palette onto the canvas. Draw wires by clicking output pins and dragging to input pins. Toggle input nodes between 0 and 1. Hit Simulate — signal propagation evaluates the graph and every wire and output node color-codes in real time: green for HIGH, red for LOW, grey for floating or unconnected.
-
-Every lesson runs three phases — *See It Work → See It Break → You Try.* The Break phase pre-severs a wire or leaves an input floating. The student sees the failure propagate visually through the circuit before being given the blank canvas to reconstruct it themselves.
-
-**The Number System Visualizer** is a side panel — binary, octal, and hex conversion with animated bit-flip highlights. 1s complement and 2s complement are shown step by step with bit cells that flip color as each transformation step runs.
-
-**The K-Map Module** is an interactive grid — click cells to fill in a 2/3/4-variable K-Map, watch groups highlight with color overlays, and get the simplified Boolean expression. The **Send to Canvas** button takes the simplified expression and auto-generates a gate circuit on the schematic canvas from it. Simplify on the K-Map, click the button, watch the gates appear.
+The phase indicator is always visible. Progress through phases is linear; no phase can be skipped.
 
 ---
 
-### Unit II — Combinational Circuits
+## The PDA
 
-The canvas shifts from primitive gates to **functional circuit blocks** — Full Adder, 4:1 MUX, 3:8 Decoder, 4-bit Comparator, BCD to 7-segment Decoder. Each block is a Konva rectangle with labeled input and output pins. Wire blocks together. Simulate. Watch signal propagation animate connection by connection.
+Every player has a **DECK-7 PDA** — a persistent in-game device accessible from the top bar at any time. It opens to a home screen with five apps:
 
-**Block Mode** shows functional units as black boxes. **Expand Mode** dissolves any block into its constituent gates inline on the canvas — the Full Adder breaks open into its 9-gate implementation with all internal wires visible.
+| App | Color | Content |
+|-----|-------|---------|
+| **COMM** | Red | Direct messages from Ada, Engineer Reyes, Captain Voss, and MAINT-SYS. Rapport system with branching reply choices. |
+| **TASKS** | Yellow | The active work order — work order ID, location, shift, phase status, and current objective. Auto-updates as phases shift. Replaces the old lesson briefing overlay entirely. |
+| **GALLERY** | White | Photos received from crew members via COMM. |
+| **CREW** | Blue | Contact cards for every crew member with role, status, and relationship notes. |
+| **LOGS** | Green | Auto-generated lore entries written by MAINT-SYS when a lesson is completed. |
+| **[LOCKED]** | — | A sixth app slot, visibly present but inaccessible. Unlocks later in the story. |
 
-The 4-bit Ripple Carry Adder lesson shows carry propagation as a timed animation — each Full Adder computes in sequence, the carry wire lights up and passes right, sum bits appear in order. The visual ripple is the lesson.
+The PDA has a full phone form factor — notch, status bar, signal/battery indicators, home indicator pill. Tapping the home pill from any app returns to the home screen. A small yellow clipboard button in the canvas corner opens TASKS directly without leaving the workspace.
 
-The 7-segment Decoder lesson maps output wires directly to a rendered 7-segment display component on the canvas. Input a BCD value, simulate, and the correct segments illuminate.
+### Rapport System
 
----
-
-### Unit III — Sequential Circuits, Flip-Flops, Counters
-
-The most complex unit. The Konva canvas shows flip-flop schematics with their input pins (S/R, J/K, D, T, Clock, Clear, Preset), but two side panels carry equal weight.
-
-**The Timing Diagram Panel** draws clock, input, and output waveforms in real time as the user toggles inputs and ticks the clock. Every clock edge, every state change, every Q transition extends the waveform live. The student builds the timing diagram themselves by interacting with the circuit.
-
-**The State Diagram Panel** shows the current state machine as a directed graph — nodes are states, edges are transitions labeled with input conditions. The active state node pulses as inputs change and the clock ticks. For counters, the state diagram is a ring of states cycling through the sequence.
-
-The **Ripple Counter visualizer** places flip-flops side by side on the canvas, Q connected to the next clock input in a chain. Each clock tick propagates through the chain with staggered timing — because ripple means the flip-flops don't all update at once. A 4-bit binary readout counts in sync below the canvas.
+Every reply choice in Ada's COMM thread shifts a hidden rapport score (-10 to +10) that determines which dialogue stream she uses: warm, neutral, or cold. Choices are logged with their delta. Unit endings trigger binary story choices that set persistent story flags and unlock flag-gated messages.
 
 ---
 
-### Unit IV — Asynchronous Circuits, Race Conditions, Hazards
+## Curriculum Coverage
 
-The "broken circuit" philosophy at full power.
+GateLab ships in five units corresponding directly to the CS22303 syllabus.
 
-The **Hazard Sandbox** is a Konva canvas showing an asynchronous combinational circuit with configurable propagation delays on each gate — small delay badges the student can adjust with a slider. Simulate and signal propagation happens over simulated time, not instantaneously. When a race condition exists, two paths of different delays arrive at a gate out of sync and the canvas shows the **glitch** — a brief unwanted pulse flashing on the output wire before the circuit settles.
-
-The Timing Diagram Panel shows the glitch as a spike in the output waveform. The student adds the consensus term by dragging a new gate onto the canvas. Re-simulate — the glitch disappears and the waveform smooths. That moment is the lesson.
-
-The simulation engine is event-driven internally — a JS priority queue sorted by event time, emitting state changes over simulated time. Konva's animation loop plays them back at a readable speed. A timeline scrubber lets the student step through the simulation frame by frame.
+| Unit | Topic | Lessons | Status |
+|------|-------|---------|--------|
+| I | Boolean Algebra, Logic Gates, K-Maps | 10 | 🔧 In Development |
+| II | Combinational Circuits | 9 | 🔧 Planned |
+| III | Sequential Circuits, Flip-Flops, Counters | 9 | 🔧 Planned |
+| IV | Asynchronous Circuits, Race Conditions, Hazards | 6 | 🔧 Planned |
+| V | Memory, ROM, PLA, PAL | 7 | 🔧 Planned |
 
 ---
 
-### Unit V — Memory, ROM, PLA, PAL
+## Workspace Layout
 
-**The Memory Grid** — SRAM, DRAM, and ROM lessons use a 2D Konva grid of memory cells. Input an address on the left bus, hit Read, and the row decoder highlights the target row, column selectors fire, and the addressed cell lights up and sends its value down the data bus. DRAM refresh is a periodic sweep across all rows. The flat grid shows all cells simultaneously — no camera angle to manage, no occlusion.
+The workspace is a three-column layout:
 
-**The PLA/PAL Grid** is a dot-matrix diagram — AND plane on top, OR plane below, clickable dots at intersections to program connections. Click a dot to add a connection, click again to remove. Simulate an input vector and the signal flows through the AND plane (highlighting active product terms) then through the OR plane (OR-ing selected terms) to the output as a spreading highlight animation.
+**Left — Sidebar** (collapsible): unit list and lesson navigator. Collapsed by default when inside a lesson so the canvas gets maximum width. Persists collapse state across sessions.
 
-**The Hamming Code Visualizer** is a React bit-cell component. Enter a data word, watch parity bits placed at the correct power-of-2 positions, see parity group membership highlighted for each bit. Inject an error by clicking any bit to flip it. Hit Detect — each parity group lights up showing its XOR result, the binary syndrome points to the error bit, which flashes red. Hit Correct — it flips back. The syndrome-to-error-position mapping is the whole lesson.
+**Centre — Canvas + ControlPanel**: the interactive circuit area. The DialogueBox floats over the canvas as a draggable card — two voices mapped to phases: Ada (red, OBSERVE phase) and the assigned command speaker (amber, FAULT and REPAIR phases). Position resets per lesson. A small clipboard button in the top-left corner opens the TASKS app directly.
+
+**Right — InfoPanel** (always visible): a tabbed right column. Tabs shown depend on the active unit:
+
+| Unit | Tabs Available |
+|------|---------------|
+| I | Trivia |
+| II | Verilog · Trivia |
+| III | Timing · State · Verilog · Trivia |
+| IV | Timing · Verilog · Trivia |
+| V | Trivia |
+
+The Trivia tab is a shuffleable deck of circuit history facts and engineering jokes — designed for chill-mode phases when the student needs a second before trying again. The Timing and State tabs serve live waveform and state diagram views for sequential and asynchronous units.
 
 ---
 
 ## Key Features
 
-- **Konva Gate Canvas** — drag-and-drop AND, OR, NOT, NAND, NOR, XOR, XNOR gates with IEEE schematic symbols, pin-to-pin wire drawing, and live signal propagation coloring
-- **Three Learning Phases per Lesson** — *See It Work → See It Break → You Try* — every lesson includes a deliberate fault state
-- **K-Map Module with Send to Canvas** — simplify a Boolean expression on an interactive K-Map and auto-generate the gate circuit from it
-- **Block Mode + Expand Mode** — view combinational circuits as functional blocks or dissolve them to gate level inline
-- **Live Timing Diagram Panel** — waveforms that grow in real time as the student interacts with sequential circuits
-- **State Diagram Viewer** — animated current-state tracking alongside the schematic for flip-flops and counters
-- **Hazard Sandbox with Configurable Delays** — per-gate propagation delay sliders, live glitch visualization, and fix workflow
-- **Event-Driven Async Simulator** — JS priority queue engine with timeline scrubber for asynchronous circuit replay
-- **Memory Grid Visualizer** — 2D address/data animation for SRAM, DRAM, and ROM
-- **PLA/PAL Dot Matrix** — clickable AND/OR plane programming with animated signal flow
-- **Hamming Code Visualizer** — interactive error injection, syndrome detection, and bit correction
-- **Auto-generated Verilog View** — read-only panel showing the Verilog equivalent of the current canvas circuit, derived from topological sort of the gate graph
-- **Number System Visualizer** — animated binary, octal, hex conversion and 1s/2s complement step-through
+- **Three-phase lesson structure** — OBSERVE → FAULT → REPAIR, every lesson, no exceptions
+- **Fault-first pedagogy** — the broken state is the teaching moment, not an error to avoid
+- **DECK-7 PDA** — full in-game phone with home screen, five apps, and a locked sixth slot
+- **Rapport system** — Ada's dialogue shifts across warm/neutral/cold bands based on reply choices
+- **Story flags** — unit-ending binary choices persist and gate future narrative content
+- **Work order system** — every lesson is a MAINT-SYS ticket with ID, location, shift, and per-phase objectives
+- **Floating DialogueBox** — draggable, speaker-labelled dialogue card over the canvas; two voices across phases
+- **InfoPanel** — permanent right column with unit-appropriate tabs and a trivia/joke deck
+- **Collapsible Sidebar** — lesson navigator that gets out of the way when you're working
+- **Three themes** — Matrix Green · Logic Gold · Signal Blue; persisted in localStorage
+- **Auto-generated Verilog view** — read-only Verilog panel derived from the gate graph (Unit II+)
+- **Live Timing Diagram** — waveforms that grow in real time as the student interacts (Units III & IV)
+- **State Diagram Viewer** — animated state machine panel tracking current state alongside the circuit (Unit III)
+- **Hazard Sandbox** — per-gate delay sliders, live glitch visualization, event-driven async simulation (Unit IV)
+- **Memory Grid** — 2D address/data animation for SRAM, DRAM, and ROM (Unit V)
+- **PLA/PAL Dot Matrix** — clickable AND/OR plane programming with animated signal flow (Unit V)
+- **Hamming Code Visualizer** — error injection, syndrome detection, and single-bit correction (Unit V)
+- **Number System Visualizer** — animated binary, octal, hex, 1s/2s complement step-through (Unit I)
+- **KMapX Bridge** — K-Map simplification with Send to Canvas (Unit I)
 
 ---
 
@@ -121,13 +126,12 @@ The simulation engine is event-driven internally — a JS priority queue sorted 
 | Layer | Technology |
 |-------|------------|
 | App shell & UI | React + Vite |
-| Global state | Zustand |
+| Global state | Zustand (with `persist` middleware) |
 | Canvas & schematics | Konva.js |
-| UI transitions & animations | Framer Motion |
-| Simulation engine | Vanilla JS (pure graph evaluator, event-driven for async) |
+| Simulation engine | Vanilla JS — graph evaluator + event-driven async engine |
 | Deployment | Vercel |
 
-No Three.js. The entire product is 2D — which is correct for this domain. Digital logic schematics are flat, and the tool reflects that.
+No Three.js. Digital logic schematics are inherently flat, and the tool reflects that.
 
 ---
 
@@ -136,30 +140,48 @@ No Three.js. The entire product is 2D — which is correct for this domain. Digi
 ```
 GateLab/
 ├── public/
-│   └── favicon.svg
+│   ├── favicon.svg
+│   └── icons.svg
 │
 ├── src/
-│   ├── main.jsx                    # Vite entry point
-│   ├── App.jsx                     # Root component, routing
+│   ├── main.jsx
+│   ├── App.jsx                     # Root layout: Home | WorkspaceView
 │   │
 │   ├── components/
-│   │   ├── ui/                     # All non-canvas React UI
-│   │   │   ├── Sidebar.jsx         # Unit/lesson navigation panel
-│   │   │   ├── ControlPanel.jsx    # Input toggles, simulate button, mode switcher
-│   │   │   ├── InfoDrawer.jsx      # Lesson phase text (See It Work / Break / You Try)
+│   │   ├── pda/                    # The DECK-7 PDA — in-game phone device
+│   │   │   ├── PDA.jsx             # Modal shell: phone frame + home/app routing
+│   │   │   ├── HomeScreen.jsx      # Icon grid, ship status strip, locked slot
+│   │   │   ├── AppShell.jsx        # Shared app wrapper (back chevron + app header)
+│   │   │   ├── TasksApp.jsx        # MAINT-SYS work order viewer (replaces PlotBox)
+│   │   │   ├── MessagesTab.jsx     # COMM — Ada & crew message threads
+│   │   │   ├── PhotosTab.jsx       # GALLERY — received photos
+│   │   │   ├── ContactsTab.jsx     # CREW — contact cards
+│   │   │   └── NotesTab.jsx        # LOGS — auto-generated lesson lore entries
+│   │   │
+│   │   ├── ui/                     # Workspace UI
+│   │   │   ├── TopBar.jsx          # Fixed header: wordmark, breadcrumb, PDA button, theme picker
+│   │   │   ├── Sidebar.jsx         # Collapsible left nav — unit/lesson list
+│   │   │   ├── ControlPanel.jsx    # Input toggles, simulate button, phase controls
+│   │   │   ├── InfoDrawer.jsx      # Permanent right panel: Timing/State/Verilog/Trivia tabs
+│   │   │   ├── DialogueBox.jsx     # Floating draggable dialogue card (Ada / Command voices)
+│   │   │   ├── PlotBox.jsx         # Canvas corner shortcut button → opens TASKS app
+│   │   │   ├── PhaseIndicator.jsx  # OBSERVE → FAULT → REPAIR phase badge
+│   │   │   ├── OperatorStatus.jsx  # Persistent footer in InfoPanel
+│   │   │   ├── SuccessCard.jsx     # Lesson completion overlay
 │   │   │   ├── TimingDiagram.jsx   # Live waveform panel (Units III & IV)
-│   │   │   ├── StateDiagram.jsx    # State machine graph viewer (Unit III)
-│   │   │   ├── VerilogPanel.jsx    # Auto-generated read-only Verilog view
-│   │   │   └── PhaseIndicator.jsx  # See It Work → Break → You Try phase badge
+│   │   │   ├── StateDiagram.jsx    # State machine viewer (Unit III)
+│   │   │   └── VerilogPanel.jsx    # Auto-generated read-only Verilog (Unit II+)
 │   │   │
-│   │   ├── canvas/                 # Konva canvas components
-│   │   │   ├── GateCanvas.jsx      # Main schematic canvas (Units I–II)
+│   │   ├── canvas/                 # Circuit canvas components
+│   │   │   ├── GateCanvas.jsx      # Main schematic canvas
+│   │   │   ├── GateGallery.jsx     # Draggable gate palette
+│   │   │   ├── WireLayer.jsx       # Wire drawing and routing
 │   │   │   ├── FlipFlopCanvas.jsx  # Sequential circuit canvas (Unit III)
-│   │   │   ├── HazardCanvas.jsx    # Async circuit canvas with delay badges (Unit IV)
-│   │   │   ├── MemoryGrid.jsx      # SRAM/DRAM/ROM grid canvas (Unit V)
-│   │   │   └── PLAGrid.jsx         # PLA/PAL dot matrix canvas (Unit V)
+│   │   │   ├── HazardCanvas.jsx    # Async canvas with delay badges (Unit IV)
+│   │   │   ├── MemoryGrid.jsx      # SRAM/DRAM/ROM grid (Unit V)
+│   │   │   └── PLAGrid.jsx         # PLA/PAL dot matrix (Unit V)
 │   │   │
-│   │   ├── gates/                  # Konva gate shape definitions
+│   │   ├── gates/                  # Gate shape definitions
 │   │   │   ├── AndGate.js
 │   │   │   ├── OrGate.js
 │   │   │   ├── NotGate.js
@@ -167,79 +189,49 @@ GateLab/
 │   │   │   ├── NorGate.js
 │   │   │   ├── XorGate.js
 │   │   │   ├── XnorGate.js
-│   │   │   └── GatePin.js          # Input/output pin circle with snap logic
+│   │   │   ├── GatePin.js
+│   │   │   ├── GateShape.jsx
+│   │   │   ├── SpecialNodes.jsx
+│   │   │   └── gateGeometry.js
 │   │   │
-│   │   └── widgets/                # Self-contained interactive sub-components
-│   │       ├── KMapGrid.jsx        # K-Map interactive cell grid
-│   │       ├── NumberVisualizer.jsx # Binary/octal/hex/complement animator
-│   │       ├── HammingVisualizer.jsx # Bit cell error injection and syndrome view
-│   │       └── SevenSegDisplay.jsx  # 7-segment display component (Unit II)
+│   │   └── widgets/                # Self-contained interactive components
+│   │       ├── KMapGrid.jsx
+│   │       ├── NumberVisualizer.jsx
+│   │       ├── HammingVisualizer.jsx
+│   │       └── SevenSegDisplay.jsx
 │   │
-│   ├── engine/                     # Simulation logic — zero knowledge of Konva or React
-│   │   ├── GraphEvaluator.js       # Combinational circuit evaluation (topological sort + propagate)
-│   │   ├── EventSimulator.js       # Event-driven async simulator (priority queue, time steps)
-│   │   ├── FlipFlopModels.js       # SR, JK, D, T flip-flop state transition functions
-│   │   ├── VerilogEmitter.js       # Generates Verilog from gate graph via topological sort
-│   │   └── HammingEngine.js        # Parity bit placement, syndrome calculation, error correction
+│   ├── engine/                     # Simulation logic — no React, no Konva
+│   │   ├── GraphEvaluator.js       # Combinational graph evaluation
+│   │   ├── EventSimulator.js       # Event-driven async simulator (priority queue)
+│   │   ├── FlipFlopModels.js       # SR, JK, D, T state transition functions
+│   │   ├── VerilogEmitter.js       # Verilog generation from gate graph
+│   │   ├── HammingEngine.js        # Parity, syndrome, correction
+│   │   └── WireRouter.js           # Wire path calculation
 │   │
-│   ├── store/                      # Zustand global state slices
-│   │   ├── lessonStore.js          # Active unit, active lesson, phase (Work/Break/Try)
-│   │   ├── canvasStore.js          # Gate positions, wire connections, node IDs
-│   │   ├── signalStore.js          # Current signal values across all nodes
+│   ├── store/                      # Zustand state slices
+│   │   ├── lessonStore.js          # Active unit/lesson/phase — syncs to canvas and PDA
+│   │   ├── canvasStore.js          # Gate positions, wires, node IDs
+│   │   ├── pdaStore.js             # PDA nav, message threads, rapport, story flags, currentTask
+│   │   ├── signalStore.js          # Signal values across all nodes
 │   │   └── timingStore.js          # Timing diagram waveform history
 │   │
-│   └── lessons/                    # Lesson content as structured JS/JSON data
-│       ├── unit1/
-│       │   ├── index.js            # Unit I lesson manifest
-│       │   ├── 01-and-gate.js
-│       │   ├── 02-or-gate.js
-│       │   ├── 03-not-gate.js
-│       │   ├── 04-nand-nor.js
-│       │   ├── 05-xor-xnor.js
-│       │   ├── 06-boolean-laws.js
-│       │   ├── 07-sop-pos.js
-│       │   ├── 08-kmap-2var.js
-│       │   ├── 09-kmap-3var.js
-│       │   └── 10-kmap-4var.js
-│       ├── unit2/
-│       │   ├── index.js
-│       │   ├── 01-half-adder.js
-│       │   ├── 02-full-adder.js
-│       │   ├── 03-ripple-carry-adder.js
-│       │   ├── 04-subtractor.js
-│       │   ├── 05-encoder.js
-│       │   ├── 06-decoder.js
-│       │   ├── 07-mux.js
-│       │   ├── 08-demux.js
-│       │   └── 09-comparator.js
-│       ├── unit3/
-│       │   ├── index.js
-│       │   ├── 01-sr-latch.js
-│       │   ├── 02-sr-flipflop.js
-│       │   ├── 03-jk-flipflop.js
-│       │   ├── 04-d-flipflop.js
-│       │   ├── 05-t-flipflop.js
-│       │   ├── 06-ripple-counter.js
-│       │   ├── 07-mod-n-counter.js
-│       │   ├── 08-ring-counter.js
-│       │   └── 09-johnson-counter.js
-│       ├── unit4/
-│       │   ├── index.js
-│       │   ├── 01-async-circuits-intro.js
-│       │   ├── 02-race-conditions.js
-│       │   ├── 03-static-hazards.js
-│       │   ├── 04-dynamic-hazards.js
-│       │   ├── 05-hazard-elimination.js
-│       │   └── 06-delay-model.js
-│       └── unit5/
-│           ├── index.js
-│           ├── 01-sram.js
-│           ├── 02-dram.js
-│           ├── 03-rom.js
-│           ├── 04-eprom-flash.js
-│           ├── 05-pla.js
-│           ├── 06-pal.js
-│           └── 07-hamming-code.js
+│   ├── data/
+│   │   └── adaMessages.js          # Ada's message bank — trigger-gated, rapport-gated
+│   │
+│   ├── hooks/
+│   │   └── useGateTheme.js
+│   │
+│   ├── pages/
+│   │   ├── Home.jsx                # Landing page with unit cards
+│   │   └── Journal.jsx
+│   │
+│   └── lessons/                    # Lesson content as structured JS data
+│       ├── index.js
+│       ├── unit1/  (10 lessons)    # Boolean Algebra, Logic Gates, K-Maps
+│       ├── unit2/  (9 lessons)     # Combinational Circuits
+│       ├── unit3/  (9 lessons)     # Sequential Circuits
+│       ├── unit4/  (6 lessons)     # Asynchronous Circuits & Hazards
+│       └── unit5/  (7 lessons)     # Memory & Programmable Logic
 │
 ├── index.html
 ├── vite.config.js
@@ -247,36 +239,36 @@ GateLab/
 └── README.md
 ```
 
-
 ---
 
 ## The Team
 
-GateLab is built by two people.
+**Alberto Felix** ([@albertofelix08](https://github.com/albertofelix08)) — Project-Lead. Circuit engine, lesson design, core simulation, Narrative, UI.
 
-**Alberto Felix** ([@albertofelix](https://github.com/albertofelix08)) — Project Lead & Creative Lead. Product vision, interaction design, unit architecture, lesson design.
-
-**Aaron Mcgeo** ([@aaronmcgeo](https://github.com/aaronmcgeo)) — Co-Lead. Implementation partner, co-architect.
+**Aaron McGeo** ([@aaronmcgeo](https://github.com/aaronmcgeo)) — Co-Lead. Implementation, systems architecture.
 
 ---
 
 ## Part of the Omega Mu Gamma Studio
 
-GateLab is the fourth tool from Omega Mu Gamma Studio, a student-built suite of open-source engineering education tools.
+Omega Mu Gamma Studio is a student-built open-source studio building interactive learning tools for engineering and CS courses.
 
-| Tool | What it does |
-|------|-------------|
-| [SeeDS](https://see-ds.vercel.app) | 3D data structure visualizer |
-| [Java-chan](https://java-chan.vercel.app) | Anime-guided interactive Java tutor (CS22301) |
-| [KMapX](https://kmapx.vercel.app) | Karnaugh map simplifier with don't-care support |
-| [EG Suite](https://eg-suite.vercel.app) | 3D Engineering Graphics simulator (ME22201) |
-| GateLab | 2D digital logic schematic playground (CS22303) — *this repo* |
+| Tool | Course | What it does |
+|------|--------|-------------|
+| [SeeDS](https://github.com/Omega-Mu-Gamma-Studio/SeeDS) | CS | 3D C code visualizer and data structures debugger |
+| [Java-Chan](https://github.com/Omega-Mu-Gamma-Studio/Java-Chan) | CS22301 | Anime-guided Java tutor — working code, broken code, hands-on practice |
+| [KMapX](https://github.com/Omega-Mu-Gamma-Studio/KMapX) | CS22303 | Boolean expression simplifier via Quine–McCluskey with don't-care support |
+| GateLab | CS22303 | Digital logic learning environment — *this repo* |
+| [ArchVisor](https://github.com/Omega-Mu-Gamma-Studio/ArchVisor) | CS22304 | Interactive Computer Organization & Architecture learning platform |
+| [EG Suite](https://github.com/Omega-Mu-Gamma-Studio/EG-Suite) | ME22201 | Interactive 3D Engineering Graphics simulator |
+| [ThermOS](https://github.com/Omega-Mu-Gamma-Studio/ThermOS) | ME22301 | Five browser-based modules for Engineering Thermodynamics |
+| [PlusPlus-Chan](https://github.com/Omega-Mu-Gamma-Studio/PlusPlus-Chan) | CS | Anime character-guided C++ tutor |
 
 ---
 
 ## Status
 
-> GateLab is in active pre-development. The architecture and tech stack have been finalized. Unit I development begins next. This README will be updated as each unit ships.
+> GateLab is in active development. The UI shell, narrative system, PDA, lesson architecture, and simulation engine are complete. Unit I circuit lessons are in progress. Units II–V deploy as live updates.
 
 ---
 
