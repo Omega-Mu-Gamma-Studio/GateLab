@@ -23,6 +23,7 @@ import { InputNode, OutputNode, ConstNode } from '../gates/SpecialNodes'
 import WireLayer from './WireLayer'
 import GateGallery from './GateGallery'
 import SuccessCard from '../ui/SuccessCard'
+import KMapWidget from '../widgets/KMapWidget'
 import { useGateTheme } from '../../hooks/useGateTheme'
 import { useCanvasStore } from '../../store/canvasStore'
 import { useLessonStore } from '../../store/lessonStore'
@@ -118,6 +119,7 @@ export default function GateCanvas() {
   const dragWire       = useCanvasStore(s => s.dragWire)
   const phase          = useCanvasStore(s => s.phase)
   const lessonSolved   = useCanvasStore(s => s.lessonSolved)
+  const kmapConfig     = useCanvasStore(s => s.kmapConfig)
 
   const toggleInput    = useCanvasStore(s => s.toggleInput)
   const moveNode       = useCanvasStore(s => s.moveNode)
@@ -324,7 +326,7 @@ export default function GateCanvas() {
             <GateGallery canvasW={size.w} canvasH={size.h} theme={theme} />
           )}
 
-          {activeUnitId && nodes.length === 0 && (
+          {activeUnitId && nodes.length === 0 && !kmapConfig && (
             <ComingSoon name={lessonName} canvasW={size.w} canvasH={size.h} theme={theme} />
           )}
 
@@ -343,6 +345,26 @@ export default function GateCanvas() {
           )}
         </Layer>
       </Stage>
+
+      {/* K-Map overlay — rendered as HTML above the canvas when lesson uses kmapConfig */}
+      {activeUnitId && kmapConfig && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          overflow: 'auto',
+          zIndex: 10,
+        }}>
+          <KMapWidget
+            config={kmapConfig}
+            theme={theme}
+            onSolve={({ simplified }) => {
+              const lessonId = meta?.id || null
+              setSolved(lessonId)
+              setShowSuccess(true)
+            }}
+          />
+        </div>
+      )}
 
       {/* Success overlay — rendered as HTML above the canvas */}
       {showSuccess && (

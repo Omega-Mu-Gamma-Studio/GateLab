@@ -38,6 +38,9 @@ export const useCanvasStore = create((set, get) => ({
   phase:           'work',  // mirrors lessonStore.phase
   hint:            '',
 
+  // ── KMap config (for K-Map lessons) ──────────────────────────────────
+  kmapConfig:      null,   // object | null
+
   // ── Success state (Group 2.2) ─────────────────────────────────────────
   lessonSolved:    false,
 
@@ -67,6 +70,7 @@ export const useCanvasStore = create((set, get) => ({
       selectedNodeId: null,
       dragWire:       null,
       lessonSolved:   false,
+      kmapConfig:     phaseData.kmapConfig || null,
     })
   },
 
@@ -173,6 +177,7 @@ export const useCanvasStore = create((set, get) => ({
       selectedNodeId: null, faultNodeId: null,
       phase: 'work', hint: '', dragWire: null,
       lessonSolved: false, timerActive: false, timerStart: null,
+      kmapConfig: null,
     })
   },
 }))
