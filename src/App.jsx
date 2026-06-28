@@ -6,6 +6,10 @@
  * Home page:  TopBar + Home (full width, no panels)
  * Workspace:  TopBar + [Sidebar | ControlPanel+Canvas | InfoPanel]
  *
+ * The DialogueBox is a floating, draggable card layered over the canvas
+ * (not a docked row) — see DialogueBox.jsx for why. Canvas gets its full
+ * height back since nothing permanently reserves space below it anymore.
+ *
  * InfoPanel is a permanent right column — always visible in the workspace.
  * No open/close state needed.
  */
@@ -15,11 +19,11 @@ import Sidebar from './components/ui/Sidebar'
 import ControlPanel from './components/ui/ControlPanel'
 import InfoPanel from './components/ui/InfoDrawer'
 import DialogueBox from './components/ui/DialogueBox'
+import PlotBox from './components/ui/PlotBox'
 import GateCanvas from './components/canvas/GateCanvas'
 import Home from './pages/Home'
 import './index.css'
 
-// Vertical rhythm of the centre column: top bar 5% : canvas 75% : dialogue 20%
 const TOPBAR_H = '5vh'
 
 function WorkspaceView() {
@@ -31,15 +35,15 @@ function WorkspaceView() {
         {/* Left nav — 20% of the workspace width when expanded */}
         <Sidebar />
 
-        {/* Centre: control strip + canvas + dialogue box — 60% of the workspace width */}
+        {/* Centre: control strip + canvas — 60% of the workspace width */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           <ControlPanel />
-          {/* Canvas + dialogue split the remaining height 75:20 (ControlPanel takes the rest) */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-            <div style={{ flex: '75 1 0%', minHeight: 0, display: 'flex' }}>
-              <GateCanvas />
-            </div>
+          {/* relative wrapper so the floating DialogueBox anchors to the
+              canvas area itself, not the whole window */}
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+            <GateCanvas />
             <DialogueBox />
+            <PlotBox />
           </div>
         </div>
 

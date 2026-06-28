@@ -90,7 +90,7 @@ export default function Sidebar() {
         {UNITS.map(unit => (
           <button
             key={unit.id}
-            onClick={() => goToUnit(unit.id)}
+            onClick={() => { goToUnit(unit.id); setCollapsed(false) }}
             title={collapsed ? `Unit ${unit.roman}: ${unit.title}` : undefined}
             style={{
               display: 'flex',

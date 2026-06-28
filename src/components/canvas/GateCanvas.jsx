@@ -293,8 +293,8 @@ export default function GateCanvas() {
   // ── Background — oscilloscope-tinted grid ────────────────────────────────
   const accentRgb = theme?.accentRgb || '0,255,136'
   const bgStyle = {
-    flex: 1,
-    position: 'relative',
+    position: 'absolute',
+    inset: 0,
     overflow: 'hidden',
     background: `
       radial-gradient(ellipse at 50% 30%, ${theme?.accentGlow || 'rgba(0,255,136,0.08)'} 0%, transparent 60%),
