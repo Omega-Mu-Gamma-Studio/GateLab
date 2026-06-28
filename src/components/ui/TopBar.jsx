@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
+import usePdaStore from '../../store/pdaStore'
 
 const THEMES = [
   { id: 'green', label: 'Matrix',  color: '#00ff88', attr: ''     },
@@ -14,6 +15,8 @@ export default function TopBar() {
   const popRef = useRef(null)
 
   const { activeUnitId, activeLessonIdx, goHome } = useLessonStore()
+  const { openPda, totalUnread } = usePdaStore()
+  const pdaUnread = totalUnread()
 
   // Get current unit info for breadcrumb
   const activeUnit = UNITS.find(u => u.id === activeUnitId)
@@ -101,8 +104,54 @@ export default function TopBar() {
         )}
       </div>
 
-      {/* Right: course code + theme picker */}
+      {/* Right: PDA button + course code + theme picker */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        {/* PDA button */}
+        <button
+          onClick={() => openPda('messages')}
+          title="Open PDA"
+          style={{
+            position: 'relative',
+            width: '32px', height: '32px', borderRadius: '8px',
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-muted)',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(255,77,94,0.1)'
+            e.currentTarget.style.borderColor = 'rgba(255,77,94,0.4)'
+            e.currentTarget.style.color = '#ff4d5e'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.borderColor = 'var(--border)'
+            e.currentTarget.style.color = 'var(--text-muted)'
+          }}
+        >
+          {/* Phone icon */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          {/* Unread badge */}
+          {pdaUnread > 0 && (
+            <span style={{
+              position: 'absolute', top: '-4px', right: '-4px',
+              background: '#ff4d5e', color: '#0a0d0a',
+              fontFamily: 'var(--mono)', fontSize: '8px', fontWeight: 700,
+              borderRadius: '99px', padding: '1px 4px',
+              minWidth: '14px', textAlign: 'center',
+              boxShadow: '0 0 6px rgba(255,77,94,0.5)',
+            }}>
+              {pdaUnread > 9 ? '9+' : pdaUnread}
+            </span>
+          )}
+        </button>
+
         <span style={{
           fontFamily: 'var(--mono)', fontSize: '11px',
           color: 'var(--text-muted)', letterSpacing: '0.08em',

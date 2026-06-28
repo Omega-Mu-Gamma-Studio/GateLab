@@ -4,10 +4,14 @@
  * Overlay shown when the OUTPUT node goes HIGH in try phase.
  * Auto-dismisses after 4 seconds or on button click.
  * Reads narrative.success and narrative.lore from lessonStore.
+ *
+ * Also triggers the PDA lesson-complete hook so Ada's post-lesson
+ * message is queued and the Notes log gets a new entry.
  */
 import { useEffect, useState } from 'react'
 import { useLessonStore } from '../../store/lessonStore'
 import { useCanvasStore } from '../../store/canvasStore'
+import usePdaStore from '../../store/pdaStore'
 
 export default function SuccessCard({ onNext, onDismiss }) {
   const { narrative, meta } = useLessonStore()

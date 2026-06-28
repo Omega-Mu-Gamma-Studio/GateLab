@@ -22,6 +22,7 @@ import DialogueBox from './components/ui/DialogueBox'
 import PlotBox from './components/ui/PlotBox'
 import GateCanvas from './components/canvas/GateCanvas'
 import Home from './pages/Home'
+import PDA from './components/pda/PDA'
 import './index.css'
 
 const TOPBAR_H = '5vh'
@@ -63,8 +64,12 @@ export default function App() {
       <div style={{ paddingTop: TOPBAR_H }}>
         <Home />
       </div>
+      <PDA />
     </>
   ) : (
-    <WorkspaceView />
+    <>
+      <WorkspaceView />
+      <PDA />
+    </>
   )
 }
