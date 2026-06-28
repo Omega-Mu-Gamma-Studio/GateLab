@@ -108,7 +108,7 @@ export default function TopBar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         {/* PDA button */}
         <button
-          onClick={() => openPda('messages')}
+          onClick={() => openPda()}
           title="Open PDA"
           style={{
             position: 'relative',

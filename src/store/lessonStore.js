@@ -11,6 +11,7 @@
 import { create } from 'zustand'
 import { getLesson } from '../lessons/index'
 import { useCanvasStore } from './canvasStore'
+import usePdaStore from './pdaStore'
 
 export const UNITS = [
   {
@@ -74,6 +75,16 @@ function syncCanvas(unitId, lessonIdx, phase) {
   const phaseData = lesson.phases?.[phase]
   if (!phaseData) { canvas.reset(); return }
   canvas.loadPhase(phaseData, phase)
+
+  // Sync lesson context to PDA
+  const pda = usePdaStore.getState()
+  if (phase === 'work') {
+    // New lesson loaded — seed the full task
+    pda.triggerLessonLoad(lesson.meta, lesson.narrative, phase)
+  } else {
+    // Phase shift only — update phase field
+    pda.updateTaskPhase(phase)
+  }
 }
 
 export const useLessonStore = create((set, get) => ({

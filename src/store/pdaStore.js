@@ -123,8 +123,10 @@ const INITIAL_CONTACTS = [
 function defaultState() {
   return {
     // Navigation
-    pdaOpen:     false,
-    activeTab:   'messages',
+    pdaOpen:      false,
+    pdaView:      'home',      // 'home' | 'app'
+    activeApp:    'comm',      // 'comm' | 'tasks' | 'gallery' | 'crew' | 'logs'
+    activeTab:    'messages',  // legacy compat — unused by new shell
     activeThread: 'ada',
 
     // Relationship
@@ -148,6 +150,9 @@ function defaultState() {
 
     // Track which lesson messages have been seeded (prevent duplicates on re-load)
     seededLessons: [],
+
+    // Current active work order (set by triggerLessonLoad)
+    currentTask: null,
   }
 }
 
@@ -157,12 +162,21 @@ const usePdaStore = create(
       ...defaultState(),
 
       // ── PDA open/close ───────────────────────────────────────────────
-      openPda(tab = 'messages', thread = null) {
-        set({ pdaOpen: true, activeTab: tab })
+      openPda(app = null, thread = null) {
+        if (app) {
+          set({ pdaOpen: true, pdaView: 'app', activeApp: app })
+        } else {
+          set({ pdaOpen: true, pdaView: 'home' })
+        }
         if (thread) set({ activeThread: thread })
       },
       closePda() { set({ pdaOpen: false }) },
-      setTab(tab) { set({ activeTab: tab }) },
+      goHome()   { set({ pdaView: 'home' }) },
+      openApp(app) { set({ pdaView: 'app', activeApp: app }) },
+      setTab(tab) {
+        const appMap = { messages: 'comm', photos: 'gallery', contacts: 'crew', notes: 'logs' }
+        set({ pdaView: 'app', activeApp: appMap[tab] || 'comm' })
+      },
       setThread(threadId) {
         // Clear unread for this thread
         const unread = { ...get().unread, [threadId]: 0 }
@@ -280,6 +294,43 @@ const usePdaStore = create(
       triggerUnitEnd(unitId) {
         get()._seedMessagesForTrigger(`unit${unitId}:end`)
       },
+
+      // ── Lesson load hook ─────────────────────────────────────────────
+      /**
+       * Called when a new lesson loads. Stores the current work order
+       * data so TasksApp can display it without reading lessonStore directly.
+       * Also auto-opens the PDA to Tasks if this is the first time seeing it.
+       * lessonMeta:      { id, workOrder, location, shift, title, unit }
+       * lessonNarrative: { recap, briefing, fault, dispatch, success }
+       * phase:           current phase string
+       */
+      triggerLessonLoad(lessonMeta, lessonNarrative, phase) {
+        set({
+          currentTask: {
+            lessonId:  lessonMeta?.id || null,
+            workOrder: lessonMeta?.workOrder || '—',
+            location:  lessonMeta?.location || '—',
+            shift:     lessonMeta?.shift || '—',
+            title:     lessonMeta?.title || '—',
+            unit:      lessonMeta?.unit || null,
+            recap:     lessonNarrative?.recap || null,
+            briefing:  lessonNarrative?.briefing || null,
+            fault:     lessonNarrative?.fault || null,
+            dispatch:  lessonNarrative?.dispatch || null,
+            success:   lessonNarrative?.success || null,
+            phase,
+          }
+        })
+      },
+
+      // Update just the phase on the current task (called when phase shifts)
+      updateTaskPhase(phase) {
+        const { currentTask } = get()
+        if (!currentTask) return
+        set({ currentTask: { ...currentTask, phase } })
+      },
+
+      clearCurrentTask() { set({ currentTask: null }) },
 
       // ── Reply to Ada ─────────────────────────────────────────────────
       /**
