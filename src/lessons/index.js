@@ -6,13 +6,14 @@ import unit1 from './unit1/index'
 import unit2 from './unit2/index'
 import unit3 from './unit3/index'
 import unit4 from './unit4/index'
+import unit5 from './unit5/index'
 
 const LESSONS = {
   1: unit1,
   2: unit2,
   3: unit3,
   4: unit4,
-  5: [],
+  5: unit5,
 }
 
 /**
