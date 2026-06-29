@@ -4,11 +4,12 @@
  */
 import unit1 from './unit1/index'
 import unit2 from './unit2/index'
+import unit3 from './unit3/index'
 
 const LESSONS = {
   1: unit1,
   2: unit2,
-  3: [],
+  3: unit3,
   4: [],
   5: [],
 }
