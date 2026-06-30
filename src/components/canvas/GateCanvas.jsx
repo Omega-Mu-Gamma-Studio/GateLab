@@ -27,6 +27,7 @@ import KMapWidget from '../widgets/KMapWidget'
 import { useGateTheme } from '../../hooks/useGateTheme'
 import { useCanvasStore } from '../../store/canvasStore'
 import { useLessonStore } from '../../store/lessonStore'
+import usePdaStore from '../../store/pdaStore'
 import { getPinWorldPos, getAllPins } from '../gates/GatePin'
 import { hitTestPin } from '../../engine/WireRouter'
 
@@ -164,6 +165,7 @@ export default function GateCanvas() {
     if (outputNode && signals[outputNode.id]?.output === true) {
       const lessonId = meta?.id || null
       setSolved(lessonId)
+      usePdaStore.getState().triggerLessonComplete(lessonId, narrative?.lore, meta?.title)
       setShowSuccess(true)
     }
   }, [signals, phase, nodes, lessonSolved, setSolved])
@@ -360,6 +362,7 @@ export default function GateCanvas() {
             onSolve={({ simplified }) => {
               const lessonId = meta?.id || null
               setSolved(lessonId)
+              usePdaStore.getState().triggerLessonComplete(lessonId, narrative?.lore, meta?.title)
               setShowSuccess(true)
             }}
           />

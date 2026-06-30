@@ -20,7 +20,25 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import usePdaStore, { rapportBand } from '../../store/pdaStore'
-import { UNIT1_END_CHOICE } from '../../data/adaMessages'
+import {
+  UNIT1_END_CHOICE,
+  UNIT2_END_CHOICE,
+  UNIT3_END_CHOICE,
+  UNIT4_END_CHOICE,
+  UNIT5_END_CHOICE,
+} from '../../data/adaMessages'
+
+// ── Unit-end metadata ──────────────────────────────────────────────────────
+// Maps each unit to its lesson count (for completion checks), its end-choice
+// config, and short banner copy for the thread-list CTA card.
+const UNIT_END_META = {
+  1: { lessonCount: 10, choice: UNIT1_END_CHOICE, bannerTitle: 'Incident Report Pending', bannerSub: 'WO-0052 · Requires your signature' },
+  2: { lessonCount: 9,  choice: UNIT2_END_CHOICE, bannerTitle: 'Performance Review Pending', bannerSub: "Reyes's assessment · Confirm or amend" },
+  3: { lessonCount: 9,  choice: UNIT3_END_CHOICE, bannerTitle: 'A Question, Unanswered', bannerSub: 'Personnel file anomaly · Tell or wait' },
+  4: { lessonCount: 6,  choice: UNIT4_END_CHOICE, bannerTitle: 'Supplemental Report Pending', bannerSub: 'Off-shift incident · Requires your signature' },
+  5: { lessonCount: 7,  choice: UNIT5_END_CHOICE, bannerTitle: 'One Last Thing', bannerSub: 'The escape pod matrix · A conversation, not a form' },
+}
+const UNIT_IDS = [1, 2, 3, 4, 5]
 
 // ── Placeholder image renderer ────────────────────────────────────────────
 // Until real art assets exist, renders a styled placeholder card.
@@ -475,7 +493,7 @@ function ImageLightbox({ image, onClose }) {
 // ══════════════════════════════════════════════════════════════════════════
 export default function MessagesTab() {
   const {
-    contacts, threads, unread, rapport, storyFlags,
+    contacts, threads, unread, rapport, storyFlags, seededLessons,
     setThread, activeThread, submitReply, submitUnitChoice, clearUnread,
   } = usePdaStore()
 
@@ -512,10 +530,22 @@ export default function MessagesTab() {
     submitReply(activeThread, pendingReplyMsg.id, option)
   }
 
-  function handleUnitEndChoice(choice) {
-    submitUnitChoice(1, choice.id, choice.label)
+  function handleUnitEndChoice(unitId, choice) {
+    submitUnitChoice(unitId, choice.id, choice.label)
     setShowUnitEnd(false)
   }
+
+  // Find the earliest unit whose lessons are all complete but whose
+  // ending choice hasn't been made yet. Units resolve in order — Unit 3's
+  // CTA won't appear until Unit 2's ending has been chosen, even if all
+  // of Unit 3's lessons are already done.
+  const pendingUnitId = UNIT_IDS.find(unitId => {
+    const meta = UNIT_END_META[unitId]
+    const flagKey = `unit${unitId}_ending`
+    const completed = seededLessons.filter(id => id.startsWith(`unit${unitId}-`)).length
+    return completed >= meta.lessonCount && !storyFlags[flagKey]
+  })
+  const pendingMeta = pendingUnitId ? UNIT_END_META[pendingUnitId] : null
 
   const contact = contacts.find(c => c.id === activeThread)
 
@@ -526,7 +556,7 @@ export default function MessagesTab() {
         <RapportBar rapport={rapport} />
 
         {/* Unit-end CTA if applicable */}
-        {!storyFlags['unit1_ending'] && (
+        {pendingMeta && (
           <button
             onClick={() => setShowUnitEnd(true)}
             style={{
@@ -545,13 +575,13 @@ export default function MessagesTab() {
                 fontFamily: 'var(--mono)', fontSize: '10px', fontWeight: 600,
                 color: '#ff4d5e', letterSpacing: '0.04em', marginBottom: '2px',
               }}>
-                Incident Report Pending
+                {pendingMeta.bannerTitle}
               </div>
               <div style={{
                 fontFamily: 'var(--mono)', fontSize: '9px',
                 color: 'rgba(255,255,255,0.3)',
               }}>
-                WO-0052 · Requires your signature
+                {pendingMeta.bannerSub}
               </div>
             </div>
           </button>
@@ -568,10 +598,10 @@ export default function MessagesTab() {
         ))}
 
         {/* Unit-end modal */}
-        {showUnitEnd && (
+        {showUnitEnd && pendingMeta && (
           <UnitEndChoice
-            choice={UNIT1_END_CHOICE}
-            onSubmit={handleUnitEndChoice}
+            choice={pendingMeta.choice}
+            onSubmit={choice => handleUnitEndChoice(pendingUnitId, choice)}
           />
         )}
       </div>

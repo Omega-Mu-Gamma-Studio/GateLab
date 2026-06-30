@@ -85,12 +85,51 @@ function Divider() {
   )
 }
 
+function PinnedTaskStrip({ tasks, shipDay }) {
+  const pinned = tasks?.find(t => t.pinned)
+  if (!pinned) return null
+
+  return (
+    <div style={{
+      margin: '14px 14px 0 14px',
+      padding: '9px 12px',
+      borderRadius: '8px',
+      border: '1px solid rgba(255,255,255,0.08)',
+      background: 'rgba(255,255,255,0.02)',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+    }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{
+          fontFamily: 'var(--mono)', fontSize: '10px',
+          color: 'rgba(255,255,255,0.45)', lineHeight: 1.4,
+        }}>
+          {pinned.label}
+        </div>
+        <div style={{
+          fontFamily: 'var(--mono)', fontSize: '8px',
+          color: 'rgba(255,255,255,0.18)', letterSpacing: '0.05em', marginTop: '2px',
+        }}>
+          — Added by {pinned.addedBy}
+        </div>
+      </div>
+      <div style={{
+        fontFamily: 'var(--mono)', fontSize: '9px', fontWeight: 600,
+        color: shipDay >= 60 ? '#ff4d5e' : 'rgba(255,255,255,0.3)',
+        letterSpacing: '0.05em', whiteSpace: 'nowrap', flexShrink: 0,
+      }}>
+        DAY {shipDay}
+      </div>
+    </div>
+  )
+}
+
 export default function TasksApp() {
-  const { currentTask } = usePdaStore()
+  const { currentTask, tasks, shipDay } = usePdaStore()
 
   if (!currentTask) {
     return (
       <AppShell appId="tasks">
+        <PinnedTaskStrip tasks={tasks} shipDay={shipDay} />
         <div style={{
           flex: 1, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
@@ -139,6 +178,7 @@ export default function TasksApp() {
 
   return (
     <AppShell appId="tasks">
+      <PinnedTaskStrip tasks={tasks} shipDay={shipDay} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px 20px 18px' }}>
 
         {/* Work order header */}

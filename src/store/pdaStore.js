@@ -66,7 +66,17 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { UNIT1_MESSAGES } from '../data/adaMessages'
+import {
+  UNIT1_MESSAGES,
+  UNIT2_MESSAGES,
+  UNIT3_MESSAGES,
+  UNIT4_MESSAGES,
+  UNIT5_MESSAGES,
+  REYES_MESSAGES,
+  VOSS_MESSAGES,
+  MAINT_MESSAGES,
+  DAY60_MESSAGES,
+} from '../data/adaMessages'
 
 // ── Rapport bands ──────────────────────────────────────────────────────
 export function rapportBand(rapport) {
@@ -153,6 +163,20 @@ function defaultState() {
 
     // Current active work order (set by triggerLessonLoad)
     currentTask: null,
+
+    // ── Standing PDA tasks (separate from work orders) ───────────────
+    // Seeded once at game start. Pinned items are never checkable —
+    // they're narrative fixtures, not actual to-dos.
+    tasks: [
+      {
+        id:        'task-day60-psych',
+        label:     'Check in with Psych before Day 60.',
+        addedBy:   'A.',
+        pinned:    true,
+        completed: false,
+      },
+    ],
+    shipDay: 1,
   }
 }
 
@@ -238,13 +262,40 @@ const usePdaStore = create(
       },
 
       /**
+       * Advance the standing ship-day counter. Once it crosses 60 for the
+       * first time, seeds the one-time "Day 60" callback message (rapport-
+       * gated, same pattern as the per-unit bonus messages). The pinned
+       * task itself never gets marked complete — that's intentional.
+       */
+      _advanceShipDay(amount) {
+        const current = get().shipDay
+        const next = current + amount
+        set({ shipDay: next })
+
+        if (current < 60 && next >= 60 && !get().storyFlags['day60_crossed']) {
+          get().setFlag('day60_crossed', true)
+          get()._seedMessagesForTrigger('flag:day60_crossed:true')
+        }
+      },
+
+      /**
        * Seed messages from a lesson trigger.
        * Called by triggerLessonComplete. Reads UNIT1_MESSAGES (and future
        * unit message banks) and delivers any message whose trigger matches.
        */
       _seedMessagesForTrigger(trigger) {
         const band = rapportBand(get().rapport)
-        const allMessages = [...UNIT1_MESSAGES]  // expand with UNIT2_MESSAGES etc. later
+        const allMessages = [
+          ...UNIT1_MESSAGES,
+          ...UNIT2_MESSAGES,
+          ...UNIT3_MESSAGES,
+          ...UNIT4_MESSAGES,
+          ...UNIT5_MESSAGES,
+          ...REYES_MESSAGES,
+          ...VOSS_MESSAGES,
+          ...MAINT_MESSAGES,
+          ...DAY60_MESSAGES,
+        ]
 
         for (const msg of allMessages) {
           if (msg.trigger !== trigger) continue
@@ -273,6 +324,9 @@ const usePdaStore = create(
         if (seededLessons.includes(lessonId)) return  // idempotent
 
         set({ seededLessons: [...seededLessons, lessonId] })
+
+        // Advance the ship-day counter and check the Day 60 threshold
+        get()._advanceShipDay(2)
 
         // Seed messages
         get()._seedMessagesForTrigger(`lesson:${lessonId}`)
@@ -440,6 +494,9 @@ const usePdaStore = create(
           ts,
         }
         set({ choiceLog: [...get().choiceLog, logEntry] })
+
+        // Unit endings are bigger narrative beats — advance the day counter more
+        get()._advanceShipDay(4)
 
         // Seed flag-gated messages
         get()._seedMessagesForTrigger(`flag:${flagKey}:${choiceKey}`)
