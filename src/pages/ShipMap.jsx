@@ -20,6 +20,11 @@ import usePdaStore from '../store/pdaStore'
 
 // ── Room data ────────────────────────────────────────────────────────────────
 
+// `art.tint` drives the CSS placeholder background shown for a room until
+// real art exists. `art.bgImage` is the override slot — drop a path in
+// (e.g. '/assets/rooms/quarters.jpg') and RoomArtPanel switches straight
+// from the generated placeholder to that static image, no other changes
+// needed. Leave it null to keep using the placeholder.
 const ROOMS = [
   {
     id: 'quarters',    label: 'YOUR QUARTERS',  code: 'A-07', deck: 'DECK 7',
@@ -28,6 +33,8 @@ const ROOMS = [
     npc: null,         npcColor: null,   isWork: false,
     denial: null,
     dlg: { sp: '[ ambient ]', txt: 'Your bunk. The PDA glows on the desk. The hull hums beneath the floor.' },
+    art: { tint: '#3fa8d8', bgImage: null },
+    hasPda: true,
   },
   {
     id: 'mess',        label: 'MESS HALL',       code: 'B-01', deck: 'DECK 7',
@@ -36,6 +43,7 @@ const ROOMS = [
     npc: 'Ada',        npcColor: '#d05858', isWork: false,
     denial: null,
     dlg: { sp: 'Ada', txt: "You're early. Or late. I can never tell with you. Sit — I'll grab your ration." },
+    art: { tint: '#d05858', bgImage: null },
   },
   {
     id: 'engine',      label: 'ENGINE ROOM',     code: 'E-01', deck: 'DECK 4',
@@ -44,6 +52,7 @@ const ROOMS = [
     npc: 'Reyes',      npcColor: '#c07028', isWork: false,
     denial: "Reyes has the room sealed for a maintenance sweep. The door doesn't budge.",
     dlg: { sp: 'Reyes', txt: "You're not supposed to be down here. But since you are — suit up." },
+    art: { tint: '#c07028', bgImage: null },
   },
   {
     id: 'obs_deck',    label: 'OBS. DECK',       code: 'C-01', deck: 'DECK 7',
@@ -52,6 +61,7 @@ const ROOMS = [
     npc: 'Ada',        npcColor: '#d05858', isWork: false,
     denial: 'The Observation Deck is closed for maintenance. Try again after your first shift.',
     dlg: { sp: 'Ada', txt: 'The Veil Nebula is visible on clear cycles. I used to come up here with... well. It\'s a good view.' },
+    art: { tint: '#6f8fd8', bgImage: null },
   },
   {
     id: 'hydro',       label: 'HYDRO-POOL',      code: 'D-03', deck: 'DECK 6',
@@ -60,6 +70,7 @@ const ROOMS = [
     npc: 'Ada',        npcColor: '#d05858', isWork: false,
     denial: 'The Hydro-Pool is on a scheduled maintenance cycle. Check back after your next shift.',
     dlg: { sp: 'Ada', txt: "Don't look so surprised. Even mechanics get shore leave. The water's warm — for now." },
+    art: { tint: '#2ea88a', bgImage: null },
   },
   {
     id: 'workstation', label: 'WORKSTATION',     code: 'B-02', deck: 'DECK 7',
@@ -68,6 +79,7 @@ const ROOMS = [
     npc: null,         npcColor: null,   isWork: true,
     denial: null,
     dlg: { sp: 'MAINT-SYS', txt: 'TERMINAL ACTIVE — WORK ORDER QUEUE: 1 PENDING — AUTHENTICATE TO BEGIN SHIFT.' },
+    art: { tint: '#40a860', bgImage: null },
   },
   {
     id: 'ada_quarters', label: "ADA'S QUARTERS", code: 'A-12', deck: 'DECK 7',
@@ -76,6 +88,7 @@ const ROOMS = [
     npc: 'Ada',        npcColor: '#d05858', isWork: false,
     denial: "Ada's door is shut. You can hear music from inside. Probably best not to interrupt.",
     dlg: { sp: 'Ada', txt: "...I wasn't expecting anyone. Come in. Mind the books — I keep meaning to sort them." },
+    art: { tint: '#d05858', bgImage: null },
   },
   {
     id: 'lounge',      label: 'LOUNGE',          code: 'C-02', deck: 'DECK 7',
@@ -84,6 +97,7 @@ const ROOMS = [
     npc: 'Ada',        npcColor: '#d05858', isWork: false,
     denial: 'The Lounge is closed for a private crew event.',
     dlg: { sp: 'Ada', txt: "Game night. You in? Reyes keeps winning and it's starting to feel personal." },
+    art: { tint: '#9868c0', bgImage: null },
   },
   {
     id: 'bridge',      label: 'BRIDGE',          code: 'α-01', deck: 'COMMAND',
@@ -92,6 +106,7 @@ const ROOMS = [
     npc: 'Voss',       npcColor: '#9080cc', isWork: false,
     denial: 'The Bridge is a restricted area. Captain Voss is not accepting visitors.',
     dlg: { sp: 'Voss', txt: "I've been watching your work orders, Mechanic. Sit down. We need to talk about Sub-Level 3." },
+    art: { tint: '#9080cc', bgImage: null },
   },
   {
     id: 'maint_bay',   label: 'MAINT. BAY',      code: 'F-01', deck: 'DECK 4',
@@ -100,6 +115,7 @@ const ROOMS = [
     npc: 'MAINT-SYS',  npcColor: '#40a860', isWork: false,
     denial: 'The Maintenance Bay is locked down for a diagnostic cycle.',
     dlg: { sp: 'MAINT-SYS', txt: 'DIAGNOSTIC COMPLETE — INTEGRITY: 94.7% — ANOMALY LOGGED: SUB-LEVEL 3 — CLASSIFICATION: [REDACTED]' },
+    art: { tint: '#40a860', bgImage: null },
   },
 ]
 
@@ -163,11 +179,136 @@ const C = {
   mono:         "'Courier New', monospace",
 }
 
+// ── Room art panel ───────────────────────────────────────────────────────────
+// Placeholder-first, override-ready. Until real background stills exist for
+// a room, this renders a generated CSS "viewport" tinted per-room so each
+// space still reads as a distinct place. The moment `room.art.bgImage` is
+// filled in with a real asset path, this same panel swaps straight to the
+// static image — no separate "real room" component to build later.
+function RoomArtPanel({ room, open, openPda }) {
+  if (!room) {
+    return (
+      <div style={{
+        height: '150px', borderRadius: '6px', marginBottom: '10px',
+        border: '0.5px solid var(--border)',
+        background: '#050d18',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{ fontSize: '9px', letterSpacing: '0.25em', color: '#162636', fontFamily: C.mono }}>
+          NO FEED SELECTED
+        </span>
+      </div>
+    )
+  }
+
+  const { tint, bgImage } = room.art
+  const hasImage = !!bgImage
+
+  return (
+    <div style={{
+      position: 'relative', height: '150px', borderRadius: '6px', marginBottom: '10px',
+      overflow: 'hidden', border: '0.5px solid var(--border)',
+      // Placeholder mode: layered radial/linear tint gradients standing in
+      // for a still. Override mode: the real image, cover-fit.
+      background: hasImage
+        ? `center / cover no-repeat url(${bgImage})`
+        : `radial-gradient(ellipse at 30% 20%, ${tint}2e 0%, transparent 55%),
+           linear-gradient(165deg, ${tint}22 0%, #050d18 65%)`,
+      filter: open ? 'none' : 'grayscale(0.6) brightness(0.5)',
+      transition: 'filter 0.2s',
+    }}>
+      {/* Faint scanline texture — only in placeholder mode, sells "no art yet"
+          without looking broken. Removed automatically once bgImage is set. */}
+      {!hasImage && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px)',
+          pointerEvents: 'none',
+        }} />
+      )}
+
+      {/* Vignette so HUD text stays legible in both modes */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(180deg, rgba(2,6,12,0.55) 0%, rgba(2,6,12,0.05) 30%, rgba(2,6,12,0.05) 65%, rgba(2,6,12,0.7) 100%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* HUD label, top-left */}
+      <div style={{ position: 'absolute', top: '10px', left: '14px' }}>
+        <div style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#eaf4fb', fontFamily: C.mono, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+          {room.label}
+        </div>
+        <div style={{ fontSize: '7.5px', letterSpacing: '0.15em', color: '#a8c8dc', fontFamily: C.mono, opacity: 0.8 }}>
+          {room.deck} · {room.code}
+        </div>
+      </div>
+
+      {/* Placeholder tag, top-right — disappears once bgImage is set */}
+      {!hasImage && (
+        <div style={{
+          position: 'absolute', top: '10px', right: '14px',
+          fontSize: '7px', letterSpacing: '0.15em', color: '#3a5468',
+          fontFamily: C.mono, border: '0.5px solid #16283a', borderRadius: '3px',
+          padding: '2px 6px', background: 'rgba(5,13,24,0.5)',
+        }}>
+          NO VISUAL FEED — PLACEHOLDER
+        </div>
+      )}
+
+      {!open && (
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#7a8a9a', fontFamily: C.mono }}>
+            ACCESS DENIED
+          </span>
+        </div>
+      )}
+
+      {/* The PDA is the whole point of Quarters — make it unmissable. */}
+      {room.hasPda && open && (
+        <button
+          onClick={openPda}
+          title="Open PDA"
+          style={{
+            position: 'absolute', bottom: '10px', right: '12px',
+            display: 'flex', alignItems: 'center', gap: '7px',
+            padding: '7px 12px', borderRadius: '20px',
+            background: 'rgba(10,4,5,0.72)', border: '1px solid rgba(255,77,94,0.55)',
+            cursor: 'pointer', backdropFilter: 'blur(6px)',
+            boxShadow: '0 0 18px rgba(255,77,94,0.28)',
+            animation: 'pda-hotspot-pulse 2.2s ease-in-out infinite',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,77,94,0.95)'; e.currentTarget.style.background = 'rgba(255,77,94,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,77,94,0.55)'; e.currentTarget.style.background = 'rgba(10,4,5,0.72)' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff4d5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          <span style={{ fontSize: '8.5px', letterSpacing: '0.15em', color: '#ffb3ba', fontFamily: C.mono }}>
+            OPEN PDA
+          </span>
+        </button>
+      )}
+
+      <style>{`
+        @keyframes pda-hotspot-pulse {
+          0%, 100% { box-shadow: 0 0 18px rgba(255,77,94,0.28); }
+          50%      { box-shadow: 0 0 28px rgba(255,77,94,0.55); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function ShipMap() {
   const { goToUnit, activeUnitId } = useLessonStore()
   const storyFlags = usePdaStore(s => s.storyFlags)
+  const openPda = usePdaStore(s => s.openPda)
 
   // Dev flag overrides — only visible/useful in dev builds
   const [devFlags, setDevFlags] = useState(new Set())
@@ -404,9 +545,18 @@ export default function ShipMap() {
           }}
         />
 
+        {/* Room art panel — placeholder viewport now, real stills later */}
+        <div style={{ marginTop: '10px' }}>
+          <RoomArtPanel
+            room={selected}
+            open={selected ? isOpen(selected) : true}
+            openPda={openPda}
+          />
+        </div>
+
         {/* Dialogue box */}
         <div style={{
-          marginTop: '10px', minHeight: '88px',
+          minHeight: '88px',
           padding: '14px 18px',
           background: '#050d18',
           border: '0.5px solid var(--border)',

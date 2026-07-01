@@ -12,6 +12,7 @@ import { create } from 'zustand'
 import { getLesson } from '../lessons/index'
 import { useCanvasStore } from './canvasStore'
 import usePdaStore from './pdaStore'
+import useProgressStore from './progressStore'
 
 export const UNITS = [
   {
@@ -66,6 +67,22 @@ export const UNITS = [
   },
 ]
 
+// Find the first lesson in a unit that hasn't been completed yet, so
+// re-entering a unit (e.g. from the Ship Map workstation) resumes where
+// the player left off instead of always restarting at lesson 0.
+// Falls back to the last lesson in the unit if everything is complete.
+function firstIncompleteLessonIdx(unitId) {
+  const unit = UNITS.find(u => u.id === unitId)
+  if (!unit) return 0
+  const { completedLessons } = useProgressStore.getState()
+  for (let i = 0; i < unit.lessons; i++) {
+    const lesson = getLesson(unitId, i)
+    const id = lesson?.meta?.id
+    if (id && !completedLessons[id]) return i
+  }
+  return Math.max(0, unit.lessons - 1)
+}
+
 // Push a lesson phase into the canvas store.
 // Called after every navigation action.
 function syncCanvas(unitId, lessonIdx, phase) {
@@ -94,16 +111,20 @@ export const useLessonStore = create((set, get) => ({
   narrative:       null,  // { briefing, fault, dispatch, success, lore } | null
   meta:            null,  // { workOrder, location, shift } | null
 
-  goToUnit(unitId) {
-    const lesson = getLesson(unitId, 0)
+  // idx is optional — pass it to jump to a specific lesson (e.g. from the
+  // Journal / dev tools). Left undefined, it resumes at the player's first
+  // incomplete lesson in that unit instead of always restarting at 0.
+  goToUnit(unitId, idx) {
+    const startIdx = idx ?? firstIncompleteLessonIdx(unitId)
+    const lesson = getLesson(unitId, startIdx)
     set({
       activeUnitId: unitId,
-      activeLessonIdx: 0,
+      activeLessonIdx: startIdx,
       phase: 'work',
       narrative: lesson?.narrative || null,
       meta: lesson?.meta || null,
     })
-    syncCanvas(unitId, 0, 'work')
+    syncCanvas(unitId, startIdx, 'work')
   },
 
   goHome() {
