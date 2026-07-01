@@ -187,7 +187,7 @@ export default function TopBar() {
                 <>
                   <div style={{ height: '0.5px', background: 'var(--border)', margin: '6px 4px' }} />
                   <button
-                    onClick={() => { devReset(); goHome(); setOpen(false) }}
+                    onClick={() => { devReset(); localStorage.removeItem('gatelab-pda'); setOpen(false); window.location.reload() }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '10px',
                       padding: '7px 8px', borderRadius: '7px', border: 'none',
