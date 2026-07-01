@@ -13,7 +13,7 @@ import { useLessonStore } from '../../store/lessonStore'
 import { useCanvasStore } from '../../store/canvasStore'
 import usePdaStore from '../../store/pdaStore'
 
-export default function SuccessCard({ onNext, onDismiss }) {
+export default function SuccessCard({ onNext, onDismiss, storyMode }) {
   const { narrative, meta } = useLessonStore()
   const [loreVisible, setLoreVisible] = useState(false)
 
@@ -142,7 +142,7 @@ export default function SuccessCard({ onNext, onDismiss }) {
             boxShadow: '0 0 18px var(--accent-glow)',
           }}
         >
-          Next Lesson →
+          {storyMode ? 'Back to the Ship →' : 'Next Lesson →'}
         </button>
       </div>
     </div>

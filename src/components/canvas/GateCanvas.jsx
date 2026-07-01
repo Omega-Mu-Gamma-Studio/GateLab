@@ -108,7 +108,8 @@ export default function GateCanvas() {
   // Track pointer position for snap feedback on OutputNode
   const [pointerPos, setPointerPos] = useState(null)
 
-  const { activeUnitId, activeLessonIdx, narrative, meta, nextLesson } = useLessonStore()
+  const { activeUnitId, activeLessonIdx, narrative, meta, nextLesson, goHome } = useLessonStore()
+  const storyMode = usePdaStore(s => s.storyMode)
 
   const nodes          = useCanvasStore(s => s.nodes)
   const wires          = useCanvasStore(s => s.wires)
@@ -372,7 +373,16 @@ export default function GateCanvas() {
       {/* Success overlay — rendered as HTML above the canvas */}
       {showSuccess && (
         <SuccessCard
-          onNext={() => { setShowSuccess(false); nextLesson() }}
+          storyMode={storyMode}
+          onNext={() => {
+            setShowSuccess(false)
+            // Story Mode: shift's over, back to the Map (ShipMap) —
+            // matches the plan's Core Loop step 5. Standard Mode keeps
+            // the original behaviour of chaining straight to the next
+            // lesson in the unit.
+            if (storyMode) goHome()
+            else nextLesson()
+          }}
           onDismiss={() => setShowSuccess(false)}
         />
       )}

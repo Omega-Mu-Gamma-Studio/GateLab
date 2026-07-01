@@ -350,6 +350,16 @@ const usePdaStore = create(
         // Seed messages
         get()._seedMessagesForTrigger(`lesson:${lessonId}`)
 
+        // Story Mode room unlocks (ShipMap.jsx). lessonId 'unit1-01' -> flag
+        // 'unit1_l1' — matches the unlockFlag values on ROOMS 1:1, so every
+        // lesson completion just derives and sets its own flag generically
+        // rather than needing a hand-maintained lessonId → room table.
+        const m = /^unit(\d+)-(\d+)$/.exec(lessonId || '')
+        if (m) {
+          const [, unitNum, lessonNum] = m
+          get().setFlag(`unit${unitNum}_l${Number(lessonNum)}`, true)
+        }
+
         // Auto-generate note from lore
         if (lore) {
           const note = {
