@@ -16,17 +16,73 @@ Every lesson is built around one idea:
 
 A floating AND input glowing red teaches more than ten rows of a truth table. A race condition glitch animating through a wire teaches hazards better than any paragraph. GateLab shows the failure first, then the fix.
 
+It ships as **two modes**, and it's important to be upfront about what each one actually is right now:
+
+| Mode | What it is | Status |
+|------|-----------|--------|
+| **Standard Mode** | The original MVP. Unit grid → lesson → OBSERVE/FAULT/REPAIR. All five units, all 41 lessons. | ✅ **Complete and usable end-to-end.** |
+| **Story Mode** | The AETHER-9 spaceship framing — a Ship Map you walk around, NPCs, a PDA, quarters, all of it wrapping the *same* lesson engine. | 🚧 **Current focus. This is the direction the project is actually headed.** |
+
+Standard Mode is the finished product from phase one — it works, it's playable, it covers the syllabus. Story Mode is where the studio's attention is now, and it's the mode that makes GateLab feel like something instead of just a circuit tool with a spaceship coat of paint over it. If you're evaluating this repo for the first time: play Standard Mode to see that the pedagogy works, then play Story Mode to see where it's going.
+
 ---
 
 ## The Setting
 
 GateLab is framed as an intergalactic spaceship maintenance simulation. You play as a mechanic aboard the **AETHER-9**, working through shift assignments that happen to map exactly to the CS22303 syllabus. Each lesson is a work order. Each unit is a chapter of a thriller narrative that builds across the semester.
 
-Your shift partner **Ada** talks you through each task. **Engineer Reyes** dispatches fault alerts. The ship's automated system, **MAINT-SYS**, generates the work logs. None of this is decoration — the narrative framing gives the failure-first pedagogy a reason to exist in-world.
+Your shift partner **Ada** talks you through each task. **Engineer Reyes** dispatches fault alerts. Captain **Voss** watches from the Bridge with something clearly on their mind about Sub-Level 3. The ship's automated system, **MAINT-SYS**, generates the work logs. None of this is decoration — the narrative framing gives the failure-first pedagogy a reason to exist in-world.
+
+In Standard Mode you get this framing through dialogue and the PDA, but there's no ship to walk around — you go straight from the unit grid into the lesson. **Story Mode is what happens when that framing gets a body.**
 
 ---
 
-## Learning Structure
+## Story Mode — the specialty
+
+Story Mode replaces the unit grid with the **Ship Map**: a top-down schematic of the AETHER-9 with clickable rooms. This is the part of GateLab that's currently getting the most design attention, so here's the full breakdown of how it works today.
+
+### The Ship Map
+
+Ten rooms across four decks, connected by corridors, most of them locked behind story flags that unlock as you clear lessons (`unit1_l1`, `unit2_l9`, and so on). Click a room and you get a dialogue line from whoever's there — Ada in the Mess Hall, Reyes in the Engine Room, Voss on the Bridge once you've earned it. Click the **Workstation** and it hands off into the exact same lesson engine Standard Mode uses — Story Mode isn't a separate simulator, it's a narrative shell around the one that already works.
+
+One thing worth calling out because it was a real bug until recently: walking back to the map and re-entering the Workstation used to always restart you at Lesson 1 of the unit, no matter how far you'd gotten. It now resumes at your first incomplete lesson, checked against actual save progress — not against how many times you'd clicked "Next."
+
+### Room art — placeholder now, real stills later, on purpose
+
+None of the rooms have real background art yet. Rather than leave that as a gap or fake it with a stock image, each room renders a generated CSS "viewport" — a tinted gradient unique to that room, a faint scanline texture, and a small tag that plainly says there's no visual feed yet. It's built so that dropping in a real background photo per room later is a one-line change, not a rebuild: fill in a room's `bgImage` path and the panel switches straight from placeholder to photo with nothing else touched.
+
+### Your Quarters — and the PDA
+
+Quarters is your bunk, and its entire narrative reason to exist is that it's where you check your PDA. That's now reflected directly in the room itself, not just implied by a line of flavor text: Quarters renders a glowing, pulsing **OPEN PDA** button as the visual focal point of the room. It's not one option among several — it's the point of being there.
+
+### The PDA itself
+
+Every player has a **DECK-7 PDA** — a persistent in-game device accessible from the top bar (Standard Mode) or from Quarters (Story Mode) at any time. It opens to a home screen with five apps:
+
+| App | Color | Content |
+|-----|-------|---------|
+| **COMM** | Red | Direct messages from Ada, Engineer Reyes, Captain Voss, and MAINT-SYS. Rapport system with branching reply choices. |
+| **TASKS** | Yellow | The active work order — work order ID, location, shift, phase status, and current objective. Auto-updates as phases shift. |
+| **GALLERY** | White | Photos received from crew members via COMM. |
+| **CREW** | Blue | Contact cards for every crew member with role, status, and relationship notes. |
+| **LOGS** | Green | Auto-generated lore entries written by MAINT-SYS when a lesson is completed. |
+| **[LOCKED]** | — | A sixth app slot, visibly present but inaccessible. Unlocks later in the story. |
+
+The PDA has a full phone form factor — notch, status bar, signal/battery indicators, home indicator pill. Tapping the home pill from any app returns to the home screen.
+
+### Rapport system
+
+Every reply choice in Ada's COMM thread shifts a hidden rapport score (-10 to +10) that determines which dialogue stream she uses: warm, neutral, or cold. Choices are logged with their delta. Unit endings trigger binary story choices that set persistent story flags and unlock flag-gated messages — including, in Story Mode, which rooms on the Ship Map open up.
+
+### Mode lock-in
+
+Story Mode vs. Standard Mode is chosen once per save file, at the Home screen, and then locked — no switching mid-save. This is intentional: the two modes are different enough in framing that flipping back and forth would undercut both.
+
+---
+
+## Standard Mode — the finished MVP
+
+Standard Mode is the part of GateLab that's done. Home screen → unit grid → pick a lesson → work through it. No ship to walk, no rooms to unlock — the PDA, Ada, and the rest of the crew are still present through dialogue and messages, but the wrapper is a straightforward course structure instead of a map.
 
 Every lesson runs three phases:
 
@@ -38,86 +94,66 @@ Every lesson runs three phases:
 
 The phase indicator is always visible. Progress through phases is linear; no phase can be skipped.
 
----
+### Curriculum coverage
 
-## The PDA
+All five units are built out with full lesson content — this was the misleading part of the old README. It's not "in development," it's built:
 
-Every player has a **DECK-7 PDA** — a persistent in-game device accessible from the top bar at any time. It opens to a home screen with five apps:
+| Unit | Topic | Lessons |
+|------|-------|---------|
+| I | Boolean Algebra, Logic Gates, K-Maps | 10 |
+| II | Combinational Circuits (Adders, MUX, Decoders, Comparators) | 9 |
+| III | Sequential Circuits (Flip-Flops, Latches, Counters) | 9 |
+| IV | Asynchronous Circuits (Race Conditions & Hazards) | 6 |
+| V | Memory & Programmable Logic (SRAM, ROM, PLA, PAL, Hamming) | 7 |
 
-| App | Color | Content |
-|-----|-------|---------|
-| **COMM** | Red | Direct messages from Ada, Engineer Reyes, Captain Voss, and MAINT-SYS. Rapport system with branching reply choices. |
-| **TASKS** | Yellow | The active work order — work order ID, location, shift, phase status, and current objective. Auto-updates as phases shift. Replaces the old lesson briefing overlay entirely. |
-| **GALLERY** | White | Photos received from crew members via COMM. |
-| **CREW** | Blue | Contact cards for every crew member with role, status, and relationship notes. |
-| **LOGS** | Green | Auto-generated lore entries written by MAINT-SYS when a lesson is completed. |
-| **[LOCKED]** | — | A sixth app slot, visibly present but inaccessible. Unlocks later in the story. |
+**41 lessons, all five units, all playable start to finish.**
 
-The PDA has a full phone form factor — notch, status bar, signal/battery indicators, home indicator pill. Tapping the home pill from any app returns to the home screen. A small yellow clipboard button in the canvas corner opens TASKS directly without leaving the workspace.
-
-### Rapport System
-
-Every reply choice in Ada's COMM thread shifts a hidden rapport score (-10 to +10) that determines which dialogue stream she uses: warm, neutral, or cold. Choices are logged with their delta. Unit endings trigger binary story choices that set persistent story flags and unlock flag-gated messages.
-
----
-
-## Curriculum Coverage
-
-GateLab ships in five units corresponding directly to the CS22303 syllabus.
-
-| Unit | Topic | Lessons | Status |
-|------|-------|---------|--------|
-| I | Boolean Algebra, Logic Gates, K-Maps | 10 | 🔧 In Development |
-| II | Combinational Circuits | 9 | 🔧 Planned |
-| III | Sequential Circuits, Flip-Flops, Counters | 9 | 🔧 Planned |
-| IV | Asynchronous Circuits, Race Conditions, Hazards | 6 | 🔧 Planned |
-| V | Memory, ROM, PLA, PAL | 7 | 🔧 Planned |
+What's *not* done yet, to be equally honest about it: the specialized visualizer panels some units are designed to eventually get — a live timing diagram for Units III/IV, a state diagram viewer for Unit III, a memory grid for Unit V, a PLA/PAL dot matrix, a Hamming code visualizer, a number system step-through. Right now the InfoPanel shows a placeholder for these tabs rather than the real widget. The lessons themselves don't depend on them — you can complete every unit today — but if you go looking for these in the code, know that you'll find empty stub files, not hidden features. They're roadmap, not shipped.
 
 ---
 
 ## Workspace Layout
 
-The workspace is a three-column layout:
+The workspace is a three-column layout, shared by both modes once you're inside a lesson:
 
 **Left — Sidebar** (collapsible): unit list and lesson navigator. Collapsed by default when inside a lesson so the canvas gets maximum width. Persists collapse state across sessions.
 
 **Centre — Canvas + ControlPanel**: the interactive circuit area. The DialogueBox floats over the canvas as a draggable card — two voices mapped to phases: Ada (red, OBSERVE phase) and the assigned command speaker (amber, FAULT and REPAIR phases). Position resets per lesson. A small clipboard button in the top-left corner opens the TASKS app directly.
 
-**Right — InfoPanel** (always visible): a tabbed right column. Tabs shown depend on the active unit:
+**Right — InfoPanel** (always visible): a tabbed right column. Tabs shown depend on the active unit — Trivia everywhere, plus Verilog for Unit II+, and Timing/State for Units III/IV (currently placeholder content, see above).
 
-| Unit | Tabs Available |
-|------|---------------|
-| I | Trivia |
-| II | Verilog · Trivia |
-| III | Timing · State · Verilog · Trivia |
-| IV | Timing · Verilog · Trivia |
-| V | Trivia |
-
-The Trivia tab is a shuffleable deck of circuit history facts and engineering jokes — designed for chill-mode phases when the student needs a second before trying again. The Timing and State tabs serve live waveform and state diagram views for sequential and asynchronous units.
+The Trivia tab is a shuffleable deck of circuit history facts and engineering jokes — designed for the moment right after a fault, when the student needs a second before trying again.
 
 ---
 
 ## Key Features
 
+**Shipped and playable:**
+
 - **Three-phase lesson structure** — OBSERVE → FAULT → REPAIR, every lesson, no exceptions
 - **Fault-first pedagogy** — the broken state is the teaching moment, not an error to avoid
+- **41 lessons across all five CS22303 units**, fully wired into the simulation engine
 - **DECK-7 PDA** — full in-game phone with home screen, five apps, and a locked sixth slot
 - **Rapport system** — Ada's dialogue shifts across warm/neutral/cold bands based on reply choices
-- **Story flags** — unit-ending binary choices persist and gate future narrative content
+- **Story flags** — unit-ending binary choices persist and gate future narrative content, including room unlocks
 - **Work order system** — every lesson is a MAINT-SYS ticket with ID, location, shift, and per-phase objectives
-- **Floating DialogueBox** — draggable, speaker-labelled dialogue card over the canvas; two voices across phases
-- **InfoPanel** — permanent right column with unit-appropriate tabs and a trivia/joke deck
+- **Floating DialogueBox** — draggable, speaker-labelled dialogue card over the canvas
 - **Collapsible Sidebar** — lesson navigator that gets out of the way when you're working
 - **Three themes** — Matrix Green · Logic Gold · Signal Blue; persisted in localStorage
-- **Auto-generated Verilog view** — read-only Verilog panel derived from the gate graph (Unit II+)
-- **Live Timing Diagram** — waveforms that grow in real time as the student interacts (Units III & IV)
-- **State Diagram Viewer** — animated state machine panel tracking current state alongside the circuit (Unit III)
-- **Hazard Sandbox** — per-gate delay sliders, live glitch visualization, event-driven async simulation (Unit IV)
-- **Memory Grid** — 2D address/data animation for SRAM, DRAM, and ROM (Unit V)
-- **PLA/PAL Dot Matrix** — clickable AND/OR plane programming with animated signal flow (Unit V)
-- **Hamming Code Visualizer** — error injection, syndrome detection, and single-bit correction (Unit V)
-- **Number System Visualizer** — animated binary, octal, hex, 1s/2s complement step-through (Unit I)
-- **KMapX Bridge** — K-Map simplification with Send to Canvas (Unit I)
+- **Ship Map** — walkable room hub with story-flag-gated unlocks and progress-aware lesson resume
+- **Room art system** — placeholder viewports per room with a one-line override path for real background stills
+
+**On the roadmap, not yet shipped:**
+
+- Live Timing Diagram (Units III & IV)
+- State Diagram Viewer (Unit III)
+- Hazard Sandbox with per-gate delay sliders (Unit IV)
+- Memory Grid (Unit V)
+- PLA/PAL Dot Matrix (Unit V)
+- Hamming Code Visualizer (Unit V)
+- Number System Visualizer (Unit I)
+- Auto-generated Verilog view from the gate graph
+- Real background art for every Story Mode room
 
 ---
 
@@ -145,14 +181,14 @@ GateLab/
 │
 ├── src/
 │   ├── main.jsx
-│   ├── App.jsx                     # Root layout: Home | WorkspaceView
+│   ├── App.jsx                     # Root layout: Home | ShipMap | WorkspaceView
 │   │
 │   ├── components/
 │   │   ├── pda/                    # The DECK-7 PDA — in-game phone device
 │   │   │   ├── PDA.jsx             # Modal shell: phone frame + home/app routing
 │   │   │   ├── HomeScreen.jsx      # Icon grid, ship status strip, locked slot
 │   │   │   ├── AppShell.jsx        # Shared app wrapper (back chevron + app header)
-│   │   │   ├── TasksApp.jsx        # MAINT-SYS work order viewer (replaces PlotBox)
+│   │   │   ├── TasksApp.jsx        # MAINT-SYS work order viewer
 │   │   │   ├── MessagesTab.jsx     # COMM — Ada & crew message threads
 │   │   │   ├── PhotosTab.jsx       # GALLERY — received photos
 │   │   │   ├── ContactsTab.jsx     # CREW — contact cards
@@ -167,53 +203,29 @@ GateLab/
 │   │   │   ├── PlotBox.jsx         # Canvas corner shortcut button → opens TASKS app
 │   │   │   ├── PhaseIndicator.jsx  # OBSERVE → FAULT → REPAIR phase badge
 │   │   │   ├── OperatorStatus.jsx  # Persistent footer in InfoPanel
-│   │   │   ├── SuccessCard.jsx     # Lesson completion overlay
-│   │   │   ├── TimingDiagram.jsx   # Live waveform panel (Units III & IV)
-│   │   │   ├── StateDiagram.jsx    # State machine viewer (Unit III)
-│   │   │   └── VerilogPanel.jsx    # Auto-generated read-only Verilog (Unit II+)
+│   │   │   └── SuccessCard.jsx     # Lesson completion overlay
 │   │   │
 │   │   ├── canvas/                 # Circuit canvas components
-│   │   │   ├── GateCanvas.jsx      # Main schematic canvas
+│   │   │   ├── GateCanvas.jsx      # Main schematic canvas — powers every lesson, both modes
 │   │   │   ├── GateGallery.jsx     # Draggable gate palette
-│   │   │   ├── WireLayer.jsx       # Wire drawing and routing
-│   │   │   ├── FlipFlopCanvas.jsx  # Sequential circuit canvas (Unit III)
-│   │   │   ├── HazardCanvas.jsx    # Async canvas with delay badges (Unit IV)
-│   │   │   ├── MemoryGrid.jsx      # SRAM/DRAM/ROM grid (Unit V)
-│   │   │   └── PLAGrid.jsx         # PLA/PAL dot matrix (Unit V)
+│   │   │   └── WireLayer.jsx       # Wire drawing and routing
 │   │   │
 │   │   ├── gates/                  # Gate shape definitions
-│   │   │   ├── AndGate.js
-│   │   │   ├── OrGate.js
-│   │   │   ├── NotGate.js
-│   │   │   ├── NandGate.js
-│   │   │   ├── NorGate.js
-│   │   │   ├── XorGate.js
-│   │   │   ├── XnorGate.js
-│   │   │   ├── GatePin.js
-│   │   │   ├── GateShape.jsx
-│   │   │   ├── SpecialNodes.jsx
-│   │   │   └── gateGeometry.js
+│   │   │   ├── AndGate.js / OrGate.js / NotGate.js / NandGate.js / NorGate.js
+│   │   │   ├── XorGate.js / XnorGate.js
+│   │   │   ├── GatePin.js / GateShape.jsx / SpecialNodes.jsx / gateGeometry.js
 │   │   │
-│   │   └── widgets/                # Self-contained interactive components
-│   │       ├── KMapGrid.jsx
-│   │       ├── NumberVisualizer.jsx
-│   │       ├── HammingVisualizer.jsx
-│   │       └── SevenSegDisplay.jsx
+│   │   └── widgets/
+│   │       └── KMapWidget.jsx      # K-Map simplification, Send to Canvas (Unit I)
 │   │
 │   ├── engine/                     # Simulation logic — no React, no Konva
-│   │   ├── GraphEvaluator.js       # Combinational graph evaluation
-│   │   ├── EventSimulator.js       # Event-driven async simulator (priority queue)
-│   │   ├── FlipFlopModels.js       # SR, JK, D, T state transition functions
-│   │   ├── VerilogEmitter.js       # Verilog generation from gate graph
-│   │   ├── HammingEngine.js        # Parity, syndrome, correction
-│   │   └── WireRouter.js           # Wire path calculation
+│   │   └── (graph evaluation, wire routing, and related pure-JS logic)
 │   │
 │   ├── store/                      # Zustand state slices
-│   │   ├── lessonStore.js          # Active unit/lesson/phase — syncs to canvas and PDA
+│   │   ├── lessonStore.js          # Active unit/lesson/phase — resumes at first incomplete lesson
 │   │   ├── canvasStore.js          # Gate positions, wires, node IDs
-│   │   ├── pdaStore.js             # PDA nav, message threads, rapport, story flags, currentTask
-│   │   ├── signalStore.js          # Signal values across all nodes
-│   │   └── timingStore.js          # Timing diagram waveform history
+│   │   ├── pdaStore.js             # PDA nav, message threads, rapport, story flags, storyMode
+│   │   └── progressStore.js        # completedLessons, XP, level — persisted
 │   │
 │   ├── data/
 │   │   └── adaMessages.js          # Ada's message bank — trigger-gated, rapport-gated
@@ -222,7 +234,8 @@ GateLab/
 │   │   └── useGateTheme.js
 │   │
 │   ├── pages/
-│   │   ├── Home.jsx                # Landing page with unit cards
+│   │   ├── Home.jsx                # Landing page + Standard/Story mode select gate
+│   │   ├── ShipMap.jsx             # Story Mode hub — rooms, corridors, room art panels
 │   │   └── Journal.jsx
 │   │
 │   └── lessons/                    # Lesson content as structured JS data
@@ -268,7 +281,7 @@ Omega Mu Gamma Studio is a student-built open-source studio building interactive
 
 ## Status
 
-> GateLab is in active development. The UI shell, narrative system, PDA, lesson architecture, and simulation engine are complete. Unit I circuit lessons are in progress. Units II–V deploy as live updates.
+> **Standard Mode is complete and usable** — all five units, all 41 lessons, playable start to finish. **Story Mode is the active focus** — the Ship Map, room system, and PDA-centric Quarters are being built out now, on top of the same lesson engine Standard Mode already proved out. The specialized visualizer panels (timing diagrams, state diagrams, memory grid, PLA/PAL matrix, Hamming visualizer) are roadmap items, not yet built.
 
 ---
 
