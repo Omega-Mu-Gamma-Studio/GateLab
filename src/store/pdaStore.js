@@ -132,6 +132,13 @@ const INITIAL_CONTACTS = [
 // ── Default PDA state ──────────────────────────────────────────────────
 function defaultState() {
   return {
+    // ── Mode select ─────────────────────────────────────────────────
+    // null    = not chosen yet (Home shows the mode-select gate)
+    // true    = Story Mode (Home → Map → Location)
+    // false   = Standard Mode (Home → unit grid, current app)
+    // Locked once set (see setStoryMode) — no mid-save switching.
+    storyMode:    null,
+
     // Navigation
     pdaOpen:      false,
     pdaView:      'home',      // 'home' | 'app'
@@ -184,6 +191,18 @@ const usePdaStore = create(
   persist(
     (set, get) => ({
       ...defaultState(),
+
+      // ── Mode select ─────────────────────────────────────────────────
+      /**
+       * Chosen once per save file, then locked — the Home mode-select
+       * gate only renders while storyMode is null, so in practice this
+       * only ever fires once, but the guard makes that a hard rule
+       * rather than an accident of the UI.
+       */
+      setStoryMode(mode) {
+        if (get().storyMode !== null) return
+        set({ storyMode: mode })
+      },
 
       // ── PDA open/close ───────────────────────────────────────────────
       openPda(app = null, thread = null) {
@@ -516,11 +535,18 @@ const usePdaStore = create(
     }),
     {
       name:    'gatelab-pda',
-      version: 1,
+      version: 2,
       // Migrate if schema changes
       migrate(persistedState, version) {
-        if (version === 0) return { ...defaultState(), ...persistedState }
-        return persistedState
+        let state = persistedState
+        if (version === 0) state = { ...defaultState(), ...state }
+        // storyMode introduced in v2. Saves that predate it were all
+        // Standard Mode (Story Mode didn't exist yet) — default them
+        // there instead of surfacing the mode-select gate retroactively.
+        if (version < 2 && state.storyMode === undefined) {
+          state = { ...state, storyMode: false }
+        }
+        return state
       },
     }
   )
