@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
+import usePdaStore from '../../store/pdaStore'
 const THEMES = [
   { id: 'green', label: 'Matrix',  color: '#00ff88', attr: ''     },
   { id: 'gold',  label: 'Logic',   color: '#f5c400', attr: 'gold' },
@@ -13,6 +14,7 @@ export default function TopBar() {
   const popRef = useRef(null)
 
   const { activeUnitId, activeLessonIdx, goHome } = useLessonStore()
+  const devReset = usePdaStore(s => s.devReset)
   // Get current unit info for breadcrumb
   const activeUnit = UNITS.find(u => u.id === activeUnitId)
 
@@ -180,6 +182,32 @@ export default function TopBar() {
                   )}
                 </button>
               ))}
+
+              {import.meta.env.DEV && (
+                <>
+                  <div style={{ height: '0.5px', background: 'var(--border)', margin: '6px 4px' }} />
+                  <button
+                    onClick={() => { devReset(); goHome(); setOpen(false) }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '7px 8px', borderRadius: '7px', border: 'none',
+                      background: 'transparent', cursor: 'pointer',
+                      width: '100%', textAlign: 'left',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,60,60,0.07)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <span style={{
+                      width: '9px', height: '9px', borderRadius: '50%',
+                      background: '#ff3c3c', flexShrink: 0,
+                    }}/>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: '#ff6060' }}>
+                      Reset Save
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

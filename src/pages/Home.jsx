@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLessonStore, UNITS } from '../store/lessonStore'
+import usePdaStore from '../store/pdaStore'
 
 function ScanlineBg() {
   return (
@@ -74,8 +75,104 @@ function UnitCard({ unit, onClick }) {
   )
 }
 
+function ModeSelect() {
+  const { setStoryMode } = usePdaStore()
+  const [hoveredMode, setHoveredMode] = useState(null)
+
+  const modes = [
+    {
+      id: false,
+      tag: 'STANDARD MODE',
+      title: 'Just the circuits.',
+      body: '41 interactive lessons across 5 units. Jump in, fix gates, learn digital logic — no story layer, no fluff.',
+      cta: 'ENTER GATELAB →',
+      accent: 'var(--accent)',
+      accentDim: 'var(--accent-dim)',
+      accentBorder: 'var(--accent-border)',
+      accentText: 'var(--accent-text)',
+    },
+    {
+      id: true,
+      tag: 'STORY MODE',
+      title: 'AETHER-9 needs you.',
+      body: "You don't remember joining the crew. Ada does. The circuits are your job — what happens after your shift is something else entirely.",
+      cta: 'BOARD THE SHIP →',
+      accent: '#3fa8d8',
+      accentDim: 'rgba(63,168,216,0.08)',
+      accentBorder: 'rgba(63,168,216,0.28)',
+      accentText: '#7aaccc',
+    },
+  ]
+
+  return (
+    <section style={{ maxWidth: '820px', margin: '0 auto', padding: '0 24px 80px' }}>
+      <div style={{
+        textAlign: 'center', marginBottom: '52px',
+        fontFamily: 'var(--mono)', fontSize: '11px',
+        letterSpacing: '0.18em', color: 'var(--text-muted)',
+      }}>
+        SELECT MODE · THIS CHOICE LOCKS TO YOUR SAVE
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+        {modes.map(mode => {
+          const hovered = hoveredMode === mode.id
+          return (
+            <button
+              key={String(mode.id)}
+              onClick={() => setStoryMode(mode.id)}
+              onMouseEnter={() => setHoveredMode(mode.id)}
+              onMouseLeave={() => setHoveredMode(null)}
+              style={{
+                all: 'unset', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', gap: '20px',
+                padding: '32px', borderRadius: '12px',
+                background: hovered ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${hovered ? mode.accentBorder : 'rgba(255,255,255,0.07)'}`,
+                transition: 'all 0.2s',
+                boxShadow: hovered ? `0 0 32px ${mode.accentDim}` : 'none',
+                textAlign: 'left',
+              }}
+            >
+              <span style={{
+                fontFamily: 'var(--mono)', fontSize: '9px',
+                letterSpacing: '0.2em', color: mode.accentText,
+                padding: '3px 10px', borderRadius: '4px',
+                background: mode.accentDim,
+                border: `0.5px solid ${mode.accentBorder}`,
+                alignSelf: 'flex-start',
+              }}>
+                {mode.tag}
+              </span>
+
+              <div>
+                <h3 style={{ fontSize: '22px', fontWeight: 600, color: 'var(--text-h)', marginBottom: '12px' }}>
+                  {mode.title}
+                </h3>
+                <p style={{ fontSize: '14px', color: 'var(--text)', lineHeight: 1.7 }}>
+                  {mode.body}
+                </p>
+              </div>
+
+              <span style={{
+                fontFamily: 'var(--mono)', fontSize: '10px',
+                letterSpacing: '0.12em', marginTop: 'auto',
+                color: hovered ? mode.accentText : 'var(--text-muted)',
+                transition: 'color 0.2s',
+              }}>
+                {mode.cta}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export default function Home() {
   const { goToUnit } = useLessonStore()
+  const storyMode = usePdaStore(s => s.storyMode)
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -105,17 +202,24 @@ export default function Home() {
           </p>
 
           <p style={{ fontSize: '16px', color: 'var(--text)', maxWidth: '480px', margin: '0 auto 52px', lineHeight: 1.75 }}>
-            41 interactive lessons across 5 units of Digital Principles — drag gates, draw wires, break circuits, fix them.
+            {storyMode === null
+              ? 'Two ways in. Same circuits. Choose how you want to learn.'
+              : '41 interactive lessons across 5 units of Digital Principles — drag gates, draw wires, break circuits, fix them.'
+            }
           </p>
         </section>
 
-        <section style={{ maxWidth: '1080px', margin: '0 auto', padding: '0 24px 80px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '18px' }}>
-            {UNITS.map(unit => (
-              <UnitCard key={unit.id} unit={unit} onClick={() => goToUnit(unit.id)} />
-            ))}
-          </div>
-        </section>
+        {storyMode === null ? (
+          <ModeSelect />
+        ) : (
+          <section style={{ maxWidth: '1080px', margin: '0 auto', padding: '0 24px 80px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '18px' }}>
+              {UNITS.map(unit => (
+                <UnitCard key={unit.id} unit={unit} onClick={() => goToUnit(unit.id)} />
+              ))}
+            </div>
+          </section>
+        )}
 
         <div style={{
           textAlign: 'center', paddingBottom: '40px',

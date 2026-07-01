@@ -14,6 +14,7 @@
  * No open/close state needed.
  */
 import { useLessonStore } from './store/lessonStore'
+import usePdaStore from './store/pdaStore'
 import TopBar from './components/ui/TopBar'
 import Sidebar from './components/ui/Sidebar'
 import ControlPanel from './components/ui/ControlPanel'
@@ -22,6 +23,7 @@ import DialogueBox from './components/ui/DialogueBox'
 import PlotBox from './components/ui/PlotBox'
 import GateCanvas from './components/canvas/GateCanvas'
 import Home from './pages/Home'
+import ShipMap from './pages/ShipMap'
 import PDA from './components/pda/PDA'
 import './index.css'
 
@@ -57,18 +59,38 @@ function WorkspaceView() {
 
 export default function App() {
   const { activeUnitId } = useLessonStore()
+  const storyMode = usePdaStore(s => s.storyMode)
 
-  return activeUnitId === null ? (
+  // In the lesson engine — always WorkspaceView regardless of mode
+  if (activeUnitId !== null) {
+    return (
+      <>
+        <WorkspaceView />
+        <PDA />
+      </>
+    )
+  }
+
+  // Story Mode hub
+  if (storyMode === true) {
+    return (
+      <>
+        <TopBar />
+        <div style={{ paddingTop: TOPBAR_H }}>
+          <ShipMap />
+        </div>
+        <PDA />
+      </>
+    )
+  }
+
+  // Standard Mode home (or mode-select when storyMode === null)
+  return (
     <>
       <TopBar />
       <div style={{ paddingTop: TOPBAR_H }}>
         <Home />
       </div>
-      <PDA />
-    </>
-  ) : (
-    <>
-      <WorkspaceView />
       <PDA />
     </>
   )
