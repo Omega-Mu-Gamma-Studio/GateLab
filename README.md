@@ -108,7 +108,11 @@ All five units are built out with full lesson content — this was the misleadin
 
 **41 lessons, all five units, all playable start to finish.**
 
-What's *not* done yet, to be equally honest about it: the specialized visualizer panels some units are designed to eventually get — a live timing diagram for Units III/IV, a state diagram viewer for Unit III, a memory grid for Unit V, a PLA/PAL dot matrix, a Hamming code visualizer, a number system step-through. Right now the InfoPanel shows a placeholder for these tabs rather than the real widget. The lessons themselves don't depend on them — you can complete every unit today — but if you go looking for these in the code, know that you'll find empty stub files, not hidden features. They're roadmap, not shipped.
+The Unit III/IV **Timing tab is now a real, live panel** — it wasn't when this README was first drafted. Worth knowing why that took more than "add a chart": the simulation engine was silently reading only the first two inputs on every gate, which quietly broke every JK flip-flop in the curriculum — the master-slave design needs a 3-input NAND for its feedback path, and that third wire was being dropped before it ever reached the evaluator. The Ripple Counter, Mod-N Counter, Ring Counter, and Johnson Counter lessons were all built on flip-flops that couldn't actually hold state. That's fixed now (input count is derived from the real wiring instead of hardcoded per gate type, and feedback loops hold their last value across a recompute instead of forgetting it), and the Timing panel was built on top of the fix rather than on top of the bug.
+
+One limitation from that same dig, flagged rather than hidden: the fix covers the pre-wired OBSERVE and FAULT phases. The REPAIR phase — where the player drags wires in by hand — still only renders two input pins per gate visually, so a 3-input NAND can't be manually rewired to its third pin yet in that phase. That's a gate-geometry and wire-routing change, not an evaluator change, and it's next up rather than done.
+
+What's still genuinely not done: a state diagram viewer for Unit III, a memory grid for Unit V, a PLA/PAL dot matrix, a Hamming code visualizer, a number system step-through. The InfoPanel still shows a placeholder for those tabs. The lessons themselves don't depend on them — you can complete every unit today — but if you go looking for these in the code, know that you'll find empty stub files, not hidden features. They're roadmap, not shipped.
 
 ---
 
@@ -120,7 +124,7 @@ The workspace is a three-column layout, shared by both modes once you're inside 
 
 **Centre — Canvas + ControlPanel**: the interactive circuit area. The DialogueBox floats over the canvas as a draggable card — two voices mapped to phases: Ada (red, OBSERVE phase) and the assigned command speaker (amber, FAULT and REPAIR phases). Position resets per lesson. A small clipboard button in the top-left corner opens the TASKS app directly.
 
-**Right — InfoPanel** (always visible): a tabbed right column. Tabs shown depend on the active unit — Trivia everywhere, plus Verilog for Unit II+, and Timing/State for Units III/IV (currently placeholder content, see above).
+**Right — InfoPanel** (always visible): a tabbed right column. Tabs shown depend on the active unit — Trivia everywhere, plus Verilog for Unit II+, and Timing/State for Units III/IV. Timing is a real, live waveform panel; State and Verilog are still placeholder tabs (see Key Features below).
 
 The Trivia tab is a shuffleable deck of circuit history facts and engineering jokes — designed for the moment right after a fault, when the student needs a second before trying again.
 
@@ -142,10 +146,10 @@ The Trivia tab is a shuffleable deck of circuit history facts and engineering jo
 - **Three themes** — Matrix Green · Logic Gold · Signal Blue; persisted in localStorage
 - **Ship Map** — walkable room hub with story-flag-gated unlocks and progress-aware lesson resume
 - **Room art system** — placeholder viewports per room with a one-line override path for real background stills
+- **Timing Diagram** (Units III & IV) — live event-timeline waveform panel, backed by a simulation engine fix that made flip-flop feedback actually hold state instead of silently dropping its third input wire
 
 **On the roadmap, not yet shipped:**
 
-- Live Timing Diagram (Units III & IV)
 - State Diagram Viewer (Unit III)
 - Hazard Sandbox with per-gate delay sliders (Unit IV)
 - Memory Grid (Unit V)
@@ -154,6 +158,7 @@ The Trivia tab is a shuffleable deck of circuit history facts and engineering jo
 - Number System Visualizer (Unit I)
 - Auto-generated Verilog view from the gate graph
 - Real background art for every Story Mode room
+- 3-input gate wiring in the REPAIR phase (currently only pre-wired OBSERVE/FAULT phases benefit from the 3-input evaluator fix — dragging a wire to a gate's 3rd pin by hand isn't supported yet)
 
 ---
 
@@ -203,7 +208,8 @@ GateLab/
 │   │   │   ├── PlotBox.jsx         # Canvas corner shortcut button → opens TASKS app
 │   │   │   ├── PhaseIndicator.jsx  # OBSERVE → FAULT → REPAIR phase badge
 │   │   │   ├── OperatorStatus.jsx  # Persistent footer in InfoPanel
-│   │   │   └── SuccessCard.jsx     # Lesson completion overlay
+│   │   │   ├── SuccessCard.jsx     # Lesson completion overlay
+│   │   │   └── TimingDiagram.jsx   # Live waveform panel for Units III & IV
 │   │   │
 │   │   ├── canvas/                 # Circuit canvas components
 │   │   │   ├── GateCanvas.jsx      # Main schematic canvas — powers every lesson, both modes
@@ -225,7 +231,8 @@ GateLab/
 │   │   ├── lessonStore.js          # Active unit/lesson/phase — resumes at first incomplete lesson
 │   │   ├── canvasStore.js          # Gate positions, wires, node IDs
 │   │   ├── pdaStore.js             # PDA nav, message threads, rapport, story flags, storyMode
-│   │   └── progressStore.js        # completedLessons, XP, level — persisted
+│   │   ├── progressStore.js        # completedLessons, XP, level — persisted
+│   │   └── timingStore.js          # Rolling signal history backing the Timing Diagram
 │   │
 │   ├── data/
 │   │   └── adaMessages.js          # Ada's message bank — trigger-gated, rapport-gated
@@ -281,7 +288,7 @@ Omega Mu Gamma Studio is a student-built open-source studio building interactive
 
 ## Status
 
-> **Standard Mode is complete and usable** — all five units, all 41 lessons, playable start to finish. **Story Mode is the active focus** — the Ship Map, room system, and PDA-centric Quarters are being built out now, on top of the same lesson engine Standard Mode already proved out. The specialized visualizer panels (timing diagrams, state diagrams, memory grid, PLA/PAL matrix, Hamming visualizer) are roadmap items, not yet built.
+> **Standard Mode is complete and usable** — all five units, all 41 lessons, playable start to finish, now backed by a simulation engine that correctly handles 3-input feedback gates and holds flip-flop state across recomputes. **Story Mode is the active focus** — the Ship Map, room system, and PDA-centric Quarters are being built out now, on top of the same lesson engine Standard Mode already proved out. The Timing Diagram (Units III & IV) is live. State diagrams, the memory grid, PLA/PAL matrix, and Hamming visualizer are still roadmap items, not yet built.
 
 ---
 

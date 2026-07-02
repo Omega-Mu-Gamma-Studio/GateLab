@@ -17,12 +17,16 @@
 import { create } from 'zustand'
 import { evaluate } from '../engine/GraphEvaluator'
 import useProgressStore from './progressStore.js'
+import useTimingStore from './timingStore.js'
 
-function runEval(nodes, wires, inputs) {
+// prevSignals lets cross-coupled memory (latches, flip-flop internals) hold
+// its last output across a recompute instead of forgetting on every call —
+// see the docstring in GraphEvaluator.evaluate() for why that matters.
+function runEval(nodes, wires, inputs, prevSignals = {}) {
   const brokenIds = new Set(
     wires.filter(w => w.broken).map(w => w.id)
   )
-  return evaluate(nodes, wires, inputs, brokenIds)
+  return evaluate(nodes, wires, inputs, brokenIds, prevSignals)
 }
 
 export const useCanvasStore = create((set, get) => ({
@@ -57,7 +61,7 @@ export const useCanvasStore = create((set, get) => ({
     const nodes   = phaseData.nodes   || []
     const wires   = phaseData.wires   || []
     const inputs  = { ...(phaseData.inputs || {}) }
-    const signals = runEval(nodes, wires, inputs)
+    const signals = runEval(nodes, wires, inputs)   // fresh circuit — no held memory
 
     set({
       nodes,
@@ -72,14 +76,18 @@ export const useCanvasStore = create((set, get) => ({
       lessonSolved:   false,
       kmapConfig:     phaseData.kmapConfig || null,
     })
+
+    // New phase, new trace — Timing panel starts clean at tick 0.
+    useTimingStore.getState().reset(nodes, signals)
   },
 
   // ── Toggle a driven input (INPUT node) ───────────────────────────────
   toggleInput(nodeId) {
-    const { inputs, nodes, wires } = get()
+    const { inputs, nodes, wires, signals } = get()
     const next = { ...inputs, [nodeId]: !inputs[nodeId] }
-    const signals = runEval(nodes, wires, next)
-    set({ inputs: next, signals })
+    const nextSignals = runEval(nodes, wires, next, signals)
+    set({ inputs: next, signals: nextSignals })
+    useTimingStore.getState().record(nextSignals)
   },
 
   // ── Move a gate (drag end) ───────────────────────────────────────────
@@ -87,7 +95,7 @@ export const useCanvasStore = create((set, get) => ({
     const nodes = get().nodes.map(n =>
       n.id === nodeId ? { ...n, x, y } : n
     )
-    const signals = runEval(nodes, get().wires, get().inputs)
+    const signals = runEval(nodes, get().wires, get().inputs, get().signals)
     set({ nodes, signals })
   },
 
@@ -127,8 +135,9 @@ export const useCanvasStore = create((set, get) => ({
       to:   { nodeId: toNodeId, pin: 'input', index: toPinIndex },
     }
     const nextWires = [...wires, newWire]
-    const signals = runEval(nodes, nextWires, inputs)
+    const signals = runEval(nodes, nextWires, inputs, get().signals)
     set({ wires: nextWires, signals, dragWire: null })
+    useTimingStore.getState().record(signals)
   },
   cancelDragWire() {
     set({ dragWire: null })
@@ -138,8 +147,9 @@ export const useCanvasStore = create((set, get) => ({
   removeWire(wireId) {
     const { nodes, inputs } = get()
     const wires = get().wires.filter(w => w.id !== wireId)
-    const signals = runEval(nodes, wires, inputs)
+    const signals = runEval(nodes, wires, inputs, get().signals)
     set({ wires, signals })
+    useTimingStore.getState().record(signals)
   },
 
   // ── Mark lesson as solved ─────────────────────────────────────────────

@@ -12,13 +12,17 @@
  *   Unit IV  → Timing · Verilog · Trivia
  *   Unit V   → Trivia only
  *
+ * Timing is a real, live panel (see TimingDiagram.jsx) — everything else
+ * besides Trivia is still a "coming soon" placeholder.
+ *
  * The close button and backdrop are removed. The tab bar sits flush at
  * the top of the panel, matching the ControlPanel height (44px).
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
 import OperatorStatus from './OperatorStatus'
+import TimingDiagram from './TimingDiagram'
 
 const PANEL_W = '20vw'
 
@@ -110,10 +114,17 @@ export default function InfoPanel() {
   const panels = unit?.panels || []
   const allTabs = [...panels, 'trivia']
 
-  // When unit changes, default to first available panel (or trivia)
-  useEffect(() => {
+  // When the active unit changes, default to its first available panel
+  // (or trivia). Adjusted during render rather than in an effect — this
+  // is React's own recommended pattern for "reset derived state when a
+  // prop changes": it avoids the extra render an effect+setState would
+  // otherwise cause, since it lands before the browser ever paints the
+  // stale tab.
+  const [prevUnitId, setPrevUnitId] = useState(activeUnitId)
+  if (activeUnitId !== prevUnitId) {
+    setPrevUnitId(activeUnitId)
     setTab(panels.length > 0 ? panels[0] : 'trivia')
-  }, [activeUnitId])
+  }
 
   const TAB_LABELS = {
     timing:  'Timing',
@@ -174,7 +185,7 @@ export default function InfoPanel() {
 
       {/* Tab content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        {tab === 'timing'  && <PanelPlaceholder label="Timing Diagram" />}
+        {tab === 'timing'  && <TimingDiagram />}
         {tab === 'state'   && <PanelPlaceholder label="State Diagram" />}
         {tab === 'verilog' && <PanelPlaceholder label="Verilog View" />}
         {tab === 'trivia'  && (

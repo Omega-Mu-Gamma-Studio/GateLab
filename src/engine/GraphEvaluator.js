@@ -6,7 +6,15 @@
  *   { [nodeId]: { output: bool|undefined, inputs: [bool|undefined, ...] } }
  *
  * Evaluation is topological — sources first, then gates in dependency order.
- * Cycles are detected and broken (undefined propagates through a cycle).
+ * Cycles are detected and broken (undefined propagates through a cycle,
+ * unless a held previous value is available — see prevSignals below).
+ *
+ * @param prevSignals - the signal map from the last evaluation. Optional,
+ *   defaults to {}. Used only to resolve feedback loops that would otherwise
+ *   float: a cross-coupled latch or flip-flop internal that can't derive a
+ *   fresh value this pass holds whatever it last had, instead of forgetting
+ *   its state on every recompute. Pass {} (or omit) for a fresh circuit with
+ *   no history — e.g. when a new lesson phase loads.
  *
  * This module has zero React / Konva / Zustand dependencies.
  * It can be called from canvasStore, unit tests, or GraphEvaluator workers.
@@ -35,7 +43,7 @@ const GATE_LOGIC = {
  * @param {Set}      [brokenWireIds]- wire ids that are broken (float their dest)
  * @returns {object} signals        - { [nodeId]: { output, inputs: [] } }
  */
-export function evaluate(nodes, wires, inputs = {}, brokenWireIds = new Set()) {
+export function evaluate(nodes, wires, inputs = {}, brokenWireIds = new Set(), prevSignals = {}) {
   // Build adjacency: for each node, which wires feed into which input index
   // wiresByDest[nodeId][inputIndex] = { fromNodeId, wireId }
   const wiresByDest = {}
@@ -108,7 +116,14 @@ export function evaluate(nodes, wires, inputs = {}, brokenWireIds = new Set()) {
 
     // Resolve input values from upstream signals
     const geo = wiresByDest[nodeId] || {}
-    const inputCount = getInputCount(node.type)
+    // A node's real input count is however many pins are actually wired,
+    // never less than the type's structural minimum. This matters for
+    // gates like the 3-input NAND used in master-slave JK flip-flops —
+    // two data inputs plus a feedback pin — which used to lose that
+    // 3rd wire entirely because input count was hardcoded per type.
+    const wiredIndices = Object.keys(geo).map(Number)
+    const maxWiredIndex = wiredIndices.length ? Math.max(...wiredIndices) : -1
+    const inputCount = Math.max(getInputCount(node.type), maxWiredIndex + 1)
     const resolvedInputs = []
     for (let i = 0; i < inputCount; i++) {
       const conn = geo[i]
@@ -125,6 +140,16 @@ export function evaluate(nodes, wires, inputs = {}, brokenWireIds = new Set()) {
     let output
     if (resolvedInputs.some(v => v === undefined)) {
       output = computeWithFloating(node.type, resolvedInputs)
+      // Cross-coupled memory elements (SR latches, flip-flop internals) feed
+      // back into their own inputs. On the very first evaluation that's a
+      // genuine floating state — but once a value has been latched, losing
+      // it back to "floating" on every recompute would mean nothing could
+      // ever remember anything. Hold the last known output instead: this is
+      // what makes S=0,R=0 actually hold Q, and what lets flip-flops keep
+      // their state between clock edges instead of forgetting on every tick.
+      if (output === undefined && prevSignals[nodeId]?.output !== undefined) {
+        output = prevSignals[nodeId].output
+      }
     } else {
       output = logic(resolvedInputs, node, inputs)
     }
