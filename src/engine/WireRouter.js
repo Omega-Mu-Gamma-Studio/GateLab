@@ -13,7 +13,30 @@
  * pin positions using getPinWorldPos() from GatePin.js before calling here.
  */
 
-const SNAP_THRESHOLD = 4 // px — treat y-difference smaller than this as "same row"
+const SNAP_THRESHOLD = 4  // px — treat y-difference smaller than this as "same row"
+const WAYPOINT_GRID  = 16 // px — grid pitch for waypoint snapping (matches the
+                           // 31-32px background grid at half-step, so corners
+                           // land on or between grid lines instead of adrift)
+
+/**
+ * snapToGrid(point, grid?)
+ *
+ * Rounds a single {x,y} point to the nearest grid intersection. Exported
+ * standalone (not just used internally by routeWire) so anything that
+ * *authors* waypoints — a future drag-to-add-waypoint interaction, or a
+ * lesson-file linting script — can snap at the source instead of relying
+ * on render-time correction.
+ *
+ * @param {{ x, y }} point
+ * @param {number}   [grid=WAYPOINT_GRID]
+ * @returns {{ x, y }}
+ */
+export function snapToGrid(point, grid = WAYPOINT_GRID) {
+  return {
+    x: Math.round(point.x / grid) * grid,
+    y: Math.round(point.y / grid) * grid,
+  }
+}
 
 /**
  * routeWire(fromPos, toPos, waypoints?)
@@ -24,10 +47,19 @@ const SNAP_THRESHOLD = 4 // px — treat y-difference smaller than this as "same
  * @returns {number[]}          - flat [x1,y1, x2,y2, ...] for Konva Line
  */
 export function routeWire(fromPos, toPos, waypoints) {
-  // Explicit waypoints from lesson file — trust them
+  // Explicit waypoints from lesson file — trust them, but snap each one to
+  // the grid first. This is a *light* snap: only the intermediate points
+  // move, never the pin endpoints themselves (fromPos/toPos stay exactly on
+  // the gate pins they were resolved from). Dense Unit IV/V circuits tend
+  // to accumulate hand-placed waypoints that drift a pixel or two off each
+  // other; snapping keeps parallel runs visually aligned instead of looking
+  // like spaghetti.
   if (waypoints && waypoints.length > 0) {
     const pts = [fromPos.x, fromPos.y]
-    for (const wp of waypoints) pts.push(wp.x, wp.y)
+    for (const wp of waypoints) {
+      const snapped = snapToGrid(wp)
+      pts.push(snapped.x, snapped.y)
+    }
     pts.push(toPos.x, toPos.y)
     return pts
   }
