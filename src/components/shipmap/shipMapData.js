@@ -186,7 +186,7 @@ export function nodeCenter(id) {
 }
 
 export function isRoomOpen(room, activeFlags) {
-  return room.alwaysOpen || !!activeFlags[room.unlockFlag]
+  return  room.alwaysOpen || !!activeFlags[room.unlockFlag]
 }
 
 // ── "Looking ≠ doing" guard ───────────────────────────────────────────────
