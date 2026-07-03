@@ -23,6 +23,7 @@ import { useState } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
 import OperatorStatus from './OperatorStatus'
 import TimingDiagram from './TimingDiagram'
+import TruthTablePanel from './TruthTablePanel'
 
 const PANEL_W = '20vw'
 
@@ -112,7 +113,10 @@ export default function InfoPanel() {
 
   const unit   = UNITS.find(u => u.id === activeUnitId)
   const panels = unit?.panels || []
-  const allTabs = [...panels, 'trivia']
+  // Truth Table, like Trivia, isn't unit-specific — any circuit with an
+  // OUTPUT node can produce one, so it's always available rather than only
+  // in units whose `panels` config happens to list it.
+  const allTabs = [...panels, 'truthtable', 'trivia']
 
   // When the active unit changes, default to its first available panel
   // (or trivia). Adjusted during render rather than in an effect — this
@@ -127,10 +131,11 @@ export default function InfoPanel() {
   }
 
   const TAB_LABELS = {
-    timing:  'Timing',
-    state:   'State',
-    verilog: 'Verilog',
-    trivia:  panels.length > 0 ? '✦ Chill' : '✦ Trivia',
+    timing:     'Timing',
+    state:      'State',
+    verilog:    'Verilog',
+    truthtable: 'Table',
+    trivia:     panels.length > 0 ? '✦ Chill' : '✦ Trivia',
   }
 
   return (
@@ -185,10 +190,11 @@ export default function InfoPanel() {
 
       {/* Tab content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        {tab === 'timing'  && <TimingDiagram />}
-        {tab === 'state'   && <PanelPlaceholder label="State Diagram" />}
-        {tab === 'verilog' && <PanelPlaceholder label="Verilog View" />}
-        {tab === 'trivia'  && (
+        {tab === 'timing'     && <TimingDiagram />}
+        {tab === 'state'      && <PanelPlaceholder label="State Diagram" />}
+        {tab === 'verilog'    && <PanelPlaceholder label="Verilog View" />}
+        {tab === 'truthtable' && <TruthTablePanel />}
+        {tab === 'trivia'     && (
           <TriviaCard
             item={deck[idx % deck.length]}
             onNext={() => setIdx(i => (i + 1) % deck.length)}
