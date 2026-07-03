@@ -1,0 +1,248 @@
+.smg-root {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: #050d18;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  overflow: visible;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.smg-corridors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.smg-corridor-base {
+  stroke: #0b1928;
+  stroke-width: 14;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.smg-corridor-line {
+  stroke: #16324a;
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.smg-grid {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: clamp(14px, 3vw, 34px);
+  padding: clamp(14px, 3vw, 34px);
+}
+
+.smg-room {
+  position: relative;
+  appearance: none;
+  cursor: pointer;
+  border-radius: 5px;
+  background: #080f1c;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: inherit;
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 8px;
+  transition: border-color 0.15s, box-shadow 0.2s, background 0.15s, transform 0.15s;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.smg-room:hover,
+.smg-room:focus-visible {
+  border-color: var(--room-color);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--room-color) 45%, transparent),
+              inset 0 0 20px color-mix(in srgb, var(--room-color) 12%, transparent);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.smg-room.is-selected {
+  border-color: var(--room-color);
+  background: #0d1f32;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--room-color) 60%, transparent),
+              inset 0 0 26px color-mix(in srgb, var(--room-color) 16%, transparent);
+}
+
+.smg-room.is-work {
+  background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--room-color) 14%, transparent) 0%, #080f1c 70%);
+}
+
+.smg-room.is-locked {
+  cursor: pointer;
+  filter: grayscale(0.7) brightness(0.55);
+}
+
+.smg-room.is-locked:hover,
+.smg-room.is-locked:focus-visible {
+  border-color: #223549;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Corner brackets — the sci-fi HUD frame detail */
+.smg-corner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--room-color);
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.smg-room:hover .smg-corner,
+.smg-room.is-selected .smg-corner { opacity: 1; }
+.smg-room.is-locked .smg-corner { border-color: #223549; opacity: 0.4; }
+
+.smg-corner-tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }
+.smg-corner-tr { top: 4px; right: 4px; border-left: none; border-bottom: none; }
+.smg-corner-bl { bottom: 4px; left: 4px; border-right: none; border-top: none; }
+.smg-corner-br { bottom: 4px; right: 4px; border-left: none; border-top: none; }
+
+.smg-label {
+  font-size: clamp(8px, 1vw, 11px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--room-color);
+  text-align: center;
+}
+.smg-room.is-locked .smg-label { color: #33475a; }
+
+.smg-code {
+  font-size: clamp(6.5px, 0.7vw, 8.5px);
+  letter-spacing: 0.1em;
+  color: #4a6478;
+  text-align: center;
+}
+.smg-room.is-locked .smg-code { color: #223140; }
+
+.smg-lock {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: #223549;
+}
+
+.smg-npc {
+  position: absolute;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: clamp(6.5px, 0.7vw, 8px);
+  letter-spacing: 0.1em;
+  color: var(--npc-color);
+  opacity: 0.9;
+}
+.smg-npc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #080f1c;
+  border: 1.2px solid var(--npc-color);
+}
+
+.smg-pda-tag {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 7px;
+  letter-spacing: 0.15em;
+  color: #ff4d5e;
+  border: 0.5px solid rgba(255, 77, 94, 0.5);
+  border-radius: 10px;
+  padding: 1px 6px;
+  animation: smg-pda-pulse 2.2s ease-in-out infinite;
+}
+@keyframes smg-pda-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 77, 94, 0.2); }
+  50%      { box-shadow: 0 0 12px rgba(255, 77, 94, 0.5); }
+}
+
+.smg-begin {
+  margin-top: 2px;
+  font-size: clamp(6.5px, 0.75vw, 8.5px);
+  letter-spacing: 0.1em;
+  color: var(--room-color);
+  border: 0.5px solid color-mix(in srgb, var(--room-color) 55%, transparent);
+  border-radius: 3px;
+  padding: 3px 8px;
+  background: #07111c;
+}
+.smg-room.is-work:hover .smg-begin,
+.smg-room.is-work:focus-visible .smg-begin {
+  background: color-mix(in srgb, var(--room-color) 18%, #07111c);
+}
+
+/* ── Hover card ─────────────────────────────────────────────────────── */
+.smg-hovercard {
+  position: absolute;
+  transform: translate(-50%, 0);
+  z-index: 20;
+  width: clamp(160px, 22vw, 220px);
+  padding: 9px 11px;
+  background: rgba(5, 13, 24, 0.94);
+  border: 1px solid var(--hc-color);
+  border-radius: 6px;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--hc-color) 35%, transparent), 0 10px 30px rgba(0,0,0,0.5);
+  pointer-events: none;
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  animation: smg-hc-in 0.12s ease-out;
+}
+.smg-hovercard[data-flip='down'] { margin-top: 8px; }
+.smg-hovercard[data-flip='up']   { transform: translate(-50%, -100%); margin-top: -8px; }
+
+@keyframes smg-hc-in {
+  from { opacity: 0; transform: translate(-50%, -4px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.smg-hovercard[data-flip='up'] { animation: smg-hc-in-up 0.12s ease-out; }
+@keyframes smg-hc-in-up {
+  from { opacity: 0; transform: translate(-50%, calc(-100% + 4px)); }
+  to   { opacity: 1; transform: translate(-50%, -100%); }
+}
+
+.smg-hovercard-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.smg-hovercard-title {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--hc-color);
+}
+.smg-hovercard-code {
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  color: #4a6478;
+  white-space: nowrap;
+}
+.smg-hovercard-body {
+  font-size: 10px;
+  line-height: 1.45;
+  color: #8fb4cc;
+}
+.smg-hovercard-locked {
+  margin-top: 6px;
+  font-size: 7.5px;
+  letter-spacing: 0.15em;
+  color: #7a8a9a;
+}

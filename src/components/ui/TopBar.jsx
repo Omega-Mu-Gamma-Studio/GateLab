@@ -15,6 +15,9 @@ export default function TopBar() {
 
   const { activeUnitId, activeLessonIdx, goHome } = useLessonStore()
   const devReset = usePdaStore(s => s.devReset)
+  const storyMode = usePdaStore(s => s.storyMode)
+  const toggleMap = usePdaStore(s => s.toggleMap)
+  const showMapButton = storyMode === true && activeUnitId !== null
   // Get current unit info for breadcrumb
   const activeUnit = UNITS.find(u => u.id === activeUnitId)
 
@@ -109,6 +112,30 @@ export default function TopBar() {
         }}>
           CS22303
         </span>
+
+        {showMapButton && (
+          <button
+            onClick={toggleMap}
+            title="Ship Map (M)"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '7px',
+              height: '32px', padding: '0 12px', borderRadius: '8px',
+              border: '1px solid var(--border)', background: 'transparent',
+              color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s',
+              fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.06em',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent-text)'; e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.background = 'var(--accent-dim)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'transparent' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+              <line x1="8" y1="2" x2="8" y2="18"/>
+              <line x1="16" y1="6" x2="16" y2="22"/>
+            </svg>
+            MAP
+            <span style={{ fontSize: '9px', opacity: 0.6 }}>M</span>
+          </button>
+        )}
 
         <div ref={popRef} style={{ position: 'relative' }}>
           <button

@@ -25,6 +25,7 @@ import GateCanvas from './components/canvas/GateCanvas'
 import Home from './pages/Home'
 import ShipMap from './pages/ShipMap'
 import PDA from './components/pda/PDA'
+import ShipMapOverlay from './components/shipmap/ShipMapOverlay'
 import './index.css'
 
 const TOPBAR_H = '5vh'
@@ -67,6 +68,7 @@ export default function App() {
       <>
         <WorkspaceView />
         <PDA />
+        <ShipMapOverlay />
       </>
     )
   }

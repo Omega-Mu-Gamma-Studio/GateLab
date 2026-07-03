@@ -141,6 +141,7 @@ function defaultState() {
 
     // Navigation
     pdaOpen:      false,
+    mapOpen:      false,       // fullscreen Ship Map overlay (TopBar button / "M" key)
     pdaView:      'home',      // 'home' | 'app'
     activeApp:    'comm',      // 'comm' | 'tasks' | 'gallery' | 'crew' | 'logs'
     activeTab:    'messages',  // legacy compat — unused by new shell
@@ -214,6 +215,14 @@ const usePdaStore = create(
         if (thread) set({ activeThread: thread })
       },
       closePda() { set({ pdaOpen: false }) },
+
+      // ── Ship Map overlay open/close ───────────────────────────────────
+      // Fullscreen tactical map, summonable mid-lesson (TopBar button or
+      // the "M" key) without leaving the Workspace/lesson you're in.
+      openMap()   { set({ mapOpen: true }) },
+      closeMap()  { set({ mapOpen: false }) },
+      toggleMap() { set(s => ({ mapOpen: !s.mapOpen })) },
+
       goHome()   { set({ pdaView: 'home' }) },
       openApp(app) { set({ pdaView: 'app', activeApp: app }) },
       setTab(tab) {
