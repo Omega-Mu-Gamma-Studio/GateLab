@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
+import { useCanvasStore } from '../../store/canvasStore'
 import usePdaStore from '../../store/pdaStore'
+import VerilogExportModal from './VerilogExportModal'
 const THEMES = [
   { id: 'green', label: 'Matrix',  color: '#00ff88', attr: ''     },
   { id: 'gold',  label: 'Logic',   color: '#f5c400', attr: 'gold' },
@@ -18,6 +20,8 @@ export default function TopBar() {
   const storyMode = usePdaStore(s => s.storyMode)
   const toggleMap = usePdaStore(s => s.toggleMap)
   const showMapButton = storyMode === true && activeUnitId !== null
+  const nodeCount = useCanvasStore(s => s.nodes.length)
+  const [verilogOpen, setVerilogOpen] = useState(false)
   // Get current unit info for breadcrumb
   const activeUnit = UNITS.find(u => u.id === activeUnitId)
 
@@ -46,6 +50,7 @@ export default function TopBar() {
   }, [])
 
   return (
+    <>
     <header style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
       height: '5vh',
@@ -134,6 +139,28 @@ export default function TopBar() {
             </svg>
             MAP
             <span style={{ fontSize: '9px', opacity: 0.6 }}>M</span>
+          </button>
+        )}
+
+        {activeUnitId && nodeCount > 0 && (
+          <button
+            onClick={() => setVerilogOpen(true)}
+            title="Export circuit as Verilog"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '7px',
+              height: '32px', padding: '0 12px', borderRadius: '8px',
+              border: '1px solid var(--border)', background: 'transparent',
+              color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.2s',
+              fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.06em',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent-text)'; e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.background = 'var(--accent-dim)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'transparent' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            .V
           </button>
         )}
 
@@ -240,5 +267,7 @@ export default function TopBar() {
         </div>
       </div>
     </header>
+    {verilogOpen && <VerilogExportModal onClose={() => setVerilogOpen(false)} />}
+    </>
   )
 }
