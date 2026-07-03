@@ -31,8 +31,8 @@ export const ROOMS = [
     denial: null,
     dlg: { sp: '[ ambient ]', txt: 'Your bunk. The PDA glows on the desk. The hull hums beneath the floor.' },
     tint: '#3fa8d8',
-    bgImage: '/background/Ship-Quarters.webp',        // drop a real photo path in here later
-    sealedImage:'/background/Blast-Door.webp',    // AI-generated "sealed door" art goes here later
+    bgImage: '/background/Ship-Quarters.png',        // drop a real photo path in here later
+    sealedImage:'/background/Blast-Door.png',    // AI-generated "sealed door" art goes here later
     hasPda: true,
   },
   {
@@ -43,8 +43,8 @@ export const ROOMS = [
     denial: null,
     dlg: { sp: 'Ada', txt: "You're early. Or late. I can never tell with you. Sit — I'll grab your ration." },
     tint: '#d05858',
-    bgImage: '/background/Mess-Hall.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Mess-Hall.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'engine', label: 'ENGINE ROOM', code: 'E-01', deck: 'DECK 4',
@@ -54,8 +54,8 @@ export const ROOMS = [
     denial: "Reyes has the room sealed for a maintenance sweep. The door doesn't budge.",
     dlg: { sp: 'Reyes', txt: "You're not supposed to be down here. But since you are — suit up." },
     tint: '#c07028',
-    bgImage: '/background/Engine-Room.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Engine-Room.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'obs_deck', label: 'OBS. DECK', code: 'C-01', deck: 'DECK 7',
@@ -65,8 +65,8 @@ export const ROOMS = [
     denial: 'The Observation Deck is closed for maintenance. Try again after your first shift.',
     dlg: { sp: 'Ada', txt: "The Veil Nebula is visible on clear cycles. I used to come up here with... well. It's a good view." },
     tint: '#6f8fd8',
-    bgImage: '/background/Observation-Deck.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Observation-Deck.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'hydro', label: 'HYDRO-POOL', code: 'D-03', deck: 'DECK 6',
@@ -76,8 +76,8 @@ export const ROOMS = [
     denial: 'The Hydro-Pool is on a scheduled maintenance cycle. Check back after your next shift.',
     dlg: { sp: 'Ada', txt: "Don't look so surprised. Even mechanics get shore leave. The water's warm — for now." },
     tint: '#2ea88a',
-    bgImage: '/background/Hydro-Pool.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Hydro-Pool.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'workstation', label: 'WORKSTATION', code: 'B-02', deck: 'DECK 7',
@@ -87,8 +87,8 @@ export const ROOMS = [
     denial: null,
     dlg: { sp: 'MAINT-SYS', txt: 'TERMINAL ACTIVE — WORK ORDER QUEUE: 1 PENDING — AUTHENTICATE TO BEGIN SHIFT.' },
     tint: '#40a860',
-    bgImage: '/background/Workstation.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Workstation.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'ada_quarters', label: "ADA'S QUARTERS", code: 'A-12', deck: 'DECK 7',
@@ -98,8 +98,8 @@ export const ROOMS = [
     denial: "Ada's door is shut. You can hear music from inside. Probably best not to interrupt.",
     dlg: { sp: 'Ada', txt: "...I wasn't expecting anyone. Come in. Mind the books — I keep meaning to sort them." },
     tint: '#c05840',
-    bgImage: '/background/Ada-Quarters.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Ada-Quarters.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'lounge', label: 'LOUNGE', code: 'C-02', deck: 'DECK 7',
@@ -109,8 +109,8 @@ export const ROOMS = [
     denial: 'The Lounge is closed for a private crew event.',
     dlg: { sp: 'Ada', txt: "Game night. You in? Reyes keeps winning and it's starting to feel personal." },
     tint: '#9868c0',
-    bgImage: '/background/Lounge.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Lounge.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'bridge', label: 'BRIDGE', code: 'α-01', deck: 'COMMAND',
@@ -120,8 +120,8 @@ export const ROOMS = [
     denial: 'The Bridge is a restricted area. Captain Voss is not accepting visitors.',
     dlg: { sp: 'Voss', txt: "I've been watching your work orders, Mechanic. Sit down. We need to talk about Sub-Level 3." },
     tint: '#9080cc',
-    bgImage: '/background/Bridge.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Bridge.png',
+    sealedImage:'/background/Blast-Door.png',
   },
   {
     id: 'maint_bay', label: 'MAINT. BAY', code: 'F-01', deck: 'DECK 4',
@@ -131,8 +131,8 @@ export const ROOMS = [
     denial: 'The Maintenance Bay is locked down for a diagnostic cycle.',
     dlg: { sp: 'MAINT-SYS', txt: 'DIAGNOSTIC COMPLETE — INTEGRITY: 94.7% — ANOMALY LOGGED: SUB-LEVEL 3 — CLASSIFICATION: [REDACTED]' },
     tint: '#40a860',
-    bgImage: '/background/Maintenance-Bay.webp',
-    sealedImage:'/background/Blast-Door.webp',
+    bgImage: '/background/Maintenance-Bay.png',
+    sealedImage:'/background/Blast-Door.png',
   },
 ]
 
