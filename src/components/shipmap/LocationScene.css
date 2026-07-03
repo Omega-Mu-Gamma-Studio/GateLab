@@ -1,0 +1,192 @@
+/* Same slot the grid occupies (16/9, rounded, bordered) so swapping
+   grid <-> scene never reflows the page around it. */
+.loc-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  animation: loc-scene-in 0.25s ease-out;
+}
+
+@keyframes loc-scene-in {
+  from { opacity: 0; transform: scale(1.02); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Placeholder-only scanline texture — swapped out the moment a real
+   bgImage/sealedImage is set on the room. */
+.loc-scene-scanlines {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.025) 0px,
+    rgba(255, 255, 255, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+/* Top-dark / bottom-dark gradient so heading text and the docked
+   dialogue panel stay readable over any background. */
+.loc-scene-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 12, 0.6) 0%,
+    rgba(2, 6, 12, 0.05) 22%,
+    rgba(2, 6, 12, 0.05) 55%,
+    rgba(2, 6, 12, 0.85) 100%
+  );
+  pointer-events: none;
+}
+
+.loc-scene-back {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: #eaf4fb;
+  background: rgba(5, 13, 24, 0.6);
+  border: 0.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 6px 11px;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.15s, background 0.15s;
+}
+.loc-scene-back:hover,
+.loc-scene-back:focus-visible {
+  border-color: var(--room-color);
+  background: rgba(5, 13, 24, 0.85);
+  outline: none;
+}
+
+.loc-scene-heading {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.loc-scene-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #eaf4fb;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+.loc-scene-code {
+  margin-top: 2px;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: #a8c8dc;
+  opacity: 0.85;
+}
+
+.loc-scene-npc {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--npc-color);
+}
+.loc-scene-npc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #080f1c;
+  border: 1.5px solid var(--npc-color);
+}
+
+.loc-scene-locked {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: #7a8a9a;
+}
+
+.loc-scene-begin {
+  position: absolute;
+  bottom: 92px;
+  right: 16px;
+  z-index: 5;
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--room-color);
+  background: #07111c;
+  border: 0.5px solid color-mix(in srgb, var(--room-color) 55%, transparent);
+  border-radius: 4px;
+  padding: 7px 13px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.loc-scene-begin:hover,
+.loc-scene-begin:focus-visible {
+  background: color-mix(in srgb, var(--room-color) 18%, #07111c);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--room-color) 35%, transparent);
+  outline: none;
+}
+
+.loc-scene-pda {
+  position: absolute;
+  bottom: 92px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 8.5px;
+  letter-spacing: 0.15em;
+  color: #ffb3ba;
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: rgba(10, 4, 5, 0.72);
+  border: 1px solid rgba(255, 77, 94, 0.55);
+  backdrop-filter: blur(6px);
+  animation: loc-scene-pda-pulse 2.2s ease-in-out infinite;
+  transition: border-color 0.15s, background 0.15s;
+}
+.loc-scene-pda:hover,
+.loc-scene-pda:focus-visible {
+  border-color: rgba(255, 77, 94, 0.95);
+  background: rgba(255, 77, 94, 0.15);
+  outline: none;
+}
+@keyframes loc-scene-pda-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(255, 77, 94, 0.28); }
+  50%      { box-shadow: 0 0 28px rgba(255, 77, 94, 0.55); }
+}
+
+.loc-scene-dialogue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  padding: 14px 18px;
+  background: rgba(5, 13, 24, 0.82);
+  backdrop-filter: blur(6px);
+  border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+}

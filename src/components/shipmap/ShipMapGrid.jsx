@@ -16,7 +16,7 @@ import { useState, useRef } from 'react'
 import { ROOMS, CORRIDORS, GRID_COLS, GRID_ROWS, VIEW_W, VIEW_H, nodeCenter, isRoomOpen } from './shipMapData'
 import './ShipMapGrid.css'
 
-export default function ShipMapGrid({ activeFlags, selectedId, onSelect, onEnterWorkstation }) {
+export default function ShipMapGrid({ activeFlags, onSelectScene, onEnterWorkstation }) {
   const [hoverId, setHoverId] = useState(null)
   const rootRef = useRef(null)
 
@@ -27,7 +27,7 @@ export default function ShipMapGrid({ activeFlags, selectedId, onSelect, onEnter
       onEnterWorkstation(room)
       return
     }
-    onSelect(room)
+    onSelectScene(room.id)
   }
 
   return (
@@ -61,12 +61,11 @@ export default function ShipMapGrid({ activeFlags, selectedId, onSelect, onEnter
       >
         {ROOMS.map(room => {
           const open = isRoomOpen(room, activeFlags)
-          const isSel = selectedId === room.id
           return (
             <button
               key={room.id}
               type="button"
-              className={`smg-room${open ? '' : ' is-locked'}${isSel ? ' is-selected' : ''}${room.isWork ? ' is-work' : ''}`}
+              className={`smg-room${open ? '' : ' is-locked'}${room.isWork ? ' is-work' : ''}`}
               style={{
                 gridColumn: room.col + 1,
                 gridRow: room.row + 1,

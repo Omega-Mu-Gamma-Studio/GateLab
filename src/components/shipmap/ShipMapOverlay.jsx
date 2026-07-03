@@ -5,15 +5,21 @@
  * when mapOpen is false — same pattern as PDA.jsx. Lets the player check
  * the Ship Map mid-lesson without losing their place in the Workspace.
  *
- * Entering the Workstation from here behaves exactly like clicking it on
- * the full ShipMap page: goToUnit() resumes at the player's first
- * incomplete lesson. The overlay just closes itself afterward.
+ * Renders either the grid or a LocationScene, exactly like the full
+ * ShipMap page — `activeScene` lives in pdaStore, so the page and this
+ * overlay are always in sync and can never show a scene at the same time.
+ *
+ * This is the path where "just peeking mid-lesson" actually happens, so
+ * entering the Workstation here goes through safeEnterWorkstation(): if
+ * you're already in the target unit, it just closes the map instead of
+ * re-firing goToUnit() and silently resetting your current lesson's phase.
  */
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLessonStore } from '../../store/lessonStore'
 import usePdaStore from '../../store/pdaStore'
 import ShipMapGrid from './ShipMapGrid'
-import RoomDialoguePanel from './RoomDialoguePanel'
+import LocationScene from './LocationScene'
+import { ROOMS, safeEnterWorkstation } from './shipMapData'
 
 export default function ShipMapOverlay() {
   const { goToUnit, activeUnitId } = useLessonStore()
@@ -22,10 +28,15 @@ export default function ShipMapOverlay() {
   const closeMap = usePdaStore(s => s.closeMap)
   const storyFlags = usePdaStore(s => s.storyFlags)
   const pdaOpen = usePdaStore(s => s.pdaOpen)
-
-  const [selected, setSelected] = useState(null)
+  const activeScene = usePdaStore(s => s.activeScene)
+  const openScene = usePdaStore(s => s.openScene)
+  const closeScene = usePdaStore(s => s.closeScene)
+  const openPda = usePdaStore(s => s.openPda)
 
   const targetUnit = activeUnitId ?? 1
+  const resuming = activeUnitId === targetUnit
+
+  const sceneRoom = ROOMS.find(r => r.id === activeScene) ?? null
 
   // "M" toggles the map — only in Story Mode, only while inside a lesson
   // (the full ShipMap page already covers the "outside a lesson" case),
@@ -53,11 +64,6 @@ export default function ShipMapOverlay() {
   }, [mapOpen, closeMap])
 
   if (!mapOpen) return null
-
-  function handleEnterWorkstation() {
-    goToUnit(targetUnit)
-    closeMap()
-  }
 
   return (
     <div
@@ -103,19 +109,25 @@ export default function ShipMapOverlay() {
 
         <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.12)', marginBottom: '14px' }} />
 
-        <ShipMapGrid
-          activeFlags={storyFlags}
-          selectedId={selected?.id ?? null}
-          onSelect={setSelected}
-          onEnterWorkstation={handleEnterWorkstation}
-        />
-
-        <div style={{
-          marginTop: '14px', minHeight: '78px', padding: '14px 18px',
-          background: '#050d18', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '6px',
-        }}>
-          <RoomDialoguePanel room={selected} activeFlags={storyFlags} />
-        </div>
+        {sceneRoom ? (
+          <LocationScene
+            room={sceneRoom}
+            activeFlags={storyFlags}
+            onBack={closeScene}
+            resuming={resuming}
+            onOpenPda={() => { closeMap(); openPda() }}
+            onBeginShift={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, () => {
+              closeScene()
+              closeMap()
+            })}
+          />
+        ) : (
+          <ShipMapGrid
+            activeFlags={storyFlags}
+            onSelectScene={openScene}
+            onEnterWorkstation={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, closeMap)}
+          />
+        )}
       </div>
     </div>
   )
