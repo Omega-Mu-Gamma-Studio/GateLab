@@ -30,7 +30,6 @@ import { useLessonStore } from '../../store/lessonStore'
 import usePdaStore from '../../store/pdaStore'
 import { getPinWorldPos, getAllPins } from '../gates/GatePin'
 import { hitTestPin } from '../../engine/WireRouter'
-import { generateTruthTable, truthTableToMarkdown } from '../../engine/TruthTable'
 
 const GATE_TYPES = new Set(['AND','OR','NOT','NAND','NOR','XOR','XNOR'])
 const SNAP_RADIUS = 24   // px — how close pointer must be to snap to a pin
@@ -108,9 +107,6 @@ export default function GateCanvas() {
 
   // Track pointer position for snap feedback on OutputNode
   const [pointerPos, setPointerPos] = useState(null)
-
-  // Which OUTPUT node's truth-table button is mid-"✓ copied" flash, if any
-  const [copiedNodeId, setCopiedNodeId] = useState(null)
 
   const { activeUnitId, activeLessonIdx, narrative, meta, nextLesson, goHome } = useLessonStore()
   const storyMode = usePdaStore(s => s.storyMode)
@@ -223,24 +219,6 @@ export default function GateCanvas() {
     startDragWire(nodeId, fromPos)
   }
 
-  // ── Copy-as-truth-table: sweep every INPUT node, copy markdown ───────────
-  // Available in any phase — this is a study aid, not a wiring action, so
-  // it isn't gated behind isTryPhase the way wire drawing is.
-  async function handleCopyTruthTable(outputNodeId) {
-    const table = generateTruthTable(nodes, wires, outputNodeId)
-    if (!table) return
-    const markdown = truthTableToMarkdown(table)
-    try {
-      await navigator.clipboard.writeText(markdown)
-    } catch {
-      // Clipboard API can be blocked (insecure origin, permissions) — the
-      // flash still fires below so the click doesn't feel dead, and the
-      // table was still generated correctly even if it couldn't be copied.
-    }
-    setCopiedNodeId(outputNodeId)
-    setTimeout(() => setCopiedNodeId(id => (id === outputNodeId ? null : id)), 1400)
-  }
-
   // ── Is this OUTPUT node currently a snap target? ─────────────────────────
   function isSnapTarget(node) {
     return getSnapPinIndex(node) !== -1
@@ -291,8 +269,6 @@ export default function GateCanvas() {
           value={outVal}
           theme={theme}
           snapTarget={!!dragWire && isSnapTarget(node)}
-          onCopyTruthTable={() => handleCopyTruthTable(node.id)}
-          copied={copiedNodeId === node.id}
         />
       )
     }

@@ -148,11 +148,7 @@ export function InputNode({ node, value, onClick, onOutputPinClick, theme, selec
 
 // ── OUTPUT node ────────────────────────────────────────────────────────────
 // LED circle. Glows green when signal HIGH. Input pin visible for snap feedback.
-// `onCopyTruthTable` (optional) renders a small "⧉" button above the LED that
-// sweeps every INPUT node through true/false and copies a markdown truth
-// table to the clipboard — see GateCanvas.handleCopyTruthTable. `copied`
-// flashes the button to confirm the copy landed.
-export function OutputNode({ node, value, theme, snapTarget, onCopyTruthTable, copied }) {
+export function OutputNode({ node, value, theme, snapTarget }) {
   const sigHigh = theme?.accent || '#00ff88'
   const col    = sigColor(value, theme)
   const fill   = value ? `${sigHigh}33` : (theme?.surface || '#111411')
@@ -165,41 +161,8 @@ export function OutputNode({ node, value, theme, snapTarget, onCopyTruthTable, c
   const pinX = -14
   const pinY = 0
 
-  // Truth-table copy button — small pill above the LED, out of the way of
-  // the input stub and the value label below.
-  const btnW = 22
-  const btnH = 15
-  const btnX = -btnW / 2
-  const btnY = -LED_R - btnH - 6
-
-  function handleCopyClick(e) {
-    e.cancelBubble = true
-    onCopyTruthTable?.()
-  }
-
   return (
     <Group x={node.x} y={node.y}>
-      {onCopyTruthTable && (
-        <Group onClick={handleCopyClick} onTap={handleCopyClick}>
-          <Rect
-            x={btnX} y={btnY} width={btnW} height={btnH}
-            cornerRadius={4}
-            fill={copied ? `${sigHigh}33` : (theme?.surface || '#111411')}
-            stroke={copied ? sigHigh : (theme?.border || 'rgba(255,255,255,0.25)')}
-            strokeWidth={1}
-            hitStrokeWidth={4}
-          />
-          <Text
-            x={btnX} y={btnY} width={btnW} height={btnH}
-            text={copied ? '✓' : '⧉'}
-            fontSize={copied ? 10 : 9}
-            fontFamily="'JetBrains Mono', monospace"
-            fill={copied ? sigHigh : (theme?.textMuted || '#4a5248')}
-            align="center" verticalAlign="middle"
-            listening={false}
-          />
-        </Group>
-      )}
       {/* Input stub */}
       <Line
         points={[pinX, pinY, 0, pinY]}
