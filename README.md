@@ -2,7 +2,7 @@
 
 **A browser-based digital logic learning environment for CS22303 — Digital Principles and System Design**
 
-Built by [Omega Mu Gamma Studio](https://github.com/Omega-Mu-Gamma-Studio) · an eight-tool student-built open-source studio
+Built by [Omega Mu Gamma Studio](https://github.com/Omega-Mu-Gamma-Studio) · a student-built open-source studio
 
 ---
 
@@ -47,9 +47,9 @@ Ten rooms across four decks, connected by corridors, most of them locked behind 
 
 One thing worth calling out because it was a real bug until recently: walking back to the map and re-entering the Workstation used to always restart you at Lesson 1 of the unit, no matter how far you'd gotten. It now resumes at your first incomplete lesson, checked against actual save progress — not against how many times you'd clicked "Next."
 
-### Room art — placeholder now, real stills later, on purpose
+### Room art — shipped
 
-None of the rooms have real background art yet. Rather than leave that as a gap or fake it with a stock image, each room renders a generated CSS "viewport" — a tinted gradient unique to that room, a faint scanline texture, and a small tag that plainly says there's no visual feed yet. It's built so that dropping in a real background photo per room later is a one-line change, not a rebuild: fill in a room's `bgImage` path and the panel switches straight from placeholder to photo with nothing else touched.
+This used to be a placeholder-only system; it isn't anymore. All ten rooms now render real background art — a dedicated still per room (Quarters, Mess Hall, Engine Room, Observation Deck, Hydro-Pool, Workstation, Ada's Quarters, Lounge, Bridge, Maintenance Bay), plus a shared "sealed" state image for rooms still locked behind a story flag. The generated CSS "viewport" — tinted gradient, scanline texture, no-feed tag — still exists in the code, but only as the fallback for a room that doesn't have art wired in yet, not as the default state anymore. Adding or swapping a room's art is still a one-line change: set its `bgImage` (and `sealedImage`) path in the room's data entry.
 
 ### Your Quarters — and the PDA
 
@@ -124,7 +124,7 @@ The workspace is a three-column layout, shared by both modes once you're inside 
 
 **Centre — Canvas + ControlPanel**: the interactive circuit area. The DialogueBox floats over the canvas as a draggable card — two voices mapped to phases: Ada (red, OBSERVE phase) and the assigned command speaker (amber, FAULT and REPAIR phases). Position resets per lesson. A small clipboard button in the top-left corner opens the TASKS app directly.
 
-**Right — InfoPanel** (always visible): a tabbed right column. Tabs shown depend on the active unit — Trivia everywhere, plus Verilog for Unit II+, and Timing/State for Units III/IV. Timing is a real, live waveform panel; State and Verilog are still placeholder tabs (see Key Features below).
+**Right — InfoPanel** (always visible): a tabbed right column. Trivia and **Truth Table** are available in every unit, regardless of the unit's own tab set — Truth Table only needs at least one INPUT and one OUTPUT node, so it works for any circuit on the canvas. On top of those, Units III/IV also get Timing and State. Timing and Truth Table are real, live panels; State is still a placeholder tab (see Key Features below). Verilog isn't an InfoPanel tab anymore — it moved to a dedicated **export modal**, opened from the TopBar.
 
 The Trivia tab is a shuffleable deck of circuit history facts and engineering jokes — designed for the moment right after a fault, when the student needs a second before trying again.
 
@@ -145,8 +145,10 @@ The Trivia tab is a shuffleable deck of circuit history facts and engineering jo
 - **Collapsible Sidebar** — lesson navigator that gets out of the way when you're working
 - **Three themes** — Matrix Green · Logic Gold · Signal Blue; persisted in localStorage
 - **Ship Map** — walkable room hub with story-flag-gated unlocks and progress-aware lesson resume
-- **Room art system** — placeholder viewports per room with a one-line override path for real background stills
+- **Room art** — real background stills for all ten rooms, plus a shared sealed-door image for locked rooms; the old CSS placeholder viewport survives only as a fallback for art that isn't wired in yet
 - **Timing Diagram** (Units III & IV) — live event-timeline waveform panel, backed by a simulation engine fix that made flip-flop feedback actually hold state instead of silently dropping its third input wire
+- **Truth Table panel** — available in every unit, not just some. Sweeps the whole circuit (every OUTPUT at once, so multi-output blocks like a full adder show SUM and CARRY together) and live-highlights the row matching your current input toggles as you flip them
+- **Verilog export** — a modal off the TopBar that generates Verilog from the current gate graph and lets you copy it out. This replaced an earlier plan to make Verilog an InfoPanel tab
 
 **On the roadmap, not yet shipped:**
 
@@ -156,8 +158,6 @@ The Trivia tab is a shuffleable deck of circuit history facts and engineering jo
 - PLA/PAL Dot Matrix (Unit V)
 - Hamming Code Visualizer (Unit V)
 - Number System Visualizer (Unit I)
-- Auto-generated Verilog view from the gate graph
-- Real background art for every Story Mode room
 - 3-input gate wiring in the REPAIR phase (currently only pre-wired OBSERVE/FAULT phases benefit from the 3-input evaluator fix — dragging a wire to a gate's 3rd pin by hand isn't supported yet)
 
 ---
@@ -200,19 +200,30 @@ GateLab/
 │   │   │   └── NotesTab.jsx        # LOGS — auto-generated lesson lore entries
 │   │   │
 │   │   ├── ui/                     # Workspace UI
-│   │   │   ├── TopBar.jsx          # Fixed header: wordmark, breadcrumb, PDA button, theme picker
+│   │   │   ├── TopBar.jsx          # Fixed header: wordmark, breadcrumb, PDA button, theme picker, Verilog export launcher
 │   │   │   ├── Sidebar.jsx         # Collapsible left nav — unit/lesson list
 │   │   │   ├── ControlPanel.jsx    # Input toggles, simulate button, phase controls
-│   │   │   ├── InfoDrawer.jsx      # Permanent right panel: Timing/State/Verilog/Trivia tabs
+│   │   │   ├── InfoDrawer.jsx      # Permanent right panel: Timing/State/Truth Table/Trivia tabs
+│   │   │   ├── TruthTablePanel.jsx # Live, whole-circuit truth table — every unit, multi-output aware
+│   │   │   ├── VerilogExportModal.jsx # Generates Verilog from the gate graph, launched from TopBar
 │   │   │   ├── DialogueBox.jsx     # Floating draggable dialogue card (Ada / Command voices)
 │   │   │   ├── PlotBox.jsx         # Canvas corner shortcut button → opens TASKS app
 │   │   │   ├── PhaseIndicator.jsx  # OBSERVE → FAULT → REPAIR phase badge
 │   │   │   ├── OperatorStatus.jsx  # Persistent footer in InfoPanel
 │   │   │   ├── SuccessCard.jsx     # Lesson completion overlay
-│   │   │   └── TimingDiagram.jsx   # Live waveform panel for Units III & IV
+│   │   │   ├── TimingDiagram.jsx   # Live waveform panel for Units III & IV
+│   │   │   ├── StateDiagram.jsx    # Stub — roadmap, not yet built
+│   │   │   └── VerilogPanel.jsx    # Stub, unused — superseded by VerilogExportModal
+│   │   │
+│   │   ├── shipmap/                 # Story Mode — Ship Map hub
+│   │   │   ├── ShipMapGrid.jsx     # Top-down room grid, corridors, unlock state
+│   │   │   ├── ShipMapOverlay.jsx  # Modal shell wrapping the map
+│   │   │   ├── LocationScene.jsx   # Per-room background art (bgImage/sealedImage), CSS placeholder fallback
+│   │   │   ├── RoomDialoguePanel.jsx # Dialogue line from whoever's in the room
+│   │   │   └── shipMapData.js      # Room definitions: id, deck, unlock flag, bgImage, sealedImage
 │   │   │
 │   │   ├── canvas/                 # Circuit canvas components
-│   │   │   ├── GateCanvas.jsx      # Main schematic canvas — powers every lesson, both modes
+│   │   │   ├── GateCanvas.jsx      # Main schematic canvas — powers every lesson, both modes; pin-snap on drag
 │   │   │   ├── GateGallery.jsx     # Draggable gate palette
 │   │   │   └── WireLayer.jsx       # Wire drawing and routing
 │   │   │
@@ -222,7 +233,11 @@ GateLab/
 │   │   │   ├── GatePin.js / GateShape.jsx / SpecialNodes.jsx / gateGeometry.js
 │   │   │
 │   │   └── widgets/
-│   │       └── KMapWidget.jsx      # K-Map simplification, Send to Canvas (Unit I)
+│   │       ├── KMapWidget.jsx      # K-Map simplification, Send to Canvas (Unit I)
+│   │       ├── SevenSegDisplay.jsx # Stub — roadmap, not yet built
+│   │       ├── NumberVisualizer.jsx # Stub — roadmap, not yet built
+│   │       ├── HammingVisualizer.jsx # Stub — roadmap, not yet built
+│   │       └── KMapGrid.jsx        # Stub — roadmap, not yet built
 │   │
 │   ├── engine/                     # Simulation logic — no React, no Konva
 │   │   └── (graph evaluation, wire routing, and related pure-JS logic)
@@ -271,24 +286,36 @@ GateLab/
 
 ## Part of the Omega Mu Gamma Studio
 
-Omega Mu Gamma Studio is a student-built open-source studio building interactive learning tools for engineering and CS courses.
+Omega Mu Gamma Studio is a student-built open-source studio building interactive learning tools for engineering and CS courses — fourteen tools and counting.
+
+**Course-mapped simulators:**
 
 | Tool | Course | What it does |
 |------|--------|-------------|
-| [SeeDS](https://github.com/Omega-Mu-Gamma-Studio/SeeDS) | CS | 3D C code visualizer and data structures debugger |
+| [SeeDS](https://github.com/Omega-Mu-Gamma-Studio/SeeDS) | CS22302 | 3D interactive data structures visualizer — the broken structure is the explanation |
 | [Java-Chan](https://github.com/Omega-Mu-Gamma-Studio/Java-Chan) | CS22301 | Anime-guided Java tutor — working code, broken code, hands-on practice |
 | [KMapX](https://github.com/Omega-Mu-Gamma-Studio/KMapX) | CS22303 | Boolean expression simplifier via Quine–McCluskey with don't-care support |
 | GateLab | CS22303 | Digital logic learning environment — *this repo* |
 | [ArchVisor](https://github.com/Omega-Mu-Gamma-Studio/ArchVisor) | CS22304 | Interactive Computer Organization & Architecture learning platform |
 | [EG Suite](https://github.com/Omega-Mu-Gamma-Studio/EG-Suite) | ME22201 | Interactive 3D Engineering Graphics simulator |
 | [ThermOS](https://github.com/Omega-Mu-Gamma-Studio/ThermOS) | ME22301 | Five browser-based modules for Engineering Thermodynamics |
-| [PlusPlus-Chan](https://github.com/Omega-Mu-Gamma-Studio/PlusPlus-Chan) | CS | Anime character-guided C++ tutor |
+
+**The "-Chan" language tutor family** — anime-mascot-guided, three-phase (working code / broken code / you try) lesson curricula, each building toward one real shipped project:
+
+| Tool | Focus | What you build by the end |
+|------|-------|-------------|
+| [PlusPlus-Chan](https://github.com/Omega-Mu-Gamma-Studio/PlusPlus-Chan) | C++ for game dev | A text-based RPG, 75 lessons |
+| [Python-Chan](https://github.com/Omega-Mu-Gamma-Studio/Python-Chan) | Python — Foundations, Data Science, ML | Three stacked 75-lesson courses, ending in a trained ML model |
+| [Rust-Chan](https://github.com/Omega-Mu-Gamma-Studio/Rust-Chan) | Rust — systems programming via CLI tools | A packaged async CLI tool, ready for crates.io |
+| [Go-Chan](https://github.com/Omega-Mu-Gamma-Studio/Go-Chan) | Go — backend APIs | A designed, tested, deployed REST backend |
+| [Sharp-Chan](https://github.com/Omega-Mu-Gamma-Studio/Sharp-Chan) | C# and Unity | A complete 2D game, shipped to Itch.io |
+| [Kotlin-Chan](https://github.com/Omega-Mu-Gamma-Studio/Kotlin-Chan) | Kotlin, Jetpack Compose, Android | A real Android app, shipped to the Play Store |
 
 ---
 
 ## Status
 
-> **Standard Mode is complete and usable** — all five units, all 41 lessons, playable start to finish, now backed by a simulation engine that correctly handles 3-input feedback gates and holds flip-flop state across recomputes. **Story Mode is the active focus** — the Ship Map, room system, and PDA-centric Quarters are being built out now, on top of the same lesson engine Standard Mode already proved out. The Timing Diagram (Units III & IV) is live. State diagrams, the memory grid, PLA/PAL matrix, and Hamming visualizer are still roadmap items, not yet built.
+> **Standard Mode is complete and usable** — all five units, all 41 lessons, playable start to finish, now backed by a simulation engine that correctly handles 3-input feedback gates and holds flip-flop state across recomputes. **Story Mode is the active focus** — the Ship Map now has real background art in every room, not placeholders, and the PDA-centric Quarters loop is built out on top of the same lesson engine Standard Mode already proved out. The Timing Diagram (Units III & IV) and the Truth Table panel (every unit) are both live, and Verilog export shipped as a TopBar modal. State diagrams, the memory grid, PLA/PAL matrix, Hamming visualizer, and number system visualizer are still roadmap items — empty stub files in the repo, not yet built.
 
 ---
 
