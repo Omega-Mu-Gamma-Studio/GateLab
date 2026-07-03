@@ -31,6 +31,8 @@ export const ROOMS = [
     denial: null,
     dlg: { sp: '[ ambient ]', txt: 'Your bunk. The PDA glows on the desk. The hull hums beneath the floor.' },
     tint: '#3fa8d8',
+    bgImage: null,        // drop a real photo path in here later
+    sealedImage: null,    // AI-generated "sealed door" art goes here later
     hasPda: true,
   },
   {
@@ -41,6 +43,8 @@ export const ROOMS = [
     denial: null,
     dlg: { sp: 'Ada', txt: "You're early. Or late. I can never tell with you. Sit — I'll grab your ration." },
     tint: '#d05858',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'engine', label: 'ENGINE ROOM', code: 'E-01', deck: 'DECK 4',
@@ -50,6 +54,8 @@ export const ROOMS = [
     denial: "Reyes has the room sealed for a maintenance sweep. The door doesn't budge.",
     dlg: { sp: 'Reyes', txt: "You're not supposed to be down here. But since you are — suit up." },
     tint: '#c07028',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'obs_deck', label: 'OBS. DECK', code: 'C-01', deck: 'DECK 7',
@@ -59,6 +65,8 @@ export const ROOMS = [
     denial: 'The Observation Deck is closed for maintenance. Try again after your first shift.',
     dlg: { sp: 'Ada', txt: "The Veil Nebula is visible on clear cycles. I used to come up here with... well. It's a good view." },
     tint: '#6f8fd8',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'hydro', label: 'HYDRO-POOL', code: 'D-03', deck: 'DECK 6',
@@ -68,6 +76,8 @@ export const ROOMS = [
     denial: 'The Hydro-Pool is on a scheduled maintenance cycle. Check back after your next shift.',
     dlg: { sp: 'Ada', txt: "Don't look so surprised. Even mechanics get shore leave. The water's warm — for now." },
     tint: '#2ea88a',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'workstation', label: 'WORKSTATION', code: 'B-02', deck: 'DECK 7',
@@ -77,6 +87,8 @@ export const ROOMS = [
     denial: null,
     dlg: { sp: 'MAINT-SYS', txt: 'TERMINAL ACTIVE — WORK ORDER QUEUE: 1 PENDING — AUTHENTICATE TO BEGIN SHIFT.' },
     tint: '#40a860',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'ada_quarters', label: "ADA'S QUARTERS", code: 'A-12', deck: 'DECK 7',
@@ -86,6 +98,8 @@ export const ROOMS = [
     denial: "Ada's door is shut. You can hear music from inside. Probably best not to interrupt.",
     dlg: { sp: 'Ada', txt: "...I wasn't expecting anyone. Come in. Mind the books — I keep meaning to sort them." },
     tint: '#c05840',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'lounge', label: 'LOUNGE', code: 'C-02', deck: 'DECK 7',
@@ -95,6 +109,8 @@ export const ROOMS = [
     denial: 'The Lounge is closed for a private crew event.',
     dlg: { sp: 'Ada', txt: "Game night. You in? Reyes keeps winning and it's starting to feel personal." },
     tint: '#9868c0',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'bridge', label: 'BRIDGE', code: 'α-01', deck: 'COMMAND',
@@ -104,6 +120,8 @@ export const ROOMS = [
     denial: 'The Bridge is a restricted area. Captain Voss is not accepting visitors.',
     dlg: { sp: 'Voss', txt: "I've been watching your work orders, Mechanic. Sit down. We need to talk about Sub-Level 3." },
     tint: '#9080cc',
+    bgImage: null,
+    sealedImage: null,
   },
   {
     id: 'maint_bay', label: 'MAINT. BAY', code: 'F-01', deck: 'DECK 4',
@@ -113,6 +131,8 @@ export const ROOMS = [
     denial: 'The Maintenance Bay is locked down for a diagnostic cycle.',
     dlg: { sp: 'MAINT-SYS', txt: 'DIAGNOSTIC COMPLETE — INTEGRITY: 94.7% — ANOMALY LOGGED: SUB-LEVEL 3 — CLASSIFICATION: [REDACTED]' },
     tint: '#40a860',
+    bgImage: null,
+    sealedImage: null,
   },
 ]
 
@@ -167,4 +187,18 @@ export function nodeCenter(id) {
 
 export function isRoomOpen(room, activeFlags) {
   return room.alwaysOpen || !!activeFlags[room.unlockFlag]
+}
+
+// ── "Looking ≠ doing" guard ───────────────────────────────────────────────
+// Only actually dispatch goToUnit() when the destination is a *different*
+// unit than the one already active. Prevents "just peeking" at Workstation
+// (e.g. from the mid-lesson map overlay) from resetting the current
+// lesson's phase back to 'work' — goToUnit() always resets phase, so
+// re-firing it while already inside the target unit would silently knock
+// the player back to phase 1 of the lesson they're mid-way through.
+export function safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, onDone) {
+  if (activeUnitId !== targetUnit) {
+    goToUnit(targetUnit)
+  }
+  onDone() // close the scene either way
 }

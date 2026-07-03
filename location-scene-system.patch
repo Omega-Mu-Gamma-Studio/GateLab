@@ -1,0 +1,1036 @@
+diff --git a/src/components/shipmap/LocationScene.css b/src/components/shipmap/LocationScene.css
+new file mode 100644
+index 0000000..58eb71e
+--- /dev/null
++++ b/src/components/shipmap/LocationScene.css
+@@ -0,0 +1,195 @@
++/* Fills whatever container it's mounted in — ShipMap.jsx and
++   ShipMapOverlay.jsx both give it the full viewport (minus TopBar), so
++   this ends up genuinely edge-to-edge, not a boxed-in widget. */
++.loc-scene {
++  position: relative;
++  width: 100%;
++  height: 100%;
++  overflow: hidden;
++  font-family: var(--mono, 'JetBrains Mono', monospace);
++  animation: loc-scene-in 0.25s ease-out;
++}
++
++@keyframes loc-scene-in {
++  from { opacity: 0; transform: scale(1.02); }
++  to   { opacity: 1; transform: scale(1); }
++}
++
++/* Placeholder-only scanline texture — swapped out the moment a real
++   bgImage/sealedImage is set on the room. */
++.loc-scene-scanlines {
++  position: absolute;
++  inset: 0;
++  background-image: repeating-linear-gradient(
++    0deg,
++    rgba(255, 255, 255, 0.025) 0px,
++    rgba(255, 255, 255, 0.025) 1px,
++    transparent 1px,
++    transparent 3px
++  );
++  pointer-events: none;
++}
++
++/* Top-dark / bottom-dark gradient so heading text and the docked
++   dialogue panel stay readable over any background. */
++.loc-scene-vignette {
++  position: absolute;
++  inset: 0;
++  background: linear-gradient(
++    180deg,
++    rgba(2, 6, 12, 0.6) 0%,
++    rgba(2, 6, 12, 0.05) 22%,
++    rgba(2, 6, 12, 0.05) 55%,
++    rgba(2, 6, 12, 0.85) 100%
++  );
++  pointer-events: none;
++}
++
++.loc-scene-back {
++  position: absolute;
++  top: 20px;
++  left: 24px;
++  z-index: 5;
++  appearance: none;
++  cursor: pointer;
++  font-family: inherit;
++  font-size: 9px;
++  letter-spacing: 0.15em;
++  color: #eaf4fb;
++  background: rgba(5, 13, 24, 0.6);
++  border: 0.5px solid rgba(255, 255, 255, 0.18);
++  border-radius: 4px;
++  padding: 6px 11px;
++  backdrop-filter: blur(4px);
++  transition: border-color 0.15s, background 0.15s;
++}
++.loc-scene-back:hover,
++.loc-scene-back:focus-visible {
++  border-color: var(--room-color);
++  background: rgba(5, 13, 24, 0.85);
++  outline: none;
++}
++
++.loc-scene-heading {
++  position: absolute;
++  top: 20px;
++  left: 50%;
++  transform: translateX(-50%);
++  text-align: center;
++}
++.loc-scene-label {
++  font-size: 12px;
++  font-weight: 700;
++  letter-spacing: 0.2em;
++  color: #eaf4fb;
++  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
++}
++.loc-scene-code {
++  margin-top: 2px;
++  font-size: 8px;
++  letter-spacing: 0.15em;
++  color: #a8c8dc;
++  opacity: 0.85;
++}
++
++.loc-scene-npc {
++  position: absolute;
++  top: 22px;
++  right: 24px;
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  font-size: 9px;
++  letter-spacing: 0.12em;
++  color: var(--npc-color);
++}
++.loc-scene-npc-dot {
++  width: 7px;
++  height: 7px;
++  border-radius: 50%;
++  background: #080f1c;
++  border: 1.5px solid var(--npc-color);
++}
++
++.loc-scene-locked {
++  position: absolute;
++  top: 50%;
++  left: 50%;
++  transform: translate(-50%, -50%);
++  font-size: 10px;
++  letter-spacing: 0.25em;
++  color: #7a8a9a;
++}
++
++.loc-scene-begin {
++  position: absolute;
++  bottom: 108px;
++  right: 24px;
++  z-index: 5;
++  appearance: none;
++  cursor: pointer;
++  font-family: inherit;
++  font-size: 9px;
++  letter-spacing: 0.12em;
++  color: var(--room-color);
++  background: #07111c;
++  border: 0.5px solid color-mix(in srgb, var(--room-color) 55%, transparent);
++  border-radius: 4px;
++  padding: 7px 13px;
++  transition: background 0.15s, box-shadow 0.15s;
++}
++.loc-scene-begin:hover,
++.loc-scene-begin:focus-visible {
++  background: color-mix(in srgb, var(--room-color) 18%, #07111c);
++  box-shadow: 0 0 16px color-mix(in srgb, var(--room-color) 35%, transparent);
++  outline: none;
++}
++
++.loc-scene-pda {
++  position: absolute;
++  bottom: 108px;
++  right: 24px;
++  z-index: 5;
++  display: flex;
++  align-items: center;
++  gap: 7px;
++  appearance: none;
++  cursor: pointer;
++  font-family: inherit;
++  font-size: 8.5px;
++  letter-spacing: 0.15em;
++  color: #ffb3ba;
++  padding: 7px 12px;
++  border-radius: 20px;
++  background: rgba(10, 4, 5, 0.72);
++  border: 1px solid rgba(255, 77, 94, 0.55);
++  backdrop-filter: blur(6px);
++  animation: loc-scene-pda-pulse 2.2s ease-in-out infinite;
++  transition: border-color 0.15s, background 0.15s;
++}
++.loc-scene-pda:hover,
++.loc-scene-pda:focus-visible {
++  border-color: rgba(255, 77, 94, 0.95);
++  background: rgba(255, 77, 94, 0.15);
++  outline: none;
++}
++@keyframes loc-scene-pda-pulse {
++  0%, 100% { box-shadow: 0 0 18px rgba(255, 77, 94, 0.28); }
++  50%      { box-shadow: 0 0 28px rgba(255, 77, 94, 0.55); }
++}
++
++.loc-scene-dialogue {
++  position: absolute;
++  left: 0;
++  right: 0;
++  bottom: 0;
++  z-index: 4;
++  padding: 20px clamp(24px, 6vw, 120px) 24px;
++  background: rgba(5, 13, 24, 0.82);
++  backdrop-filter: blur(6px);
++  border-top: 0.5px solid rgba(255, 255, 255, 0.08);
++}
++.loc-scene-dialogue > * {
++  max-width: 760px;
++  margin: 0 auto;
++}
+diff --git a/src/components/shipmap/LocationScene.jsx b/src/components/shipmap/LocationScene.jsx
+new file mode 100644
+index 0000000..9e43a6c
+--- /dev/null
++++ b/src/components/shipmap/LocationScene.jsx
+@@ -0,0 +1,93 @@
++/**
++ * LocationScene.jsx
++ *
++ * Full-screen "you are now standing in this room" scene. Replaces the old
++ * grid + 150px art strip + dialogue box combo with one immersive screen:
++ * background fills the frame, dialogue docks at the bottom, a small tab
++ * gets you back to the map.
++ *
++ * Sealed-door variant: if the room is locked, this renders the same shell
++ * but swaps in `sealedImage` and lets RoomDialoguePanel's own open/closed
++ * branch surface the room's `denial` line — no separate locked-scene
++ * component needed.
++ *
++ * LocationScene never imports useLessonStore or calls goToUnit itself.
++ * onBeginShift is passed in by whoever mounted the scene (ShipMap.jsx or
++ * ShipMapOverlay.jsx), and that caller decides — via safeEnterWorkstation —
++ * whether it's actually safe to navigate. This keeps the "looking ≠ doing"
++ * rule enforced at the boundary, not scattered through this component.
++ */
++import RoomDialoguePanel from './RoomDialoguePanel'
++import { isRoomOpen } from './shipMapData'
++import './LocationScene.css'
++
++export default function LocationScene({ room, activeFlags, onBack, onBeginShift, resuming, onOpenPda }) {
++  const open = isRoomOpen(room, activeFlags)
++  const tint = room.tint
++  // Sealed-door variant reuses the bgImage slot logic, just points at
++  // sealedImage instead when the room is locked.
++  const bgImage = open ? room.bgImage : room.sealedImage
++  const hasImage = !!bgImage
++
++  return (
++    <div
++      className="loc-scene"
++      style={{
++        '--room-color': tint,
++        background: hasImage
++          ? `center / cover no-repeat url(${bgImage})`
++          : `radial-gradient(ellipse at 40% 25%, ${tint}33 0%, transparent 60%),
++             linear-gradient(165deg, ${tint}22 0%, #050d18 70%)`,
++      }}
++    >
++      {/* scanline texture, placeholder-only — swaps out the moment bgImage/sealedImage is set */}
++      {!hasImage && <div className="loc-scene-scanlines" />}
++
++      <div className="loc-scene-vignette" />
++
++      {/* Back-to-map tab — always present, always in the same corner */}
++      <button type="button" className="loc-scene-back" onClick={onBack}>
++        ← MAP
++      </button>
++
++      {/* Room heading */}
++      <div className="loc-scene-heading">
++        <div className="loc-scene-label">{room.label}</div>
++        <div className="loc-scene-code">{room.deck} · {room.code}</div>
++      </div>
++
++      {/* NPC tag, only if open and someone's actually here */}
++      {open && room.npc && (
++        <div className="loc-scene-npc" style={{ '--npc-color': room.npcColor }}>
++          <span className="loc-scene-npc-dot" />
++          {room.npc}
++        </div>
++      )}
++
++      {!open && <div className="loc-scene-locked">ACCESS DENIED</div>}
++
++      {/* PDA hotspot — carried over from the old RoomArtPanel, only Quarters has it */}
++      {open && room.hasPda && (
++        <button type="button" className="loc-scene-pda" onClick={onOpenPda} title="Open PDA">
++          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff4d5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
++            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
++            <line x1="12" y1="18" x2="12.01" y2="18" />
++          </svg>
++          <span>OPEN PDA</span>
++        </button>
++      )}
++
++      {/* Workstation gets one extra action; nobody else does */}
++      {open && room.isWork && (
++        <button type="button" className="loc-scene-begin" onClick={onBeginShift}>
++          {resuming ? '▶ RESUME SHIFT' : '▶ BEGIN SHIFT'}
++        </button>
++      )}
++
++      {/* Dialogue, docked bottom — same shared component as before */}
++      <div className="loc-scene-dialogue">
++        <RoomDialoguePanel room={room} activeFlags={activeFlags} />
++      </div>
++    </div>
++  )
++}
+diff --git a/src/components/shipmap/ShipMapGrid.css b/src/components/shipmap/ShipMapGrid.css
+index 4e40dda..ae5c577 100644
+--- a/src/components/shipmap/ShipMapGrid.css
++++ b/src/components/shipmap/ShipMapGrid.css
+@@ -1,10 +1,8 @@
+ .smg-root {
+   position: relative;
+   width: 100%;
+-  aspect-ratio: 16 / 9;
+-  border-radius: 8px;
++  height: 100%;
+   background: #050d18;
+-  border: 0.5px solid rgba(255, 255, 255, 0.08);
+   overflow: visible;
+   background-image:
+     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+@@ -71,13 +69,6 @@
+   outline: none;
+ }
+ 
+-.smg-room.is-selected {
+-  border-color: var(--room-color);
+-  background: #0d1f32;
+-  box-shadow: 0 0 22px color-mix(in srgb, var(--room-color) 60%, transparent),
+-              inset 0 0 26px color-mix(in srgb, var(--room-color) 16%, transparent);
+-}
+-
+ .smg-room.is-work {
+   background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--room-color) 14%, transparent) 0%, #080f1c 70%);
+ }
+@@ -103,8 +94,7 @@
+   opacity: 0.55;
+   transition: opacity 0.15s;
+ }
+-.smg-room:hover .smg-corner,
+-.smg-room.is-selected .smg-corner { opacity: 1; }
++.smg-room:hover .smg-corner { opacity: 1; }
+ .smg-room.is-locked .smg-corner { border-color: #223549; opacity: 0.4; }
+ 
+ .smg-corner-tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }
+diff --git a/src/components/shipmap/ShipMapGrid.jsx b/src/components/shipmap/ShipMapGrid.jsx
+index 68dae8c..bfe90b0 100644
+--- a/src/components/shipmap/ShipMapGrid.jsx
++++ b/src/components/shipmap/ShipMapGrid.jsx
+@@ -16,7 +16,7 @@ import { useState, useRef } from 'react'
+ import { ROOMS, CORRIDORS, GRID_COLS, GRID_ROWS, VIEW_W, VIEW_H, nodeCenter, isRoomOpen } from './shipMapData'
+ import './ShipMapGrid.css'
+ 
+-export default function ShipMapGrid({ activeFlags, selectedId, onSelect, onEnterWorkstation }) {
++export default function ShipMapGrid({ activeFlags, onSelectScene, onEnterWorkstation }) {
+   const [hoverId, setHoverId] = useState(null)
+   const rootRef = useRef(null)
+ 
+@@ -27,7 +27,7 @@ export default function ShipMapGrid({ activeFlags, selectedId, onSelect, onEnter
+       onEnterWorkstation(room)
+       return
+     }
+-    onSelect(room)
++    onSelectScene(room.id)
+   }
+ 
+   return (
+@@ -61,12 +61,11 @@ export default function ShipMapGrid({ activeFlags, selectedId, onSelect, onEnter
+       >
+         {ROOMS.map(room => {
+           const open = isRoomOpen(room, activeFlags)
+-          const isSel = selectedId === room.id
+           return (
+             <button
+               key={room.id}
+               type="button"
+-              className={`smg-room${open ? '' : ' is-locked'}${isSel ? ' is-selected' : ''}${room.isWork ? ' is-work' : ''}`}
++              className={`smg-room${open ? '' : ' is-locked'}${room.isWork ? ' is-work' : ''}`}
+               style={{
+                 gridColumn: room.col + 1,
+                 gridRow: room.row + 1,
+diff --git a/src/components/shipmap/ShipMapOverlay.jsx b/src/components/shipmap/ShipMapOverlay.jsx
+index 8f6cc51..671784c 100644
+--- a/src/components/shipmap/ShipMapOverlay.jsx
++++ b/src/components/shipmap/ShipMapOverlay.jsx
+@@ -5,15 +5,26 @@
+  * when mapOpen is false — same pattern as PDA.jsx. Lets the player check
+  * the Ship Map mid-lesson without losing their place in the Workspace.
+  *
+- * Entering the Workstation from here behaves exactly like clicking it on
+- * the full ShipMap page: goToUnit() resumes at the player's first
+- * incomplete lesson. The overlay just closes itself afterward.
++ * Genuinely fills the whole viewport — no centered/padded modal box.
++ * Header info and the close button are floating HUD overlays, same
++ * pattern as the full ShipMap page, so the grid/scene underneath gets
++ * the entire screen instead of a boxed-in chunk of it.
++ *
++ * Renders either the grid or a LocationScene, exactly like the full
++ * ShipMap page — `activeScene` lives in pdaStore, so the page and this
++ * overlay are always in sync and can never show a scene at the same time.
++ *
++ * This is the path where "just peeking mid-lesson" actually happens, so
++ * entering the Workstation here goes through safeEnterWorkstation(): if
++ * you're already in the target unit, it just closes the map instead of
++ * re-firing goToUnit() and silently resetting your current lesson's phase.
+  */
+-import { useEffect, useState } from 'react'
++import { useEffect } from 'react'
+ import { useLessonStore } from '../../store/lessonStore'
+ import usePdaStore from '../../store/pdaStore'
+ import ShipMapGrid from './ShipMapGrid'
+-import RoomDialoguePanel from './RoomDialoguePanel'
++import LocationScene from './LocationScene'
++import { ROOMS, safeEnterWorkstation } from './shipMapData'
+ 
+ export default function ShipMapOverlay() {
+   const { goToUnit, activeUnitId } = useLessonStore()
+@@ -22,10 +33,15 @@ export default function ShipMapOverlay() {
+   const closeMap = usePdaStore(s => s.closeMap)
+   const storyFlags = usePdaStore(s => s.storyFlags)
+   const pdaOpen = usePdaStore(s => s.pdaOpen)
+-
+-  const [selected, setSelected] = useState(null)
++  const activeScene = usePdaStore(s => s.activeScene)
++  const openScene = usePdaStore(s => s.openScene)
++  const closeScene = usePdaStore(s => s.closeScene)
++  const openPda = usePdaStore(s => s.openPda)
+ 
+   const targetUnit = activeUnitId ?? 1
++  const resuming = activeUnitId === targetUnit
++
++  const sceneRoom = ROOMS.find(r => r.id === activeScene) ?? null
+ 
+   // "M" toggles the map — only in Story Mode, only while inside a lesson
+   // (the full ShipMap page already covers the "outside a lesson" case),
+@@ -54,67 +70,63 @@ export default function ShipMapOverlay() {
+ 
+   if (!mapOpen) return null
+ 
+-  function handleEnterWorkstation() {
+-    goToUnit(targetUnit)
+-    closeMap()
+-  }
+-
+   return (
+-    <div
+-      style={{
+-        position: 'fixed', inset: 0, zIndex: 250,
+-        background: 'rgba(3, 6, 11, 0.86)',
+-        backdropFilter: 'blur(10px)',
+-        WebkitBackdropFilter: 'blur(10px)',
+-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+-        padding: '5vh 4vw',
+-      }}
+-      onMouseDown={e => { if (e.target === e.currentTarget) closeMap() }}
+-    >
+-      <div style={{ width: '100%', maxWidth: '1180px', fontFamily: 'var(--mono)' }}>
+-
+-        {/* Header — deck label / title / close, echoing the reference art's HUD chrome */}
+-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+-          <div>
+-            <div style={{ fontSize: '9px', letterSpacing: '0.3em', color: '#3a5468', marginBottom: '3px' }}>
+-              AETHER-9 · DECK SCHEMATIC · LIVE OVERLAY
+-            </div>
+-            <div style={{ fontSize: '17px', letterSpacing: '0.18em', fontWeight: 500, color: '#eaf4fb' }}>
+-              SHIP MAP
+-            </div>
+-          </div>
+-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+-            <span style={{ fontSize: '9px', letterSpacing: '0.12em', color: '#3a5468' }}>
+-              ESC or M to close
+-            </span>
+-            <button
+-              onClick={closeMap}
+-              title="Close map"
+-              style={{
+-                width: '30px', height: '30px', borderRadius: '6px',
+-                border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)',
+-                color: '#8fb4cc', cursor: 'pointer', fontSize: '14px', lineHeight: 1,
+-              }}
+-            >
+-              ✕
+-            </button>
+-          </div>
+-        </div>
+-
+-        <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.12)', marginBottom: '14px' }} />
+-
++    <div style={{
++      position: 'fixed', inset: 0, zIndex: 250,
++      background: '#03060b',
++      fontFamily: 'var(--mono)',
++      overflow: 'hidden',
++    }}>
++      {sceneRoom ? (
++        <LocationScene
++          room={sceneRoom}
++          activeFlags={storyFlags}
++          onBack={closeScene}
++          resuming={resuming}
++          onOpenPda={() => { closeMap(); openPda() }}
++          onBeginShift={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, () => {
++            closeScene()
++            closeMap()
++          })}
++        />
++      ) : (
+         <ShipMapGrid
+           activeFlags={storyFlags}
+-          selectedId={selected?.id ?? null}
+-          onSelect={setSelected}
+-          onEnterWorkstation={handleEnterWorkstation}
++          onSelectScene={openScene}
++          onEnterWorkstation={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, closeMap)}
+         />
++      )}
+ 
+-        <div style={{
+-          marginTop: '14px', minHeight: '78px', padding: '14px 18px',
+-          background: '#050d18', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '6px',
+-        }}>
+-          <RoomDialoguePanel room={selected} activeFlags={storyFlags} />
++      {/* Header — HUD overlay, doesn't shrink the map's screen real estate */}
++      <div style={{
++        position: 'absolute', top: '20px', left: '24px', right: '24px',
++        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
++        pointerEvents: 'none', zIndex: 3,
++      }}>
++        <div>
++          <div style={{ fontSize: '9px', letterSpacing: '0.3em', color: '#3a5468', marginBottom: '3px', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++            AETHER-9 · DECK SCHEMATIC · LIVE OVERLAY
++          </div>
++          <div style={{ fontSize: '17px', letterSpacing: '0.18em', fontWeight: 500, color: '#eaf4fb', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++            SHIP MAP
++          </div>
++        </div>
++        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', pointerEvents: 'auto' }}>
++          <span style={{ fontSize: '9px', letterSpacing: '0.12em', color: '#3a5468', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++            ESC or M to close
++          </span>
++          <button
++            onClick={closeMap}
++            title="Close map"
++            style={{
++              width: '30px', height: '30px', borderRadius: '6px',
++              border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(5,13,24,0.6)',
++              color: '#8fb4cc', cursor: 'pointer', fontSize: '14px', lineHeight: 1,
++              backdropFilter: 'blur(4px)',
++            }}
++          >
++            ✕
++          </button>
+         </div>
+       </div>
+     </div>
+diff --git a/src/components/shipmap/shipMapData.js b/src/components/shipmap/shipMapData.js
+index 642beb3..4a03dbf 100644
+--- a/src/components/shipmap/shipMapData.js
++++ b/src/components/shipmap/shipMapData.js
+@@ -31,6 +31,8 @@ export const ROOMS = [
+     denial: null,
+     dlg: { sp: '[ ambient ]', txt: 'Your bunk. The PDA glows on the desk. The hull hums beneath the floor.' },
+     tint: '#3fa8d8',
++    bgImage: null,        // drop a real photo path in here later
++    sealedImage: null,    // AI-generated "sealed door" art goes here later
+     hasPda: true,
+   },
+   {
+@@ -41,6 +43,8 @@ export const ROOMS = [
+     denial: null,
+     dlg: { sp: 'Ada', txt: "You're early. Or late. I can never tell with you. Sit — I'll grab your ration." },
+     tint: '#d05858',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'engine', label: 'ENGINE ROOM', code: 'E-01', deck: 'DECK 4',
+@@ -50,6 +54,8 @@ export const ROOMS = [
+     denial: "Reyes has the room sealed for a maintenance sweep. The door doesn't budge.",
+     dlg: { sp: 'Reyes', txt: "You're not supposed to be down here. But since you are — suit up." },
+     tint: '#c07028',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'obs_deck', label: 'OBS. DECK', code: 'C-01', deck: 'DECK 7',
+@@ -59,6 +65,8 @@ export const ROOMS = [
+     denial: 'The Observation Deck is closed for maintenance. Try again after your first shift.',
+     dlg: { sp: 'Ada', txt: "The Veil Nebula is visible on clear cycles. I used to come up here with... well. It's a good view." },
+     tint: '#6f8fd8',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'hydro', label: 'HYDRO-POOL', code: 'D-03', deck: 'DECK 6',
+@@ -68,6 +76,8 @@ export const ROOMS = [
+     denial: 'The Hydro-Pool is on a scheduled maintenance cycle. Check back after your next shift.',
+     dlg: { sp: 'Ada', txt: "Don't look so surprised. Even mechanics get shore leave. The water's warm — for now." },
+     tint: '#2ea88a',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'workstation', label: 'WORKSTATION', code: 'B-02', deck: 'DECK 7',
+@@ -77,6 +87,8 @@ export const ROOMS = [
+     denial: null,
+     dlg: { sp: 'MAINT-SYS', txt: 'TERMINAL ACTIVE — WORK ORDER QUEUE: 1 PENDING — AUTHENTICATE TO BEGIN SHIFT.' },
+     tint: '#40a860',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'ada_quarters', label: "ADA'S QUARTERS", code: 'A-12', deck: 'DECK 7',
+@@ -86,6 +98,8 @@ export const ROOMS = [
+     denial: "Ada's door is shut. You can hear music from inside. Probably best not to interrupt.",
+     dlg: { sp: 'Ada', txt: "...I wasn't expecting anyone. Come in. Mind the books — I keep meaning to sort them." },
+     tint: '#c05840',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'lounge', label: 'LOUNGE', code: 'C-02', deck: 'DECK 7',
+@@ -95,6 +109,8 @@ export const ROOMS = [
+     denial: 'The Lounge is closed for a private crew event.',
+     dlg: { sp: 'Ada', txt: "Game night. You in? Reyes keeps winning and it's starting to feel personal." },
+     tint: '#9868c0',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'bridge', label: 'BRIDGE', code: 'α-01', deck: 'COMMAND',
+@@ -104,6 +120,8 @@ export const ROOMS = [
+     denial: 'The Bridge is a restricted area. Captain Voss is not accepting visitors.',
+     dlg: { sp: 'Voss', txt: "I've been watching your work orders, Mechanic. Sit down. We need to talk about Sub-Level 3." },
+     tint: '#9080cc',
++    bgImage: null,
++    sealedImage: null,
+   },
+   {
+     id: 'maint_bay', label: 'MAINT. BAY', code: 'F-01', deck: 'DECK 4',
+@@ -113,6 +131,8 @@ export const ROOMS = [
+     denial: 'The Maintenance Bay is locked down for a diagnostic cycle.',
+     dlg: { sp: 'MAINT-SYS', txt: 'DIAGNOSTIC COMPLETE — INTEGRITY: 94.7% — ANOMALY LOGGED: SUB-LEVEL 3 — CLASSIFICATION: [REDACTED]' },
+     tint: '#40a860',
++    bgImage: null,
++    sealedImage: null,
+   },
+ ]
+ 
+@@ -168,3 +188,17 @@ export function nodeCenter(id) {
+ export function isRoomOpen(room, activeFlags) {
+   return room.alwaysOpen || !!activeFlags[room.unlockFlag]
+ }
++
++// ── "Looking ≠ doing" guard ───────────────────────────────────────────────
++// Only actually dispatch goToUnit() when the destination is a *different*
++// unit than the one already active. Prevents "just peeking" at Workstation
++// (e.g. from the mid-lesson map overlay) from resetting the current
++// lesson's phase back to 'work' — goToUnit() always resets phase, so
++// re-firing it while already inside the target unit would silently knock
++// the player back to phase 1 of the lesson they're mid-way through.
++export function safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, onDone) {
++  if (activeUnitId !== targetUnit) {
++    goToUnit(targetUnit)
++  }
++  onDone() // close the scene either way
++}
+diff --git a/src/pages/ShipMap.jsx b/src/pages/ShipMap.jsx
+index dddc0cf..b7b1d57 100644
+--- a/src/pages/ShipMap.jsx
++++ b/src/pages/ShipMap.jsx
+@@ -2,158 +2,52 @@
+  * ShipMap.jsx
+  *
+  * Story Mode navigation hub — the full-page version of the AETHER-9 deck
+- * schematic. Renders the same ShipMapGrid used by the fullscreen "press M"
+- * overlay (see components/shipmap/ShipMapOverlay.jsx), plus the room art
+- * viewport and dev flag toggles that only make sense on the full page.
++ * schematic. Fills the entire viewport below the TopBar edge-to-edge, no
++ * centered/padded column — the grid (or, once a room is selected, a full
++ * LocationScene) IS the page. Header info and dev-flag toggles are
++ * floating HUD overlays on top of the map, not stacked content that
++ * shrinks how much of the screen the map itself gets.
+  *
+- * The grid/corridor rendering itself lives in components/shipmap/ — this
+- * file just wires it up to the page's own state (selected room, dev flags)
+- * and the surrounding chrome (header, art panel, dialogue box).
++ * Renders either the grid or a LocationScene, never both — `activeScene`
++ * in pdaStore drives this, so the page and the "press M" overlay
++ * (ShipMapOverlay.jsx) are always in sync. When a scene is showing, the
++ * page's own header is hidden — LocationScene already has its own
++ * heading + back button, so there's no need for two.
+  */
+ 
+ import { useState } from 'react'
+ import { useLessonStore } from '../store/lessonStore'
+ import usePdaStore from '../store/pdaStore'
+ import ShipMapGrid from '../components/shipmap/ShipMapGrid'
+-import RoomDialoguePanel from '../components/shipmap/RoomDialoguePanel'
+-import { DEV_FLAGS } from '../components/shipmap/shipMapData'
++import LocationScene from '../components/shipmap/LocationScene'
++import { ROOMS, DEV_FLAGS, safeEnterWorkstation } from '../components/shipmap/shipMapData'
+ 
+-const C = { mono: "'Courier New', monospace" }
+-
+-// ── Room art panel ───────────────────────────────────────────────────────────
+-// Placeholder-first, override-ready. Until real background stills exist for
+-// a room, this renders a generated CSS "viewport" tinted per-room so each
+-// space still reads as a distinct place. The moment a room gets a real
+-// `bgImage` asset path, this panel swaps straight to the static image —
+-// no separate "real room" component to build later.
+-function RoomArtPanel({ room, open, openPda }) {
+-  if (!room) {
+-    return (
+-      <div style={{
+-        height: '150px', borderRadius: '6px', marginBottom: '10px',
+-        border: '0.5px solid var(--border)',
+-        background: '#050d18',
+-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+-      }}>
+-        <span style={{ fontSize: '9px', letterSpacing: '0.25em', color: '#162636', fontFamily: C.mono }}>
+-          NO FEED SELECTED
+-        </span>
+-      </div>
+-    )
+-  }
+-
+-  const tint = room.tint
+-  const bgImage = room.bgImage ?? null
+-  const hasImage = !!bgImage
+-
+-  return (
+-    <div style={{
+-      position: 'relative', height: '150px', borderRadius: '6px', marginBottom: '10px',
+-      overflow: 'hidden', border: '0.5px solid var(--border)',
+-      background: hasImage
+-        ? `center / cover no-repeat url(${bgImage})`
+-        : `radial-gradient(ellipse at 30% 20%, ${tint}2e 0%, transparent 55%),
+-           linear-gradient(165deg, ${tint}22 0%, #050d18 65%)`,
+-      filter: open ? 'none' : 'grayscale(0.6) brightness(0.5)',
+-      transition: 'filter 0.2s',
+-    }}>
+-      {!hasImage && (
+-        <div style={{
+-          position: 'absolute', inset: 0,
+-          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px)',
+-          pointerEvents: 'none',
+-        }} />
+-      )}
+-
+-      <div style={{
+-        position: 'absolute', inset: 0,
+-        background: 'linear-gradient(180deg, rgba(2,6,12,0.55) 0%, rgba(2,6,12,0.05) 30%, rgba(2,6,12,0.05) 65%, rgba(2,6,12,0.7) 100%)',
+-        pointerEvents: 'none',
+-      }} />
+-
+-      <div style={{ position: 'absolute', top: '10px', left: '14px' }}>
+-        <div style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#eaf4fb', fontFamily: C.mono, textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+-          {room.label}
+-        </div>
+-        <div style={{ fontSize: '7.5px', letterSpacing: '0.15em', color: '#a8c8dc', fontFamily: C.mono, opacity: 0.8 }}>
+-          {room.deck} · {room.code}
+-        </div>
+-      </div>
+-
+-      {!hasImage && (
+-        <div style={{
+-          position: 'absolute', top: '10px', right: '14px',
+-          fontSize: '7px', letterSpacing: '0.15em', color: '#3a5468',
+-          fontFamily: C.mono, border: '0.5px solid #16283a', borderRadius: '3px',
+-          padding: '2px 6px', background: 'rgba(5,13,24,0.5)',
+-        }}>
+-          NO VISUAL FEED — PLACEHOLDER
+-        </div>
+-      )}
+-
+-      {!open && (
+-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+-          <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#7a8a9a', fontFamily: C.mono }}>
+-            ACCESS DENIED
+-          </span>
+-        </div>
+-      )}
+-
+-      {room.hasPda && open && (
+-        <button
+-          onClick={openPda}
+-          title="Open PDA"
+-          style={{
+-            position: 'absolute', bottom: '10px', right: '12px',
+-            display: 'flex', alignItems: 'center', gap: '7px',
+-            padding: '7px 12px', borderRadius: '20px',
+-            background: 'rgba(10,4,5,0.72)', border: '1px solid rgba(255,77,94,0.55)',
+-            cursor: 'pointer', backdropFilter: 'blur(6px)',
+-            boxShadow: '0 0 18px rgba(255,77,94,0.28)',
+-            animation: 'pda-hotspot-pulse 2.2s ease-in-out infinite',
+-          }}
+-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,77,94,0.95)'; e.currentTarget.style.background = 'rgba(255,77,94,0.15)' }}
+-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,77,94,0.55)'; e.currentTarget.style.background = 'rgba(10,4,5,0.72)' }}
+-        >
+-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff4d5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+-            <line x1="12" y1="18" x2="12.01" y2="18"/>
+-          </svg>
+-          <span style={{ fontSize: '8.5px', letterSpacing: '0.15em', color: '#ffb3ba', fontFamily: C.mono }}>
+-            OPEN PDA
+-          </span>
+-        </button>
+-      )}
+-
+-      <style>{`
+-        @keyframes pda-hotspot-pulse {
+-          0%, 100% { box-shadow: 0 0 18px rgba(255,77,94,0.28); }
+-          50%      { box-shadow: 0 0 28px rgba(255,77,94,0.55); }
+-        }
+-      `}</style>
+-    </div>
+-  )
+-}
++// Must match App.jsx's TOPBAR_H (not exported from there, so kept in sync
++// by hand — same approach App.jsx already uses in a couple of places).
++const TOPBAR_H = '5vh'
+ 
+ // ── Component ────────────────────────────────────────────────────────────────
+ 
+ export default function ShipMap() {
+   const { goToUnit, activeUnitId } = useLessonStore()
+   const storyFlags = usePdaStore(s => s.storyFlags)
++  const activeScene = usePdaStore(s => s.activeScene)
++  const openScene = usePdaStore(s => s.openScene)
++  const closeScene = usePdaStore(s => s.closeScene)
+   const openPda = usePdaStore(s => s.openPda)
+ 
+   // Dev flag overrides — only visible/useful in dev builds
+   const [devFlags, setDevFlags] = useState(new Set())
+-  const [selected, setSelected] = useState(null)
+ 
+   // Combine real story flags + dev overrides
+   const activeFlags = { ...storyFlags }
+   for (const f of devFlags) activeFlags[f] = true
+ 
+-  const isOpen = (room) => room.alwaysOpen || !!activeFlags[room.unlockFlag]
+-
+   // Determine which unit the workstation should send the player to.
+   const targetUnit = activeUnitId ?? 1
++  const resuming = activeUnitId === targetUnit
++
++  const sceneRoom = ROOMS.find(r => r.id === activeScene) ?? null
+ 
+   function toggleDevFlag(f) {
+     setDevFlags(prev => {
+@@ -165,85 +59,84 @@ export default function ShipMap() {
+ 
+   return (
+     <div style={{
+-      minHeight: '100vh', padding: '80px 24px 40px',
+-      background: 'var(--bg)', fontFamily: 'var(--mono)',
++      position: 'relative',
++      width: '100%',
++      height: `calc(100vh - ${TOPBAR_H})`,
++      overflow: 'hidden',
++      background: 'var(--bg)',
++      fontFamily: 'var(--mono)',
+     }}>
+-      <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+-
+-        {/* Header */}
+-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+-          <div>
+-            <div style={{ fontSize: '9px', letterSpacing: '0.3em', color: 'var(--text-muted)', marginBottom: '3px' }}>
+-              AETHER-9 · DECK SCHEMATIC
+-            </div>
+-            <div style={{ fontSize: '16px', letterSpacing: '0.18em', fontWeight: 500, color: 'var(--text-h)' }}>
+-              SHIP MAP
+-            </div>
+-          </div>
+-          <div style={{ fontSize: '9px', letterSpacing: '0.12em', color: 'var(--text-muted)', textAlign: 'right', lineHeight: 1.7 }}>
+-            SHIFT END · STAND-DOWN<br />SELECT DESTINATION
+-          </div>
+-        </div>
+-
+-        <div style={{ height: '0.5px', background: 'var(--border-strong)', marginBottom: '12px' }} />
+-
+-        <ShipMapGrid
++      {sceneRoom ? (
++        <LocationScene
++          room={sceneRoom}
+           activeFlags={activeFlags}
+-          selectedId={selected?.id ?? null}
+-          onSelect={setSelected}
+-          onEnterWorkstation={() => goToUnit(targetUnit)}
++          onBack={closeScene}
++          resuming={resuming}
++          onOpenPda={() => openPda()}
++          onBeginShift={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, closeScene)}
+         />
+-
+-        {/* Room art panel — placeholder viewport now, real stills later */}
+-        <div style={{ marginTop: '10px' }}>
+-          <RoomArtPanel
+-            room={selected}
+-            open={selected ? isOpen(selected) : true}
+-            openPda={openPda}
++      ) : (
++        <>
++          <ShipMapGrid
++            activeFlags={activeFlags}
++            onSelectScene={openScene}
++            onEnterWorkstation={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, () => {})}
+           />
+-        </div>
+-
+-        {/* Dialogue box */}
+-        <div style={{
+-          minHeight: '88px',
+-          padding: '14px 18px',
+-          background: '#050d18',
+-          border: '0.5px solid var(--border)',
+-          borderRadius: '6px',
+-        }}>
+-          <RoomDialoguePanel room={selected} activeFlags={activeFlags} />
+-        </div>
+ 
+-        {/* Dev flag toggles — only render in dev */}
+-        {import.meta.env.DEV && (
+-          <>
+-            <div style={{ fontSize: '8px', letterSpacing: '0.2em', color: 'var(--text-muted)', margin: '12px 0 6px' }}>
+-              POC — UNLOCK FLAGS (dev)
++          {/* Header — HUD overlay, doesn't reserve dedicated page space */}
++          <div style={{
++            position: 'absolute', top: '20px', left: '24px', right: '24px',
++            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
++            pointerEvents: 'none', zIndex: 3,
++          }}>
++            <div>
++              <div style={{ fontSize: '9px', letterSpacing: '0.3em', color: 'var(--text-muted)', marginBottom: '3px', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++                AETHER-9 · DECK SCHEMATIC
++              </div>
++              <div style={{ fontSize: '16px', letterSpacing: '0.18em', fontWeight: 500, color: 'var(--text-h)', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++                SHIP MAP
++              </div>
+             </div>
+-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+-              {DEV_FLAGS.map(f => {
+-                const active = devFlags.has(f)
+-                return (
+-                  <button
+-                    key={f}
+-                    onClick={() => toggleDevFlag(f)}
+-                    style={{
+-                      background: active ? '#0a1e30' : 'transparent',
+-                      border: `0.5px solid ${active ? '#2a6fa8' : 'var(--border-strong)'}`,
+-                      color: active ? '#3fa8d8' : 'var(--text-muted)',
+-                      padding: '3px 10px', fontSize: '8px', letterSpacing: '0.1em',
+-                      cursor: 'pointer', borderRadius: '4px',
+-                      fontFamily: 'var(--mono)', transition: 'all 0.15s',
+-                    }}
+-                  >
+-                    {f}
+-                  </button>
+-                )
+-              })}
++            <div style={{ fontSize: '9px', letterSpacing: '0.12em', color: 'var(--text-muted)', textAlign: 'right', lineHeight: 1.7, textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++              SHIFT END · STAND-DOWN<br />SELECT DESTINATION
+             </div>
+-          </>
+-        )}
+-      </div>
++          </div>
++
++          {/* Dev flag toggles — floating HUD panel, only render in dev */}
++          {import.meta.env.DEV && (
++            <div style={{
++              position: 'absolute', bottom: '20px', left: '24px', maxWidth: '70%',
++              zIndex: 3,
++            }}>
++              <div style={{ fontSize: '8px', letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '6px', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
++                POC — UNLOCK FLAGS (dev)
++              </div>
++              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
++                {DEV_FLAGS.map(f => {
++                  const active = devFlags.has(f)
++                  return (
++                    <button
++                      key={f}
++                      onClick={() => toggleDevFlag(f)}
++                      style={{
++                        background: active ? '#0a1e30' : 'rgba(5,13,24,0.7)',
++                        border: `0.5px solid ${active ? '#2a6fa8' : 'var(--border-strong)'}`,
++                        color: active ? '#3fa8d8' : 'var(--text-muted)',
++                        padding: '3px 10px', fontSize: '8px', letterSpacing: '0.1em',
++                        cursor: 'pointer', borderRadius: '4px',
++                        fontFamily: 'var(--mono)', transition: 'all 0.15s',
++                        backdropFilter: 'blur(4px)',
++                      }}
++                    >
++                      {f}
++                    </button>
++                  )
++                })}
++              </div>
++            </div>
++          )}
++        </>
++      )}
+     </div>
+   )
+ }
+diff --git a/src/store/pdaStore.js b/src/store/pdaStore.js
+index a1b8c10..0d3d433 100644
+--- a/src/store/pdaStore.js
++++ b/src/store/pdaStore.js
+@@ -142,6 +142,7 @@ function defaultState() {
+     // Navigation
+     pdaOpen:      false,
+     mapOpen:      false,       // fullscreen Ship Map overlay (TopBar button / "M" key)
++    activeScene:  null,        // room id, or null = showing the map grid
+     pdaView:      'home',      // 'home' | 'app'
+     activeApp:    'comm',      // 'comm' | 'tasks' | 'gallery' | 'crew' | 'logs'
+     activeTab:    'messages',  // legacy compat — unused by new shell
+@@ -220,9 +221,19 @@ const usePdaStore = create(
+       // Fullscreen tactical map, summonable mid-lesson (TopBar button or
+       // the "M" key) without leaving the Workspace/lesson you're in.
+       openMap()   { set({ mapOpen: true }) },
+-      closeMap()  { set({ mapOpen: false }) },
++      // Also clears activeScene — otherwise reopening the overlay later
++      // would drop the player straight into whatever scene they last had
++      // open instead of the map grid.
++      closeMap()  { set({ mapOpen: false, activeScene: null }) },
+       toggleMap() { set(s => ({ mapOpen: !s.mapOpen })) },
+ 
++      // ── Location Scene open/close ─────────────────────────────────────
++      // activeScene is a room id ('quarters', 'mess', ...) or null.
++      // Works identically whether the map underneath is the full page or
++      // the mid-lesson overlay — neither needs to know which context it's in.
++      openScene(roomId)  { set({ activeScene: roomId }) },
++      closeScene()       { set({ activeScene: null }) },
++
+       goHome()   { set({ pdaView: 'home' }) },
+       openApp(app) { set({ pdaView: 'app', activeApp: app }) },
+       setTab(tab) {

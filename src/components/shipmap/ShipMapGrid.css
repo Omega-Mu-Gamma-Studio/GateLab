@@ -1,10 +1,8 @@
 .smg-root {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 8px;
+  height: 100%;
   background: #050d18;
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
   overflow: visible;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
@@ -71,13 +69,6 @@
   outline: none;
 }
 
-.smg-room.is-selected {
-  border-color: var(--room-color);
-  background: #0d1f32;
-  box-shadow: 0 0 22px color-mix(in srgb, var(--room-color) 60%, transparent),
-              inset 0 0 26px color-mix(in srgb, var(--room-color) 16%, transparent);
-}
-
 .smg-room.is-work {
   background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--room-color) 14%, transparent) 0%, #080f1c 70%);
 }
@@ -103,8 +94,7 @@
   opacity: 0.55;
   transition: opacity 0.15s;
 }
-.smg-room:hover .smg-corner,
-.smg-room.is-selected .smg-corner { opacity: 1; }
+.smg-room:hover .smg-corner { opacity: 1; }
 .smg-room.is-locked .smg-corner { border-color: #223549; opacity: 0.4; }
 
 .smg-corner-tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }

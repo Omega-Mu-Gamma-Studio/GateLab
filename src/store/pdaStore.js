@@ -142,6 +142,7 @@ function defaultState() {
     // Navigation
     pdaOpen:      false,
     mapOpen:      false,       // fullscreen Ship Map overlay (TopBar button / "M" key)
+    activeScene:  null,        // room id, or null = showing the map grid
     pdaView:      'home',      // 'home' | 'app'
     activeApp:    'comm',      // 'comm' | 'tasks' | 'gallery' | 'crew' | 'logs'
     activeTab:    'messages',  // legacy compat — unused by new shell
@@ -220,8 +221,18 @@ const usePdaStore = create(
       // Fullscreen tactical map, summonable mid-lesson (TopBar button or
       // the "M" key) without leaving the Workspace/lesson you're in.
       openMap()   { set({ mapOpen: true }) },
-      closeMap()  { set({ mapOpen: false }) },
+      // Also clears activeScene — otherwise reopening the overlay later
+      // would drop the player straight into whatever scene they last had
+      // open instead of the map grid.
+      closeMap()  { set({ mapOpen: false, activeScene: null }) },
       toggleMap() { set(s => ({ mapOpen: !s.mapOpen })) },
+
+      // ── Location Scene open/close ─────────────────────────────────────
+      // activeScene is a room id ('quarters', 'mess', ...) or null.
+      // Works identically whether the map underneath is the full page or
+      // the mid-lesson overlay — neither needs to know which context it's in.
+      openScene(roomId)  { set({ activeScene: roomId }) },
+      closeScene()       { set({ activeScene: null }) },
 
       goHome()   { set({ pdaView: 'home' }) },
       openApp(app) { set({ pdaView: 'app', activeApp: app }) },
