@@ -5,11 +5,16 @@
  * Each wire is a Konva Line using routeWire() for its points.
  *
  * Wire visual states:
- *   HIGH    → theme accent colour, 2px solid
- *   LOW     → dark dead green, 2px solid
- *   UNDEF   → muted grey, 2px dashed
- *   BROKEN  → red (#ff3b3b), 2px dashed
- *   GHOST   → accent colour, 1.5px dashed (drag in progress)
+ *   HIGH         → theme accent colour, 2px solid
+ *   LOW          → dark dead green, 2px solid
+ *   UNDEF        → muted grey, 2px dashed
+ *   BROKEN       → red (#ff3b3b), 2px dashed
+ *   GHOST search → accent colour @ low opacity, dashed, thin — drag in
+ *                  progress, not currently over a valid input pin
+ *   GHOST snap   → accent colour @ full opacity, mostly-solid, thicker,
+ *                  glowing — drag in progress AND over a pin it would
+ *                  connect to on release. Mirrors the per-pin highlight
+ *                  in GateShape/OutputNode so the wire and the pin agree.
  */
 
 import { Line, Circle } from 'react-konva'
@@ -44,7 +49,7 @@ function resolveWireEndpoints(wire, nodes) {
   return { fromPos, toPos }
 }
 
-export default function WireLayer({ nodes, wires, signals, dragWire, theme, onWireClick }) {
+export default function WireLayer({ nodes, wires, signals, dragWire, dragValid = false, theme, onWireClick }) {
   const sigHigh = theme?.accent || '#00ff88'
 
   return (
@@ -86,11 +91,14 @@ export default function WireLayer({ nodes, wires, signals, dragWire, theme, onWi
         <Line
           points={routeWire(dragWire.fromPos, dragWire.currentPos)}
           stroke={theme?.accent || sigHigh}
-          strokeWidth={1.5}
+          strokeWidth={dragValid ? 2.5 : 1.5}
           lineCap="round"
           lineJoin="round"
-          dash={[5, 4]}
-          opacity={0.7}
+          dash={dragValid ? [10, 2] : [5, 4]}
+          opacity={dragValid ? 1 : 0.7}
+          shadowColor={dragValid ? (theme?.accent || sigHigh) : undefined}
+          shadowBlur={dragValid ? 10 : 0}
+          shadowOpacity={0.6}
           listening={false}
         />
       )}

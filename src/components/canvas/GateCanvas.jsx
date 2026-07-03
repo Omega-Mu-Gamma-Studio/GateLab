@@ -221,13 +221,25 @@ export default function GateCanvas() {
 
   // ── Is this OUTPUT node currently a snap target? ─────────────────────────
   function isSnapTarget(node) {
-    if (!dragWire || !pointerPos) return false
+    return getSnapPinIndex(node) !== -1
+  }
+
+  // ── Which specific input pin (by index) on this node is in snap range? ───
+  // Returns -1 if none. Used to highlight exactly one pin on gates that have
+  // several inputs, instead of glowing the whole node for any nearby pin.
+  function getSnapPinIndex(node) {
+    if (!dragWire || !pointerPos) return -1
     const pins = getAllPins(node)
-    if (!pins.inputs?.length) return false
-    return pins.inputs.some(pin =>
+    if (!pins.inputs?.length) return -1
+    return pins.inputs.findIndex(pin =>
       Math.hypot(pin.x - pointerPos.x, pin.y - pointerPos.y) < SNAP_RADIUS
     )
   }
+
+  // ── Is the in-progress drag wire currently over ANY valid pin? ───────────
+  // Drives the ghost wire's color in WireLayer — bright/solid when it would
+  // snap somewhere on release, muted/dashed while it's still searching.
+  const dragWireIsValid = !!dragWire && nodes.some(isSnapTarget)
 
   // ── Node renderer ────────────────────────────────────────────────────────
   function renderNode(node) {
@@ -288,6 +300,7 @@ export default function GateCanvas() {
           onClick={() => selectNode(node.id)}
           onOutputPinClick={isTryPhase && !dragWire ? () => handleOutputPinClick(node.id) : undefined}
           onDragEnd={({ x, y }) => moveNode(node.id, x, y)}
+          snapPinIndex={dragWire ? getSnapPinIndex(node) : -1}
         />
       )
     }
@@ -340,6 +353,7 @@ export default function GateCanvas() {
                 wires={wires}
                 signals={signals}
                 dragWire={dragWire}
+                dragValid={dragWireIsValid}
                 theme={theme}
                 onWireClick={isTryPhase ? removeWire : undefined}
               />

@@ -17,6 +17,11 @@
  *   onClick           {fn}        Gate body click
  *   onOutputPinClick  {fn}        Output pin circle click — starts a wire
  *   theme             {object}    Tokens from useGateTheme()
+ *   snapPinIndex      {number}    Index into this gate's input pins currently
+ *                                 within snap range of an in-progress wire
+ *                                 drag, or -1 if none. Highlights that one
+ *                                 pin so the player gets feedback on exactly
+ *                                 where the wire will land before they let go.
  */
 
 import { Group, Path, Circle, Line, Text } from 'react-konva'
@@ -77,6 +82,7 @@ export default function GateShape({
   onClick,
   onOutputPinClick,
   theme,
+  snapPinIndex = -1,
 }) {
   const geo = GATE_GEOMETRY[type]
   if (!geo) return null
@@ -122,8 +128,12 @@ export default function GateShape({
         <Line
           key={`istub-${i}`}
           points={[stub.x1, stub.y1, stub.x2, stub.y2]}
-          stroke={sigColor(inputValues[i], t)}
-          strokeWidth={2} lineCap="round"
+          stroke={i === snapPinIndex ? sigHigh : sigColor(inputValues[i], t)}
+          strokeWidth={i === snapPinIndex ? 3 : 2}
+          lineCap="round"
+          shadowColor={i === snapPinIndex ? sigHigh : undefined}
+          shadowBlur={i === snapPinIndex ? 8 : 0}
+          shadowOpacity={0.7}
         />
       ))}
 
@@ -164,17 +174,22 @@ export default function GateShape({
       )}
 
       {/* Input pin dots */}
-      {geo.inputs.map((pin, i) => (
-        <Circle
-          key={`ipin-${i}`}
-          x={pin.x} y={pin.y}
-          radius={PIN_RADIUS_SM}
-          fill={sigColor(inputValues[i], t)}
-          shadowColor={inputValues[i] === true ? sigHigh : undefined}
-          shadowBlur={inputValues[i] === true ? 8 : 0}
-          shadowOpacity={0.8}
-        />
-      ))}
+      {geo.inputs.map((pin, i) => {
+        const isSnap = i === snapPinIndex
+        return (
+          <Circle
+            key={`ipin-${i}`}
+            x={pin.x} y={pin.y}
+            radius={isSnap ? PIN_RADIUS + 2 : PIN_RADIUS_SM}
+            fill={isSnap ? sigHigh : sigColor(inputValues[i], t)}
+            stroke={isSnap ? sigHigh : undefined}
+            strokeWidth={isSnap ? 2 : 0}
+            shadowColor={isSnap || inputValues[i] === true ? sigHigh : undefined}
+            shadowBlur={isSnap ? 14 : inputValues[i] === true ? 8 : 0}
+            shadowOpacity={0.85}
+          />
+        )
+      })}
 
       {/* Output pin dot — clickable to start a drag wire */}
       <Circle
