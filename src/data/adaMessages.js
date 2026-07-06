@@ -120,9 +120,9 @@ export const UNIT1_MESSAGES = [
         label:       "Redundancy logic. Makes sense why it fires on either.",
         adaResponse: "Right. Depends what you're protecting against. If you're afraid of *missing* a fault, OR is your gate. If you're afraid of *false* positives, AND is.\n\nNeither is right or wrong. It's about the failure mode you're designing for.",
         adaImage: {
-          src:     'ada:photo-or-gate-diagram',
+          src:     '/ada/photo-or-gate-diagram.png',
           caption: 'Quick sketch I made during training. Still have it.',
-          alt:     'Hand-drawn OR gate truth table on a maintenance log page',
+          alt:     'Hand-drawn OR gate truth table on a yellowed maintenance log page, pencil and ink',
         },
       },
       {
@@ -169,9 +169,9 @@ export const UNIT1_MESSAGES = [
         label:       "Universal gates. That's kind of wild to think about.",
         adaResponse: "Right? Every calculation, every sensor read, every door open — all of it is ultimately 'not both inputs are high.'\n\nI find that either deeply satisfying or deeply unsettling depending on the day.",
         adaImage: {
-          src:     'ada:photo-processor-board',
-          caption: 'Pulled this from a failed nav unit last cycle. All NAND arrays.',
-          alt:     'Close-up of a circuit board showing dense NAND gate arrays, green PCB with silver traces',
+          src:     '/ada/photo-coffee-station.png',
+          caption: 'The only thing keeping this station operational.',
+          alt:     'A cluttered, messy coffee station on the ship. A chipped mug with a faded sticker, a bag of black coffee, and a small succulent plant surviving under a harsh fluorescent light',
         },
       },
       {
@@ -306,9 +306,9 @@ export const UNIT1_MESSAGES = [
         label:       "Didn't expect to actually enjoy the theory part.",
         adaResponse: "The theory is the part that's yours. Anyone can follow a wiring diagram. Understanding *why* the diagram works — that's what you keep when the manual's gone.\n\nGlad you got something out of it.",
         adaImage: {
-          src:     'ada:photo-milky-way',
-          caption: 'Taken from the observation port last cycle. First clear view in weeks.',
-          alt:     'Long-exposure photo through a thick porthole window, stars streaked into arcs, the Milky Way band visible across the frame',
+          src:     '/ada/photo-milky-way.png',
+          caption: 'Had a minute to just… look up. Insane how big it all is.',
+          alt:     'A gorgeous, dark, deep-space photo taken through a porthole, showing a massive, swirling section of the Milky Way galaxy',
         },
       },
       {
@@ -338,9 +338,9 @@ export const UNIT1_MESSAGES = [
         label:       "Sometimes. Fragments. Like a conversation I can't quite hear.",
         adaResponse: "That's something, at least.\n\nI wasn't sure if asking was okay. I figured if you wanted to talk about it you would. But I've been wondering for a while.",
         adaImage: {
-          src:     'ada:photo-ada-face-first',
-          caption: "I took this in the break room. The lighting's bad but I look alive in it, which is more than I can say for most of my photos.",
-          alt:     'A slightly blurry selfie in a dim ship break room, warm overhead light catching half a face — brown skin, one visible dark eye, a small smile that looks surprised',
+          src:     '/ada/photo-ada-face-first.png',
+          caption: "I took this in the break room. The lighting's bad but I look alive in it...",
+          alt:     'A slightly blurry selfie in a dim ship break room. Warm overhead light catching half a face — brown skin, one visible dark eye, a small smile that looks surprised',
         },
       },
       {
@@ -583,7 +583,15 @@ export const UNIT2_MESSAGES = [
     id: 'u2-02-post', trigger: 'lesson:unit2-02', type: 'incoming',
     content: "XOR again, but slower this time — actually sit with it. HIGH only when inputs disagree. It's the 'are these different' gate.\n\nUseful for parity checking, for comparators, for the sum bit you just learned. It shows up everywhere once you know to look for it. Most of the interesting logic on this ship is XOR wearing a disguise.",
     replyOptions: replies(
-      { label: "The 'disagreement' framing actually helps.", adaResponse: "Good. That's the one thing to keep — everything else falls out of it." },
+      {
+        label: "The 'disagreement' framing actually helps.",
+        adaResponse: "Good. That's the one thing to keep — everything else falls out of it.\n\nGot a letter from home this cycle. Made me look at the wall again.",
+        adaImage: {
+          src:     '/ada/photo-wall-pictures.png',
+          caption: 'People from home. They still send mail, even this far out.',
+          alt:     'A wall in the dorm covered in taped-up polaroids of friends, family, and pets. Faded, slightly torn at the edges',
+        },
+      },
       { label: "Got it. Moving on.", adaResponse: "Full adder next. It's the half adder's more useful sibling." },
       { label: "Why does this ship need parity checking?", adaResponse: "Memory errors. Comm line noise. You'll see it again in Unit V — hold the question." }
     ),
@@ -596,7 +604,7 @@ export const UNIT2_MESSAGES = [
       {
         label: "Show me.",
         adaResponse: "Found this jammed behind a panel on Deck 9. Someone's handwriting — predates both of us by a long way.",
-        adaImage: { src: 'ada:photo-ripple-carry-schematic', caption: "Found this in the panel. Someone's handwriting from 2218. Predates us both.", alt: 'Ripple carry adder schematic on yellowed paper, coffee-stained' },
+        adaImage: { src: '/ada/photo-ripple-carry-schematic.png', caption: "Found this in the panel. Someone's handwriting from 2218. Predates us both.", alt: 'Ripple carry adder schematic on yellowed paper, coffee-stained' },
       },
       { label: "Ripple carry — sounds slow.", adaResponse: "It is, comparatively. Carry has to propagate through every stage. There are faster adders. We'll get there." },
       { label: "Cool. Next lesson?", adaResponse: "Carry propagation delay. The thing that makes ripple carry slow, explained properly." }
@@ -635,12 +643,12 @@ export const UNIT2_MESSAGES = [
 
   msg({
     id: 'u2-07-post', trigger: 'lesson:unit2-07', type: 'incoming',
-    content: "Multiplexer. Several data inputs, a set of select lines, one output. The select lines act like a switch — they choose which input gets routed through.\n\nWalked past the MUX routing panel on Deck 9 today doing an unrelated job and actually stopped to look at it for once.",
+    content: "Multiplexer. Several data inputs, a set of select lines, one output. The select lines act like a switch — they choose which input gets routed through.\n\nHaven't cleaned my workstation in a while, if I'm honest. Been meaning to.",
     replyOptions: replies(
       {
-        label: "What'd it look like?",
-        adaResponse: "Color-coded, every line traced cleanly. Somebody who wired this actually cared about the next person who'd have to read it.",
-        adaImage: { src: 'ada:photo-mux-routing-panel', caption: 'Whoever wired this actually cared. You can tell.', alt: 'MUX routing panel with color-coded wiring' },
+        label: "What's it look like over there?",
+        adaResponse: "Don't judge me. I'm fixing it. Eventually.",
+        adaImage: { src: '/ada/photo-desk-mess.png', caption: "This is my workstation right now. Don't judge me. I'm fixing it.", alt: 'A chaotic desk. Scribbled notes, a half-eaten ration bar, a toolkit, and a laptop with a glowing green terminal screen' },
       },
       { label: "Sounds like good craftsmanship stands out.", adaResponse: "It does. Most of what I work on doesn't look like that. This did." },
       { label: "Noted. Next lesson?", adaResponse: "Demultiplexer. Same idea, reversed — one input routed out to one of several outputs." }
@@ -771,7 +779,7 @@ export const UNIT3_MESSAGES = [
       {
         label: "Send it.",
         adaResponse: "This is what memory looks like before anyone calls it memory. Just two gates, feeding back into each other.",
-        adaImage: { src: 'ada:photo-airlock-nor-latch', caption: 'This is what memory looks like when it\'s hardware.', alt: 'Airlock panel with cross-coupled NOR latch visible inside' },
+        adaImage: { src: '/ada/photo-airlock-nor-latch.png', caption: 'This is what memory looks like when it\'s hardware.', alt: 'Airlock panel with cross-coupled NOR latch visible inside' },
       },
       { label: "So state is just feedback.", adaResponse: "Mostly, yes. The output feeds back into the input. That loop is the memory." },
       { label: "Why does the airlock need to remember anything?", adaResponse: "Has to know if the outer door cycled even if nobody's watching when it happens. Otherwise it can't enforce the safety interlock." }
@@ -820,15 +828,15 @@ export const UNIT3_MESSAGES = [
 
   msg({
     id: 'u3-06-post', trigger: 'lesson:unit3-06', type: 'incoming',
-    content: "Register. A bank of flip-flops, one per bit, all clocked together. The basic unit of working memory on this ship — and most others. Hold a value, update it on command, otherwise leave it alone.\n\nMade a ripple counter timing diagram a few shifts back, trying to explain all this to the last mechanic on this rotation. Want to see it? Fair warning, it didn't land at the time.",
+    content: "Register. A bank of flip-flops, one per bit, all clocked together. The basic unit of working memory on this ship — and most others. Hold a value, update it on command, otherwise leave it alone.\n\nOff duty I've been trying to learn something a lot less cooperative than a register, for what it's worth.",
     replyOptions: replies(
       {
-        label: "Show me anyway.",
-        adaResponse: "Made this to explain it to the last guy on this shift. Didn't help.\n\nMaybe it'll land better with you.",
-        adaImage: { src: 'ada:photo-ripple-counter-timing', caption: "Made this to explain it to the last guy on this shift. Didn't help.", alt: 'Ripple counter timing diagram, hand-traced on graph paper' },
+        label: "What's that?",
+        adaResponse: "My off-duty sound. Been trying to learn this chord for a week. It holds a value about as well as I do right now.",
+        adaImage: { src: '/ada/photo-red-dorm-guitar.png', caption: "My off-duty sound. Been trying to learn this chord for a week.", alt: "A close-up of an acoustic guitar leaning against a shelf, a sheet of chords taped to the wall above it, warm amber string lights glowing in the background" },
       },
       { label: "Counters are next, then?", adaResponse: "Right after this. Chained T flip-flops, basically — each one toggling off the one before it." },
-      { label: "Sorry it didn't land for him.", adaResponse: "Not every explanation works on every person. Wasn't really about the diagram." }
+      { label: "Hope it's going well.", adaResponse: "It's not. But thanks." }
     ),
   }),
 
@@ -976,7 +984,7 @@ export const UNIT4_MESSAGES = [
       {
         label: "Show me what it looked like.",
         adaResponse: "One nanosecond. That's the margin. Caught it logging.",
-        adaImage: { src: 'ada:photo-oscilloscope-glitch', caption: "One nanosecond. That's the margin. Caught it logging.", alt: 'Oscilloscope readout showing a race condition glitch' },
+        adaImage: { src: '/ada/photo-oscilloscope-glitch.png', caption: "One nanosecond. That's the margin. Caught it logging.", alt: 'Oscilloscope readout showing a race condition glitch' },
       },
       { label: "How do you even catch something that fast?", adaResponse: "Logging hardware running faster than the circuit you're watching. You're not catching the glitch in real time — you're catching its shadow." },
       { label: "Did it cause a real problem?", adaResponse: "Not that time. Caught it before it propagated anywhere that mattered. Not every shift goes that way." }
@@ -1000,7 +1008,7 @@ export const UNIT4_MESSAGES = [
       {
         label: "What does an entry like that actually look like?",
         adaResponse: "Here's one of mine.",
-        adaImage: { src: 'ada:photo-maint-log-entry', caption: 'Shift covered. No incidents. — A.', alt: 'A maintenance log entry, handwritten. One line: Shift covered. No incidents. — A.' },
+        adaImage: { src: '/ada/photo-maint-log-entry.png', caption: 'Shift covered. No incidents. — A.', alt: 'A maintenance log entry, handwritten. One line: Shift covered. No incidents. — A.' },
         rapportGate: 'cold',
       },
       { label: "You sound like you're talking about something specific.", adaResponse: "Maybe. Let's just get through the lesson." },
@@ -1015,7 +1023,7 @@ export const UNIT4_MESSAGES = [
       {
         label: "Show me the after.",
         adaResponse: "After. Took four hours. Looked worse before.",
-        adaImage: { src: 'ada:photo-repaired-hazard-board', caption: 'After. Took four hours. Looked worse before.', alt: 'Repaired hazard-elimination circuit board, clean and neat' },
+        adaImage: { src: '/ada/photo-repaired-hazard-board.png', caption: 'After. Took four hours. Looked worse before.', alt: 'Repaired hazard-elimination circuit board, clean and neat' },
       },
       { label: "Four hours for one board?", adaResponse: "Some of that was finding the problem. The fix itself took twenty minutes. That's usually how it goes." },
       { label: "Worth it?", adaResponse: "It runs clean now. So, yes." }
@@ -1131,12 +1139,12 @@ export const UNIT5_MESSAGES = [
 
   msg({
     id: 'u5-01-post', trigger: 'lesson:unit5-01', type: 'incoming',
-    content: "SRAM. Static random-access memory — each cell built from a latch, holding one bit for as long as it has power. Fast. Expensive per bit, compared to the alternative. Most cache memory on this ship is SRAM for exactly that tradeoff.\n\nLooked at a cell array under magnification this week. Wanted to show you before we get further into the unit.",
+    content: "SRAM. Static random-access memory — each cell built from a latch, holding one bit for as long as it has power. Fast. Expensive per bit, compared to the alternative. Most cache memory on this ship is SRAM for exactly that tradeoff.\n\nHad an actual quiet stretch this week, for once. Watched the planet turn for an hour instead of thinking about any of this.",
     replyOptions: replies(
       {
         label: "Show me.",
-        adaResponse: "Ship's memory, up close. Looks like a city.",
-        adaImage: { src: 'ada:photo-sram-array', caption: 'Ship\'s memory, up close. Looks like a city.', alt: 'SRAM cell array under magnification' },
+        adaResponse: "Watched the planet rotate for an hour today. No alarms. Quiet.",
+        adaImage: { src: '/ada/photo-view-outside.png', caption: 'Watched the planet rotate for an hour today. No alarms. Quiet.', alt: 'A view out a large starship porthole. A distant blue-green planet slowly turning in the black void of space' },
       },
       { label: "Why's SRAM expensive per bit?", adaResponse: "More transistors per cell than the alternative. You're trading silicon area for speed. Standard tradeoff, dressed in a new circuit." },
       { label: "Got it. Next?", adaResponse: "DRAM. Cheaper, denser, needs to be refreshed constantly or it forgets. Different set of compromises." }
@@ -1165,12 +1173,12 @@ export const UNIT5_MESSAGES = [
 
   msg({
     id: 'u5-04-post', trigger: 'lesson:unit5-04', type: 'incoming',
-    content: "EPROM. Erasable, programmable ROM — you can wipe it and write it again, but not electrically. You expose the die to UV light through a little window on the package, and that resets every cell back to its blank state. Then you reprogram from scratch.\n\nIt's a strange procedure once you've actually seen it done.",
+    content: "EPROM. Erasable, programmable ROM — you can wipe it and write it again, but not electrically. You expose the die to UV light through a little window on the package, and that resets every cell back to its blank state. Then you reprogram from scratch.\n\nMakes me think of my own habit of trying to keep things from just fading, honestly. I've been keeping a journal, of all things.",
     replyOptions: replies(
       {
-        label: "What's it actually look like?",
-        adaResponse: "UV erase. One of the stranger things this job involves.",
-        adaImage: { src: 'ada:photo-eprom-uv-erase', caption: 'UV erase. One of the stranger things this job involves.', alt: 'EPROM chip under UV eraser light, glowing faintly purple' },
+        label: "Yeah? What's that like?",
+        adaResponse: "Trying to write down the things I learn. It helps me remember.",
+        adaImage: { src: '/ada/photo-journal-open.png', caption: 'Trying to write down the things I learn. It helps me remember.', alt: 'A leather-bound journal lying open on a desk. Handwritten notes, diagrams, and a pressed flower tucked between the pages' },
       },
       { label: "Why not just make it electrically erasable?", adaResponse: "That exists too — EEPROM. Different generation of the same idea. EPROM's older, cruder, still kicking around on some legacy boards here." },
       { label: "Strange procedure, got it.", adaResponse: "PLD next. Programmable logic, not just programmable memory." }
@@ -1194,7 +1202,7 @@ export const UNIT5_MESSAGES = [
       {
         label: "You didn't have to do that.",
         adaResponse: "I know. I wanted to.\n\nIt's co-authored. That felt right.",
-        adaImage: { src: 'ada:photo-wo0058-signoff', caption: "She filed it as co-authored. She didn't have to.", alt: 'Both their names on the WO-0058 sign-off sheet — her handwriting, your redacted name', rapportGate: 'warm' },
+        adaImage: { src: '/ada/photo-wo0058-signoff.png', caption: "She filed it as co-authored. She didn't have to.", alt: 'Both their names on the WO-0058 sign-off sheet — her handwriting, your redacted name', rapportGate: 'warm' },
       },
       { label: "What's the matrix actually for?", adaResponse: "Escape pod authorization logic. It's the same circuit family as the one active during your accident, as it happens. We'll get to that." },
       { label: "Thanks for the sign-off, either way.", adaResponse: "You earned it. Last lesson's next." }
@@ -1208,7 +1216,7 @@ export const UNIT5_MESSAGES = [
       {
         label: "Show me the matrix.",
         adaResponse: "I drew this trying to explain error correction to myself. It helped.",
-        adaImage: { src: 'ada:photo-hamming-matrix', caption: 'I drew this trying to explain error correction to myself. It helped.', alt: 'Hamming code parity matrix written on a whiteboard' },
+        adaImage: { src: '/ada/photo-hamming-matrix.png', caption: 'I drew this trying to explain error correction to myself. It helped.', alt: 'Hamming code parity matrix written on a whiteboard' },
       },
       { label: "That actually is elegant.", adaResponse: "It is. Took someone a long time to think of it, and now it's just a thing every memory chip does without anyone noticing." },
       { label: "That's the last lesson, right?", adaResponse: "It is. There's something else, though. Not a lesson. Give me a moment." }
@@ -1273,7 +1281,11 @@ export const UNIT5_MESSAGES = [
     replyOptions: replies(
       { label: "Maybe. I'm not ready yet.", adaResponse: "That's allowed.\n\nFiles the full report herself — with both your names on it. You'll find it in the Notes tab." },
       { label: "I just can't right now.", adaResponse: "I know. I'm not pushing.\n\nFiles the full report herself anyway. With both your names on it." },
-      { label: "Maybe someday.", adaResponse: "Someday's fine.\n\nFiles the full report herself, with both your names on it, in case someday comes sooner than you think." }
+      {
+        label: "Maybe someday.",
+        adaResponse: "Someday's fine.\n\nFiles the full report herself, with both your names on it, in case someday comes sooner than you think.",
+        adaImage: { src: '/ada/photo-warm-route-end.png', caption: "For now, this is enough.", alt: "A warm, softly lit final image of Ada, at ease, looking toward the camera with a quiet, open expression" },
+      }
     ),
   }),
   // Cold
