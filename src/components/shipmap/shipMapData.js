@@ -321,7 +321,11 @@ export const SP_COLORS = {
   '[ SYSTEM ]': '#1a3050',
 }
 
-export const DEV_FLAGS = ['unit1_l1', 'unit2_l1', 'unit2_l9', 'unit3_l1', 'unit4_l6']
+// NOTE: the old POC unlock-flag toggle list that used to live here has
+// been superseded by the global dev cheat panel
+// (src/components/dev/DevCheatPanel.jsx), which tracks the full flag
+// inventory (including ending variants and per-room visit counts) and
+// writes straight to the real pdaStore instead of a page-local override.
 
 // ── Geometry helpers ─────────────────────────────────────────────────────
 // The map is drawn on a 400x300 virtual canvas (4 cols x 100, 3 rows x 100)

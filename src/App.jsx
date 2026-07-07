@@ -26,6 +26,7 @@ import Home from './pages/Home'
 import ShipMap from './pages/ShipMap'
 import PDA from './components/pda/PDA'
 import ShipMapOverlay from './components/shipmap/ShipMapOverlay'
+import DevCheatPanel from './components/dev/DevCheatPanel'
 import './index.css'
 
 const TOPBAR_H = '5vh'
@@ -69,6 +70,7 @@ export default function App() {
         <WorkspaceView />
         <PDA />
         <ShipMapOverlay />
+        <DevCheatPanel />
       </>
     )
   }
@@ -82,6 +84,7 @@ export default function App() {
           <ShipMap />
         </div>
         <PDA />
+        <DevCheatPanel />
       </>
     )
   }
@@ -94,6 +97,7 @@ export default function App() {
         <Home />
       </div>
       <PDA />
+      <DevCheatPanel />
     </>
   )
 }

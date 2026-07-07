@@ -15,12 +15,11 @@
  * heading + back button, so there's no need for two.
  */
 
-import { useState } from 'react'
 import { useLessonStore } from '../store/lessonStore'
 import usePdaStore, { rapportBand } from '../store/pdaStore'
 import ShipMapGrid from '../components/shipmap/ShipMapGrid'
 import LocationScene from '../components/shipmap/LocationScene'
-import { ROOMS, DEV_FLAGS, safeEnterWorkstation } from '../components/shipmap/shipMapData'
+import { ROOMS, safeEnterWorkstation } from '../components/shipmap/shipMapData'
 
 // Must match App.jsx's TOPBAR_H (not exported from there, so kept in sync
 // by hand — same approach App.jsx already uses in a couple of places).
@@ -38,26 +37,17 @@ export default function ShipMap() {
   const closeScene = usePdaStore(s => s.closeScene)
   const openPda = usePdaStore(s => s.openPda)
 
-  // Dev flag overrides — only visible/useful in dev builds
-  const [devFlags, setDevFlags] = useState(new Set())
-
-  // Combine real story flags + dev overrides
-  const activeFlags = { ...storyFlags }
-  for (const f of devFlags) activeFlags[f] = true
+  // Dev-mode story-state overrides now live in the global DevCheatPanel
+  // (see src/components/dev/DevCheatPanel.jsx) — it writes directly to
+  // storyFlags/rapport/roomVisits in pdaStore, so this page just reads
+  // the real state and needs no local override merging anymore.
+  const activeFlags = storyFlags
 
   // Determine which unit the workstation should send the player to.
   const targetUnit = activeUnitId ?? 1
   const resuming = activeUnitId === targetUnit
 
   const sceneRoom = ROOMS.find(r => r.id === activeScene) ?? null
-
-  function toggleDevFlag(f) {
-    setDevFlags(prev => {
-      const next = new Set(prev)
-      next.has(f) ? next.delete(f) : next.add(f)
-      return next
-    })
-  }
 
   return (
     <div style={{
@@ -105,40 +95,6 @@ export default function ShipMap() {
               SHIFT END · STAND-DOWN<br />SELECT DESTINATION
             </div>
           </div>
-
-          {/* Dev flag toggles — floating HUD panel, only render in dev */}
-          {import.meta.env.DEV && (
-            <div style={{
-              position: 'absolute', bottom: '20px', left: '24px', maxWidth: '70%',
-              zIndex: 3,
-            }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '6px', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
-                POC — UNLOCK FLAGS (dev)
-              </div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                {DEV_FLAGS.map(f => {
-                  const active = devFlags.has(f)
-                  return (
-                    <button
-                      key={f}
-                      onClick={() => toggleDevFlag(f)}
-                      style={{
-                        background: active ? '#0a1e30' : 'rgba(5,13,24,0.7)',
-                        border: `0.5px solid ${active ? '#2a6fa8' : 'var(--border-strong)'}`,
-                        color: active ? '#3fa8d8' : 'var(--text-muted)',
-                        padding: '3px 10px', fontSize: '8px', letterSpacing: '0.1em',
-                        cursor: 'pointer', borderRadius: '4px',
-                        fontFamily: 'var(--mono)', transition: 'all 0.15s',
-                        backdropFilter: 'blur(4px)',
-                      }}
-                    >
-                      {f}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>

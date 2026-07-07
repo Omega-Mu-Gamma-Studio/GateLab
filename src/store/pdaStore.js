@@ -600,6 +600,16 @@ const usePdaStore = create(
       // ── Dev / reset ──────────────────────────────────────────────────
       devReset() { set(defaultState()) },
       devSetRapport(val) { set({ rapport: Math.max(-10, Math.min(10, val)) }) },
+      // Direct room-visit override — lets the dev cheat panel preview
+      // minVisits-gated stages (e.g. Hydro-Pool visit 2 / visit 5) without
+      // actually walking in and out of a room N times.
+      devSetRoomVisits(roomId, n) {
+        set({ roomVisits: { ...get().roomVisits, [roomId]: Math.max(0, n) } })
+      },
+      // Wipes every story flag at once — used by the cheat panel's
+      // "Jump to Unit" presets before laying down a clean set for the
+      // target unit, so stale flags from a previous jump can't linger.
+      devClearFlags() { set({ storyFlags: {} }) },
     }),
     {
       name:    'gatelab-pda',
