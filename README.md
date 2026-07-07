@@ -16,14 +16,14 @@ Every lesson is built around one idea:
 
 A floating AND input glowing red teaches more than ten rows of a truth table. A race condition glitch animating through a wire teaches hazards better than any paragraph. GateLab shows the failure first, then the fix.
 
-It ships as **two modes**, and it's important to be upfront about what each one actually is right now:
+It ships as **two modes**:
 
 | Mode | What it is | Status |
 |------|-----------|--------|
 | **Standard Mode** | The original MVP. Unit grid → lesson → OBSERVE/FAULT/REPAIR. All five units, all 41 lessons. | ✅ **Complete and usable end-to-end.** |
-| **Story Mode** | The AETHER-9 spaceship framing — a Ship Map you walk around, NPCs, a PDA, quarters, all of it wrapping the *same* lesson engine. | 🚧 **Current focus. This is the direction the project is actually headed.** |
+| **Story Mode** | The AETHER-9 spaceship framing — a Ship Map you walk around, NPCs, a PDA, quarters, all of it wrapping the *same* lesson engine. | ✅ **Content-complete.** Every room, every story beat, every photo — all real, all shipped. |
 
-Standard Mode is the finished product from phase one — it works, it's playable, it covers the syllabus. Story Mode is where the studio's attention is now, and it's the mode that makes GateLab feel like something instead of just a circuit tool with a spaceship coat of paint over it. If you're evaluating this repo for the first time: play Standard Mode to see that the pedagogy works, then play Story Mode to see where it's going.
+Both modes are finished, playable experiences. Story Mode's narrative, art, and RPG systems — the Ship Map, real background art in all ten rooms, Ada's full five-unit dialogue arc with branching rapport, every unit ending, and the complete photo gallery (room "moments" *and* Ada's message-thread photos, 27 images total, zero placeholders left) — are done. What's left on the roadmap isn't story or art anymore; it's a specific, bounded list of circuit-visualization widgets (state diagrams, memory grids, and the like) that live in the InfoPanel and apply equally to both modes — see **Key Features** below for the exact list. If you're evaluating this repo for the first time: either mode shows the pedagogy works; Story Mode shows the full narrative experience GateLab was actually built toward.
 
 ---
 
@@ -39,7 +39,7 @@ In Standard Mode you get this framing through dialogue and the PDA, but there's 
 
 ## Story Mode — the specialty
 
-Story Mode replaces the unit grid with the **Ship Map**: a top-down schematic of the AETHER-9 with clickable rooms. This is the part of GateLab that's currently getting the most design attention, so here's the full breakdown of how it works today.
+Story Mode replaces the unit grid with the **Ship Map**: a top-down schematic of the AETHER-9 with clickable rooms. This is GateLab's flagship experience, and it's finished — here's the full breakdown of how it works.
 
 ### The Ship Map
 
@@ -50,6 +50,15 @@ One thing worth calling out because it was a real bug until recently: walking ba
 ### Room art — shipped
 
 This used to be a placeholder-only system; it isn't anymore. All ten rooms now render real background art — a dedicated still per room (Quarters, Mess Hall, Engine Room, Observation Deck, Hydro-Pool, Workstation, Ada's Quarters, Lounge, Bridge, Maintenance Bay), plus a shared "sealed" state image for rooms still locked behind a story flag. The generated CSS "viewport" — tinted gradient, scanline texture, no-feed tag — still exists in the code, but only as the fallback for a room that doesn't have art wired in yet, not as the default state anymore. Adding or swapping a room's art is still a one-line change: set its `bgImage` (and `sealedImage`) path in the room's data entry.
+
+### The Gallery — complete
+
+Every photo GateLab can show you is a real image now, not a placeholder card — two independent systems, both fully wired end to end:
+
+- **Ten room "moments"** — one candid story beat photographed in each of the ten rooms (Ada mid-sentence over coffee in the Mess Hall, Reyes scowling at a console in the Engine Room, Voss beside a sealed bulkhead on the Bridge, and so on), unlocked into the PDA's GALLERY tab the first time a player actually reaches that story beat in Free-Roam.
+- **Seventeen of Ada's message-thread photos** — woven into specific COMM reply choices across all five units (a hand-sketched OR-gate truth table, her actual guitar, a warm final portrait at the end of the questline). Pick the one reply out of three that carries a photo, and it lands in the gallery with her caption attached.
+
+A dev-only cheat panel (secret trigger, not surfaced anywhere in the UI) can force-unlock every one of these at once — useful for QA and art-review passes without needing to grind rapport or replay five units' worth of dialogue branches just to check that a given image renders correctly.
 
 ### Your Quarters — and the PDA
 
@@ -146,6 +155,7 @@ The Trivia tab is a shuffleable deck of circuit history facts and engineering jo
 - **Three themes** — Matrix Green · Logic Gold · Signal Blue; persisted in localStorage
 - **Ship Map** — walkable room hub with story-flag-gated unlocks and progress-aware lesson resume
 - **Room art** — real background stills for all ten rooms, plus a shared sealed-door image for locked rooms; the old CSS placeholder viewport survives only as a fallback for art that isn't wired in yet
+- **Full photo gallery** — 10 room moments + 17 Ada reply-choice photos, 27 real images total, zero placeholder cards left anywhere in the pipeline
 - **Timing Diagram** (Units III & IV) — live event-timeline waveform panel, backed by a simulation engine fix that made flip-flop feedback actually hold state instead of silently dropping its third input wire
 - **Truth Table panel** — available in every unit, not just some. Sweeps the whole circuit (every OUTPUT at once, so multi-output blocks like a full adder show SUM and CARRY together) and live-highlights the row matching your current input toggles as you flip them
 - **Verilog export** — a modal off the TopBar that generates Verilog from the current gate graph and lets you copy it out. This replaced an earlier plan to make Verilog an InfoPanel tab
@@ -315,7 +325,7 @@ Omega Mu Gamma Studio is a student-built open-source studio building interactive
 
 ## Status
 
-> **Standard Mode is complete and usable** — all five units, all 41 lessons, playable start to finish, now backed by a simulation engine that correctly handles 3-input feedback gates and holds flip-flop state across recomputes. **Story Mode is the active focus** — the Ship Map now has real background art in every room, not placeholders, and the PDA-centric Quarters loop is built out on top of the same lesson engine Standard Mode already proved out. The Timing Diagram (Units III & IV) and the Truth Table panel (every unit) are both live, and Verilog export shipped as a TopBar modal. State diagrams, the memory grid, PLA/PAL matrix, Hamming visualizer, and number system visualizer are still roadmap items — empty stub files in the repo, not yet built.
+> **Both modes are complete and playable end to end.** Standard Mode: all five units, all 41 lessons, backed by a simulation engine that correctly handles 3-input feedback gates and holds flip-flop state across recomputes. Story Mode: the Ship Map, real background art in all ten rooms, the full PDA-centric Quarters loop, Ada's complete five-unit dialogue arc with branching rapport and story-flag-gated endings, and the entire photo gallery (27 images — 10 room moments + 17 message-thread photos) are all shipped. Narrative, art, and RPG systems are **done**. The Timing Diagram (Units III & IV) and the Truth Table panel (every unit) are both live, and Verilog export shipped as a TopBar modal. What's left is a specific, bounded list of circuit-visualization widgets — state diagrams, the memory grid, PLA/PAL matrix, Hamming visualizer, number system visualizer, and 3-input gate wiring in the REPAIR phase — still stub files or known limitations, not yet built, but no longer entangled with story or art work.
 
 ---
 
