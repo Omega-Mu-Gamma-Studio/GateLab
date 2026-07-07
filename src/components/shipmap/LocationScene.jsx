@@ -21,7 +21,7 @@ import RoomDialoguePanel from './RoomDialoguePanel'
 import { isRoomOpen } from './shipMapData'
 import './LocationScene.css'
 
-export default function LocationScene({ room, activeFlags, onBack, onBeginShift, resuming, onOpenPda }) {
+export default function LocationScene({ room, activeFlags, onBack, onBeginShift, resuming, onOpenPda, rapportBand, visits }) {
   const open = isRoomOpen(room, activeFlags)
   const tint = room.tint
   // Sealed-door variant reuses the bgImage slot logic, just points at
@@ -86,7 +86,7 @@ export default function LocationScene({ room, activeFlags, onBack, onBeginShift,
 
       {/* Dialogue, docked bottom — same shared component as before */}
       <div className="loc-scene-dialogue">
-        <RoomDialoguePanel room={room} activeFlags={activeFlags} />
+        <RoomDialoguePanel room={room} activeFlags={activeFlags} rapportBand={rapportBand} visits={visits} />
       </div>
     </div>
   )

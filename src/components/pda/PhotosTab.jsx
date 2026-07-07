@@ -15,7 +15,7 @@ import { useState } from 'react'
 import usePdaStore from '../../store/pdaStore'
 
 function isPlaceholder(src) {
-  return !src || src.startsWith('ada:') || src.startsWith('photo:')
+  return !src || src.startsWith('ada:') || src.startsWith('photo:') || src.startsWith('moment:')
 }
 
 // ── Single grid cell ─────────────────────────────────────────────────────

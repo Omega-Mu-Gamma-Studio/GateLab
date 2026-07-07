@@ -77,6 +77,7 @@ import {
   MAINT_MESSAGES,
   DAY60_MESSAGES,
 } from '../data/adaMessages'
+import { ROOMS, resolveRoomStage } from '../components/shipmap/shipMapData'
 
 // ── Rapport bands ──────────────────────────────────────────────────────
 export function rapportBand(rapport) {
@@ -163,6 +164,7 @@ function defaultState() {
     },
     gallery:     [],   // [{ id, src, caption, alt, senderId, ts, lessonId }]
     notes:       [],   // [{ id, title, body, lessonId, ts }]
+    roomVisits:  {},   // { roomId: count } — free-roam visit counter, per room
 
     // Unread counts per thread
     unread:      { ada: 0, reyes: 0, captain: 0, maint: 0 },
@@ -231,8 +233,44 @@ const usePdaStore = create(
       // activeScene is a room id ('quarters', 'mess', ...) or null.
       // Works identically whether the map underneath is the full page or
       // the mid-lesson overlay — neither needs to know which context it's in.
-      openScene(roomId)  { set({ activeScene: roomId }) },
+      openScene(roomId)  {
+        const state = get()
+        const visits = (state.roomVisits[roomId] || 0) + 1
+        set({ activeScene: roomId, roomVisits: { ...state.roomVisits, [roomId]: visits } })
+        get()._checkRoomMoment(roomId, visits)
+      },
       closeScene()       { set({ activeScene: null }) },
+
+      // ── Free-roam moment photos ───────────────────────────────────────
+      /**
+       * Called every time a room scene opens. Resolves the room's current
+       * dialogue stage (same logic RoomDialoguePanel uses) and, if that
+       * stage carries a `moment`, unlocks it into the gallery — once.
+       */
+      _checkRoomMoment(roomId, visits) {
+        const room = ROOMS.find(r => r.id === roomId)
+        if (!room) return
+        const state = get()
+        const ctx = { flags: state.storyFlags, rapportBand: rapportBand(state.rapport), visits }
+        const stage = resolveRoomStage(room, ctx)
+        if (stage.moment) get().unlockMoment(stage.moment)
+      },
+      unlockMoment(moment) {
+        const gallery = get().gallery
+        if (gallery.find(p => p.id === moment.id)) return  // already collected
+        set({
+          gallery: [...gallery, {
+            id:       moment.id,
+            src:      moment.src,
+            caption:  moment.caption || '',
+            alt:      moment.alt || '',
+            senderId: 'moment',
+            ts:       Date.now(),
+            lessonId: null,
+          }],
+        })
+      },
+      getRoomVisits(roomId) { return get().roomVisits[roomId] || 0 },
 
       goHome()   { set({ pdaView: 'home' }) },
       openApp(app) { set({ pdaView: 'app', activeApp: app }) },

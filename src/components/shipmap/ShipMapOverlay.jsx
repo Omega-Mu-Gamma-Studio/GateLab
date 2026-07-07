@@ -21,7 +21,7 @@
  */
 import { useEffect } from 'react'
 import { useLessonStore } from '../../store/lessonStore'
-import usePdaStore from '../../store/pdaStore'
+import usePdaStore, { rapportBand } from '../../store/pdaStore'
 import ShipMapGrid from './ShipMapGrid'
 import LocationScene from './LocationScene'
 import { ROOMS, safeEnterWorkstation } from './shipMapData'
@@ -32,6 +32,8 @@ export default function ShipMapOverlay() {
   const mapOpen = usePdaStore(s => s.mapOpen)
   const closeMap = usePdaStore(s => s.closeMap)
   const storyFlags = usePdaStore(s => s.storyFlags)
+  const rapport = usePdaStore(s => s.rapport)
+  const roomVisits = usePdaStore(s => s.roomVisits)
   const pdaOpen = usePdaStore(s => s.pdaOpen)
   const activeScene = usePdaStore(s => s.activeScene)
   const openScene = usePdaStore(s => s.openScene)
@@ -88,6 +90,8 @@ export default function ShipMapOverlay() {
             closeScene()
             closeMap()
           })}
+          rapportBand={rapportBand(rapport)}
+          visits={roomVisits[sceneRoom.id] || 0}
         />
       ) : (
         <ShipMapGrid

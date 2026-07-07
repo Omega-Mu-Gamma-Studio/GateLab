@@ -17,7 +17,7 @@
 
 import { useState } from 'react'
 import { useLessonStore } from '../store/lessonStore'
-import usePdaStore from '../store/pdaStore'
+import usePdaStore, { rapportBand } from '../store/pdaStore'
 import ShipMapGrid from '../components/shipmap/ShipMapGrid'
 import LocationScene from '../components/shipmap/LocationScene'
 import { ROOMS, DEV_FLAGS, safeEnterWorkstation } from '../components/shipmap/shipMapData'
@@ -31,6 +31,8 @@ const TOPBAR_H = '5vh'
 export default function ShipMap() {
   const { goToUnit, activeUnitId } = useLessonStore()
   const storyFlags = usePdaStore(s => s.storyFlags)
+  const rapport = usePdaStore(s => s.rapport)
+  const roomVisits = usePdaStore(s => s.roomVisits)
   const activeScene = usePdaStore(s => s.activeScene)
   const openScene = usePdaStore(s => s.openScene)
   const closeScene = usePdaStore(s => s.closeScene)
@@ -74,6 +76,8 @@ export default function ShipMap() {
           resuming={resuming}
           onOpenPda={() => openPda()}
           onBeginShift={() => safeEnterWorkstation(goToUnit, activeUnitId, targetUnit, closeScene)}
+          rapportBand={rapportBand(rapport)}
+          visits={roomVisits[sceneRoom.id] || 0}
         />
       ) : (
         <>

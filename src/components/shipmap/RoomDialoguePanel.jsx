@@ -1,6 +1,6 @@
-import { SP_COLORS, isRoomOpen } from './shipMapData'
+import { SP_COLORS, isRoomOpen, resolveRoomStage } from './shipMapData'
 
-export default function RoomDialoguePanel({ room, activeFlags }) {
+export default function RoomDialoguePanel({ room, activeFlags, rapportBand, visits }) {
   if (!room) {
     return (
       <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#1a3050' }}>
@@ -9,8 +9,11 @@ export default function RoomDialoguePanel({ room, activeFlags }) {
     )
   }
   const open = isRoomOpen(room, activeFlags)
-  const spLabel = open ? room.dlg.sp : '[ SYSTEM ]'
-  const bodyText = open ? room.dlg.txt : room.denial
+  const stage = open
+    ? resolveRoomStage(room, { flags: activeFlags, rapportBand, visits })
+    : null
+  const spLabel = open ? stage.sp : '[ SYSTEM ]'
+  const bodyText = open ? stage.txt : room.denial
   const spColor = SP_COLORS[spLabel] ?? '#3fa8d8'
 
   return (
