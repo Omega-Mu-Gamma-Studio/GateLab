@@ -136,6 +136,8 @@ export default function DevCheatPanel() {
   const devSetRoomVisits = usePdaStore(s => s.devSetRoomVisits)
   const devClearFlags  = usePdaStore(s => s.devClearFlags)
   const devReset        = usePdaStore(s => s.devReset)
+  const devUnlockAllPhotos = usePdaStore(s => s.devUnlockAllPhotos)
+  const gallery         = usePdaStore(s => s.gallery)
 
   const registerTap = useSecretTrigger(() => setOpen(true))
   const band = rapportBand(rapport)
@@ -280,6 +282,17 @@ export default function DevCheatPanel() {
                   />
                 </div>
               ))}
+            </div>
+
+            {/* Gallery */}
+            <SectionLabel>Gallery — currently {gallery.length} photo{gallery.length !== 1 ? 's' : ''}</SectionLabel>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Btn onClick={() => devUnlockAllPhotos()}>
+                UNLOCK ALL PHOTOS (moments + message photos)
+              </Btn>
+              <span style={{ fontSize: '9px', color: 'var(--text-muted, #8899aa)' }}>
+                additive — safe to combine with normal play, no duplicates
+              </span>
             </div>
 
             {/* Reset */}

@@ -272,6 +272,93 @@ const usePdaStore = create(
       },
       getRoomVisits(roomId) { return get().roomVisits[roomId] || 0 },
 
+      // ── Dev cheat: unlock every gallery photo at once ──────────────────
+      /**
+       * Force-unlocks EVERY photo the gallery can ever contain, regardless
+       * of story flags, rapport band, room-visit counts, or which of the
+       * 3 reply options a real player would've had to pick — in one shot.
+       * Purely additive: never removes/replaces existing entries, and
+       * dedups by id, so it's safe to hit this before, during, or after a
+       * real playthrough without creating duplicate gallery cards.
+       *
+       * Two independent photo systems feed the gallery, so this walks both:
+       *   1. Room "moments"     — stage.moment across every ROOMS entry
+       *      (shipMapData.js), normally gated by flags/rapport/minVisits.
+       *   2. Ada's reply photos — the `adaImage` tucked inside a specific
+       *      replyOptions entry (adaMessages.js), normally only added once
+       *      a player picks that exact reply out of 3 choices.
+       *
+       * NOTE: the id scheme for #2 below must exactly match what
+       * submitReply() would generate for a real playthrough
+       * (`response-${parentMsgId}-${replyOption.id}`) — otherwise cheating
+       * this in first and then actually playing through legitimately would
+       * create a duplicate card for the same photo.
+       */
+      devUnlockAllPhotos() {
+        const gallery = get().gallery
+        const seen = new Set(gallery.map(p => p.id))
+        const additions = []
+
+        // 1) Every room moment, ignoring flag/rapport/minVisits gates.
+        for (const room of ROOMS) {
+          for (const stage of room.stages || []) {
+            if (!stage.moment || seen.has(stage.moment.id)) continue
+            seen.add(stage.moment.id)
+            additions.push({
+              id:       stage.moment.id,
+              src:      stage.moment.src,
+              caption:  stage.moment.caption || '',
+              alt:      stage.moment.alt || '',
+              senderId: 'moment',
+              ts:       Date.now(),
+              lessonId: null,
+            })
+          }
+        }
+
+        // 2) Every adaImage across all 5 units' message banks, ignoring
+        //    which reply option a player would've had to choose.
+        const allMessages = [
+          ...UNIT1_MESSAGES, ...UNIT2_MESSAGES, ...UNIT3_MESSAGES,
+          ...UNIT4_MESSAGES, ...UNIT5_MESSAGES,
+        ]
+        for (const message of allMessages) {
+          for (const option of message.replyOptions || []) {
+            if (!option.adaImage) continue
+            const id = `response-${message.id}-${option.id}`
+            if (seen.has(id)) continue
+            seen.add(id)
+            additions.push({
+              id,
+              src:      option.adaImage.src,
+              caption:  option.adaImage.caption || '',
+              alt:      option.adaImage.alt || '',
+              senderId: message.contactId,
+              ts:       Date.now(),
+              lessonId: message.id,
+            })
+          }
+          // Belt-and-suspenders: also catch any top-level `image` a message
+          // might carry directly (the type:'image' shape _addMessage
+          // already supports) — none exist in the data today, but this
+          // keeps the cheat correct if that pattern gets used later.
+          if (message.image && !seen.has(message.id)) {
+            seen.add(message.id)
+            additions.push({
+              id:       message.id,
+              src:      message.image.src,
+              caption:  message.image.caption || '',
+              alt:      message.image.alt || '',
+              senderId: message.contactId,
+              ts:       Date.now(),
+              lessonId: message.id,
+            })
+          }
+        }
+
+        if (additions.length) set({ gallery: [...gallery, ...additions] })
+      },
+
       goHome()   { set({ pdaView: 'home' }) },
       openApp(app) { set({ pdaView: 'app', activeApp: app }) },
       setTab(tab) {
