@@ -104,7 +104,7 @@ export const ROOMS = [
       { flag: ['unit1_ending', 'defiant'], sp: 'Ada', txt: "You kept it vague. Reyes hasn't said anything. Yet. I'm not going to push." },
       {
         flag: ['unit1_l3'], sp: 'Ada', txt: "That relay fault's still bugging Reyes. She won't say it, but she's impressed you caught it.",
-        moment: { id: 'moment-mess-hall-candid', src: 'moment:mess-hall-candid', caption: 'Ada mid-sentence, coffee in hand, explaining something with that "you getting this?" look.', alt: 'Ada mid-sentence, coffee in hand, explaining something with a "you getting this?" look' },
+        moment: { id: 'moment-mess-hall-candid', src: '/moments/moment-messhall-1.png', caption: 'Ada mid-sentence, coffee in hand, explaining something with that "you getting this?" look.', alt: 'Ada mid-sentence, coffee in hand, explaining something with a "you getting this?" look' },
       },
     ],
   },
@@ -132,7 +132,7 @@ export const ROOMS = [
       { flag: ['unit1_ending', 'defiant'], sp: 'Reyes', txt: "Filed it vague. That's not how we do things down here. Watch yourself." },
       {
         flag: ['unit1_l5'], sp: 'Reyes', txt: "Relay's acting up again. Don't just stand there — hand me that meter.",
-        moment: { id: 'moment-engine-reyes-console', src: 'moment:engine-reyes-console', caption: 'Reyes scowling at a readout, greasy hands, annoyed at the relay fault.', alt: 'Reyes scowling at a diagnostic readout, hands greasy, visibly annoyed' },
+        moment: { id: 'moment-engine-reyes-console', src: '/moments/moment-engine-1.png', caption: 'Reyes scowling at a readout, greasy hands, annoyed at the relay fault.', alt: 'Reyes scowling at a diagnostic readout, hands greasy, visibly annoyed' },
       },
     ],
   },
@@ -158,7 +158,7 @@ export const ROOMS = [
       { flag: ['unit3_l1'], sp: 'Ada', txt: "I heard about your file. You doing alright?" },
       {
         flag: ['unit2_l5'], sp: 'Ada', txt: "You ever feel small up here? In a good way, I mean.",
-        moment: { id: 'moment-obsdeck-nebula-silhouette', src: 'moment:obsdeck-nebula-silhouette', caption: 'Ada silhouetted against the Veil Nebula, back to camera, trailing off mid-sentence.', alt: 'Ada silhouetted against the Veil Nebula through the observation window, back to camera' },
+        moment: { id: 'moment-obsdeck-nebula-silhouette', src: '/moments/moment-obsdeck-1.png', caption: 'Ada silhouetted against the Veil Nebula, back to camera, trailing off mid-sentence.', alt: 'Ada silhouetted against the Veil Nebula through the observation window, back to camera' },
       },
     ],
   },
@@ -178,11 +178,11 @@ export const ROOMS = [
       { flag: ['unit4_ending', 'accurate'], sp: 'Ada', txt: "I get it. I do. Come sit anyway — no point both of us being tense." },
       {
         flag: ['unit4_l1'], minVisits: 5, rapportGate: 'warm', sp: 'Ada', txt: "You're quiet today. In a good way, I think. Sit with me a while.",
-        moment: { id: 'moment-hydro-pool-edge', src: 'moment:hydro-pool-edge', caption: 'Ada sitting at the pool edge, feet in the water, quiet conversation.', alt: 'Ada sitting at the edge of the Hydro-Pool with her feet in the water, mid quiet conversation' },
+        moment: { id: 'moment-hydro-pool-edge', src: '/moments/moment-hydropool-2.png', caption: 'Ada sitting at the pool edge, feet in the water, quiet conversation.', alt: 'Ada sitting at the edge of the Hydro-Pool with her feet in the water, mid quiet conversation' },
       },
       {
         flag: ['unit4_l1'], minVisits: 2, sp: 'Ada', txt: "You're staring, mechanic.",
-        moment: { id: 'moment-hydro-swim', src: 'moment:hydro-swim', caption: 'Ada mid-swim, hair back, unaware she\u2019s being watched.', alt: 'Ada mid-swim in the Hydro-Pool, hair pulled back, unaware she\u2019s being watched' },
+        moment: { id: 'moment-hydro-swim', src: '/moments/moment-hydropool-1.png', caption: 'Ada mid-swim, hair back, unaware she\u2019s being watched.', alt: 'Ada mid-swim in the Hydro-Pool, hair pulled back, unaware she\u2019s being watched' },
       },
       { flag: ['unit2_l1'], sp: 'Ada', txt: "Shore leave. Finally. Don't look so surprised — even mechanics get it." },
     ],
@@ -219,7 +219,7 @@ export const ROOMS = [
       { flag: ['unit3_ending', 'tell'], sp: 'Ada', txt: "You deserved to know. I meant that. Mind the books, still sorting them." },
       {
         flag: ['unit3_l5'], sp: 'Ada', txt: "You play? I'm still stuck on this one chord. Don't laugh.",
-        moment: { id: 'moment-ada-quarters-guitar', src: 'moment:ada-quarters-guitar', caption: 'Ada actually playing the guitar, messy room, focused expression.', alt: 'Ada playing an acoustic guitar in her quarters, messy room, deeply focused expression' },
+        moment: { id: 'moment-ada-quarters-guitar', src: '/moments/moment-adaquarters-1.png', caption: 'Ada actually playing the guitar, messy room, focused expression.', alt: 'Ada playing an acoustic guitar in her quarters, messy room, deeply focused expression' },
       },
     ],
   },
@@ -239,7 +239,7 @@ export const ROOMS = [
       { flag: ['unit3_l1'], sp: 'Ada', txt: "Reyes got chewed out. You hear? Won't say by who." },
       {
         flag: ['unit2_l5'], sp: 'Ada', txt: "You should join next time. Reyes needs someone else to lose to.",
-        moment: { id: 'moment-lounge-game-night', src: 'moment:lounge-game-night', caption: 'Reyes mid-argument, Ada laughing, cards flying across the table.', alt: 'Reyes mid-argument over a card game, Ada laughing, cards flying across the table' },
+        moment: { id: 'moment-lounge-game-night', src: '/moments/moment-lounge-1.png', caption: 'Reyes mid-argument, Ada laughing, cards flying across the table.', alt: 'Reyes mid-argument over a card game, Ada laughing, cards flying across the table' },
       },
     ],
   },
@@ -256,14 +256,14 @@ export const ROOMS = [
     stages: [
       {
         flag: ['unit5_ending', 'need'], sp: 'Voss', txt: "You want the full picture. Understood. Follow me — I'll show you what's actually down there.",
-        moment: { id: 'moment-bridge-behind-door', src: 'moment:bridge-behind-door', caption: "Voss finally showing you what's behind Sub-Level 3.", alt: 'Captain Voss standing beside an open bulkhead, showing what lies behind Sub-Level 3' },
+        moment: { id: 'moment-bridge-behind-door', src: '/moments/moment-bridge-2.png', caption: "Voss finally showing you what's behind Sub-Level 3.", alt: 'Captain Voss standing beside an open bulkhead, showing what lies behind Sub-Level 3' },
       },
       { flag: ['unit5_ending', 'matter'], sp: 'Voss', txt: "You let it go. Your peace, Mechanic. Just know the offer doesn't come twice." },
       { flag: ['unit5_l1'], sp: 'Voss', txt: "It's time you knew. Sit down properly this time." },
       { flag: ['unit4_l1'], sp: 'Voss', txt: "The incident was connected. More than you've been told. Sit." },
       {
         flag: ['unit3_l9'], sp: 'Voss', txt: "Something's coming. Be ready for it, Mechanic.",
-        moment: { id: 'moment-bridge-sealed-bulkhead', src: 'moment:bridge-sealed-bulkhead', caption: 'Voss staring at a sealed door, hand on the frame, clearly troubled.', alt: 'Captain Voss standing before a sealed bulkhead door, hand on the frame, visibly troubled' },
+        moment: { id: 'moment-bridge-sealed-bulkhead', src: '/moments/moment-bridge-1.png', caption: 'Voss staring at a sealed door, hand on the frame, clearly troubled.', alt: 'Captain Voss standing before a sealed bulkhead door, hand on the frame, visibly troubled' },
       },
       { flag: ['unit2_l9'], sp: 'Voss', txt: "You've got questions. I can see it. Not yet, Mechanic." },
       { flag: ['unit1_l1'], sp: 'Voss', txt: "You're the new one. I've been watching your work orders since day one." },
@@ -282,7 +282,7 @@ export const ROOMS = [
     stages: [
       {
         flag: ['unit5_ending', 'need'], sp: 'MAINT-SYS', txt: 'LOG UNSEALED — FULL RECORD AVAILABLE — CLASSIFICATION: [DECLASSIFIED]',
-        moment: { id: 'moment-maintbay-unredacted-log', src: 'moment:maintbay-unredacted-log', caption: 'The full log, everything revealed.', alt: 'A terminal screen showing a fully unredacted maintenance log, no blacked-out lines remaining' },
+        moment: { id: 'moment-maintbay-unredacted-log', src: '/moments/moment-maintbay-1.png', caption: 'The full log, everything revealed.', alt: 'A terminal screen showing a fully unredacted maintenance log, no blacked-out lines remaining' },
       },
       { flag: ['unit5_ending', 'matter'], sp: 'MAINT-SYS', txt: 'LOG STATUS UNCHANGED — CLASSIFICATION: [REDACTED] — no further access requested' },
       { flag: ['unit5_l1'], sp: 'MAINT-SYS', txt: 'DIAGNOSTIC COMPLETE — INTEGRITY: 97.1% — SUB-LEVEL 3 RECORD: [MOSTLY DECLASSIFIED]' },
