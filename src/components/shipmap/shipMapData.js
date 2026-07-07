@@ -46,11 +46,13 @@ export const GRID_ROWS = 3
  *
  * NOTE ON FLAGS: "unit N start" here means the flag for that unit's lesson
  * 1 (e.g. `unit3_l1`), auto-set by triggerLessonLoad the moment a player
- * begins that lesson — NOT the same as a room's own `unlockFlag`, which in
- * a couple of cases unlocks earlier than a strict "Unit N start" framing
- * (e.g. Obs. Deck's unlockFlag is `unit1_l1`, so the room itself opens
- * almost immediately — the stage table below still tracks unit-by-unit
- * progress correctly on top of that).
+ * begins that lesson. Room `unlockFlag` values are now kept in lockstep
+ * with this same convention (Obs. Deck / Lounge → `unit2_l1`, Ada's
+ * Quarters → `unit3_l1`, Hydro-Pool → `unit4_l1`) — Mess Hall, Your
+ * Quarters, Workstation, Engine Room, Bridge, and Maint. Bay are all
+ * `alwaysOpen`, available from Day 1 per the free-roam design doc, and
+ * rely on their base `dlg` (or the lowest-priority `stages` entry) to
+ * carry a room until its first real story beat fires.
  */
 
 export const ROOMS = [
@@ -109,9 +111,9 @@ export const ROOMS = [
   {
     id: 'engine', label: 'ENGINE ROOM', code: 'E-01', deck: 'DECK 4',
     col: 0, row: 2,
-    alwaysOpen: false, unlockFlag: 'unit2_l9',
+    alwaysOpen: true, unlockFlag: null,
     npc: 'Reyes', npcColor: '#c07028', isWork: false,
-    denial: "Reyes has the room sealed for a maintenance sweep. The door doesn't budge.",
+    denial: null,
     dlg: { sp: 'Reyes', txt: "You're not supposed to be down here. But since you are — suit up." },
     tint: '#c07028',
     bgImage: '/background/Engine-Room.png',
@@ -137,7 +139,7 @@ export const ROOMS = [
   {
     id: 'obs_deck', label: 'OBS. DECK', code: 'C-01', deck: 'DECK 7',
     col: 1, row: 0,
-    alwaysOpen: false, unlockFlag: 'unit1_l1',
+    alwaysOpen: false, unlockFlag: 'unit2_l1',
     npc: 'Ada', npcColor: '#d05858', isWork: false,
     denial: 'The Observation Deck is closed for maintenance. Try again after your first shift.',
     dlg: { sp: 'Ada', txt: "The Veil Nebula is visible on clear cycles. I used to come up here with... well. It's a good view." },
@@ -163,7 +165,7 @@ export const ROOMS = [
   {
     id: 'hydro', label: 'HYDRO-POOL', code: 'D-03', deck: 'DECK 6',
     col: 1, row: 2,
-    alwaysOpen: false, unlockFlag: 'unit2_l1',
+    alwaysOpen: false, unlockFlag: 'unit4_l1',
     npc: 'Ada', npcColor: '#d05858', isWork: false,
     denial: 'The Hydro-Pool is on a scheduled maintenance cycle. Check back after your next shift.',
     dlg: { sp: 'Ada', txt: "Don't look so surprised. Even mechanics get shore leave. The water's warm — for now." },
@@ -224,7 +226,7 @@ export const ROOMS = [
   {
     id: 'lounge', label: 'LOUNGE', code: 'C-02', deck: 'DECK 7',
     col: 2, row: 2,
-    alwaysOpen: false, unlockFlag: 'unit3_l1',
+    alwaysOpen: false, unlockFlag: 'unit2_l1',
     npc: 'Ada', npcColor: '#d05858', isWork: false,
     denial: 'The Lounge is closed for a private crew event.',
     dlg: { sp: 'Ada', txt: "Game night. You in? Reyes keeps winning and it's starting to feel personal." },
@@ -244,9 +246,9 @@ export const ROOMS = [
   {
     id: 'bridge', label: 'BRIDGE', code: 'α-01', deck: 'COMMAND',
     col: 3, row: 0,
-    alwaysOpen: false, unlockFlag: 'unit4_l6',
+    alwaysOpen: true, unlockFlag: null,
     npc: 'Voss', npcColor: '#9080cc', isWork: false,
-    denial: 'The Bridge is a restricted area. Captain Voss is not accepting visitors.',
+    denial: null,
     dlg: { sp: 'Voss', txt: "I've been watching your work orders, Mechanic. Sit down. We need to talk about Sub-Level 3." },
     tint: '#9080cc',
     bgImage: '/background/Bridge.png',
@@ -270,9 +272,9 @@ export const ROOMS = [
   {
     id: 'maint_bay', label: 'MAINT. BAY', code: 'F-01', deck: 'DECK 4',
     col: 3, row: 2,
-    alwaysOpen: false, unlockFlag: 'unit4_l6',
+    alwaysOpen: true, unlockFlag: null,
     npc: 'MAINT-SYS', npcColor: '#40a860', isWork: false,
-    denial: 'The Maintenance Bay is locked down for a diagnostic cycle.',
+    denial: null,
     dlg: { sp: 'MAINT-SYS', txt: 'DIAGNOSTIC COMPLETE — INTEGRITY: 94.7% — ANOMALY LOGGED: SUB-LEVEL 3 — CLASSIFICATION: [REDACTED]' },
     tint: '#40a860',
     bgImage: '/background/Maintenance-Bay.png',
