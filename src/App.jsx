@@ -22,6 +22,7 @@ import InfoPanel from './components/ui/InfoDrawer'
 import DialogueBox from './components/ui/DialogueBox'
 import PlotBox from './components/ui/PlotBox'
 import GateCanvas from './components/canvas/GateCanvas'
+import HazardCanvas from './components/canvas/HazardCanvas'
 import Home from './pages/Home'
 import ShipMap from './pages/ShipMap'
 import PDA from './components/pda/PDA'
@@ -47,6 +48,7 @@ function WorkspaceView() {
               canvas area itself, not the whole window */}
           <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
             <GateCanvas />
+            <HazardCanvas />
             <DialogueBox />
             <PlotBox />
           </div>
