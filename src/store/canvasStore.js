@@ -18,6 +18,7 @@ import { create } from 'zustand'
 import { evaluate } from '../engine/GraphEvaluator'
 import useProgressStore from './progressStore.js'
 import useTimingStore from './timingStore.js'
+import useStateDiagramStore from './stateDiagramStore.js'
 
 // prevSignals lets cross-coupled memory (latches, flip-flop internals) hold
 // its last output across a recompute instead of forgetting on every call —
@@ -79,6 +80,9 @@ export const useCanvasStore = create((set, get) => ({
 
     // New phase, new trace — Timing panel starts clean at tick 0.
     useTimingStore.getState().reset(nodes, signals)
+    // New phase, new flip-flop detection — State Diagram panel re-derives
+    // its type (SR/JK/D/T/counter) from this phase's node ids.
+    useStateDiagramStore.getState().reset(nodes, signals)
   },
 
   // ── Toggle a driven input (INPUT node) ───────────────────────────────
@@ -88,6 +92,7 @@ export const useCanvasStore = create((set, get) => ({
     const nextSignals = runEval(nodes, wires, next, signals)
     set({ inputs: next, signals: nextSignals })
     useTimingStore.getState().record(nextSignals)
+    useStateDiagramStore.getState().record(next, nextSignals)
   },
 
   // ── Move a gate (drag end) ───────────────────────────────────────────
@@ -138,6 +143,7 @@ export const useCanvasStore = create((set, get) => ({
     const signals = runEval(nodes, nextWires, inputs, get().signals)
     set({ wires: nextWires, signals, dragWire: null })
     useTimingStore.getState().record(signals)
+    useStateDiagramStore.getState().record(inputs, signals)
   },
   cancelDragWire() {
     set({ dragWire: null })
@@ -150,6 +156,7 @@ export const useCanvasStore = create((set, get) => ({
     const signals = runEval(nodes, wires, inputs, get().signals)
     set({ wires, signals })
     useTimingStore.getState().record(signals)
+    useStateDiagramStore.getState().record(inputs, signals)
   },
 
   // ── Mark lesson as solved ─────────────────────────────────────────────

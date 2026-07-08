@@ -12,8 +12,8 @@
  *   Unit IV  → Timing · Verilog · Trivia
  *   Unit V   → Trivia only
  *
- * Timing is a real, live panel (see TimingDiagram.jsx) — everything else
- * besides Trivia is still a "coming soon" placeholder.
+ * Timing (see TimingDiagram.jsx) and State (see StateDiagram.jsx) are both
+ * real, live panels. Verilog is still a "coming soon" placeholder.
  *
  * The close button and backdrop are removed. The tab bar sits flush at
  * the top of the panel, matching the ControlPanel height (44px).
@@ -23,6 +23,7 @@ import { useState } from 'react'
 import { useLessonStore, UNITS } from '../../store/lessonStore'
 import OperatorStatus from './OperatorStatus'
 import TimingDiagram from './TimingDiagram'
+import StateDiagram from './StateDiagram'
 import TruthTablePanel from './TruthTablePanel'
 
 const PANEL_W = '20vw'
@@ -191,7 +192,7 @@ export default function InfoPanel() {
       {/* Tab content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         {tab === 'timing'     && <TimingDiagram />}
-        {tab === 'state'      && <PanelPlaceholder label="State Diagram" />}
+        {tab === 'state'      && <StateDiagram />}
         {tab === 'verilog'    && <PanelPlaceholder label="Verilog View" />}
         {tab === 'truthtable' && <TruthTablePanel />}
         {tab === 'trivia'     && (
