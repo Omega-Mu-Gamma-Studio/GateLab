@@ -12,8 +12,8 @@
  *   Unit IV  → Timing · Verilog · Trivia
  *   Unit V   → Trivia only
  *
- * Timing (see TimingDiagram.jsx) and State (see StateDiagram.jsx) are both
- * real, live panels. Verilog is still a "coming soon" placeholder.
+ * Timing, State, and Verilog are all real, live panels (see TimingDiagram.jsx,
+ * StateDiagram.jsx, VerilogPanel.jsx).
  *
  * The close button and backdrop are removed. The tab bar sits flush at
  * the top of the panel, matching the ControlPanel height (44px).
@@ -24,6 +24,7 @@ import { useLessonStore, UNITS } from '../../store/lessonStore'
 import OperatorStatus from './OperatorStatus'
 import TimingDiagram from './TimingDiagram'
 import StateDiagram from './StateDiagram'
+import VerilogPanel from './VerilogPanel'
 import TruthTablePanel from './TruthTablePanel'
 
 const PANEL_W = '20vw'
@@ -92,15 +93,6 @@ function TriviaCard({ item, onNext }) {
       <p style={{ fontFamily: 'var(--mono)', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.06em', margin: 0 }}>
         SHUFFLE FOR ANOTHER ONE
       </p>
-    </div>
-  )
-}
-
-function PanelPlaceholder({ label }) {
-  return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-muted)', fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.08em', padding: '20px', textAlign: 'center' }}>
-      <span style={{ color: 'var(--accent-text)', fontSize: '10px' }}>{label.toUpperCase()}</span>
-      <span>PANEL COMING SOON</span>
     </div>
   )
 }
@@ -193,7 +185,7 @@ export default function InfoPanel() {
       <div style={{ flex: 1, overflow: 'auto' }}>
         {tab === 'timing'     && <TimingDiagram />}
         {tab === 'state'      && <StateDiagram />}
-        {tab === 'verilog'    && <PanelPlaceholder label="Verilog View" />}
+        {tab === 'verilog'    && <VerilogPanel />}
         {tab === 'truthtable' && <TruthTablePanel />}
         {tab === 'trivia'     && (
           <TriviaCard
