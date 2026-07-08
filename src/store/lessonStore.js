@@ -63,7 +63,7 @@ export const UNITS = [
     description: 'Memory grid visualiser, clickable PLA/PAL dot matrix, and Hamming code error injection.',
     lessons: 7,
     status: 'dev',
-    panels: [],
+    panels: ['memory', 'pla'],
   },
 ]
 

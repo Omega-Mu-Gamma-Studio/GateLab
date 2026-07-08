@@ -10,10 +10,11 @@
  *   Unit II  → Verilog · Trivia
  *   Unit III → Timing · State · Verilog · Trivia
  *   Unit IV  → Timing · Verilog · Trivia
- *   Unit V   → Trivia only
+ *   Unit V   → Memory · PLA/PAL · Trivia
  *
- * Timing, State, and Verilog are all real, live panels (see TimingDiagram.jsx,
- * StateDiagram.jsx, VerilogPanel.jsx).
+ * Timing, State, Verilog, Memory, and PLA/PAL are all real, live panels
+ * (see TimingDiagram.jsx, StateDiagram.jsx, VerilogPanel.jsx,
+ * MemoryCellPanel.jsx, PlaGrid.jsx).
  *
  * The close button and backdrop are removed. The tab bar sits flush at
  * the top of the panel, matching the ControlPanel height (44px).
@@ -26,6 +27,8 @@ import TimingDiagram from './TimingDiagram'
 import StateDiagram from './StateDiagram'
 import VerilogPanel from './VerilogPanel'
 import TruthTablePanel from './TruthTablePanel'
+import MemoryCellPanel from './MemoryCellPanel'
+import PlaGrid from './PlaGrid'
 
 const PANEL_W = '20vw'
 
@@ -128,6 +131,8 @@ export default function InfoPanel() {
     state:      'State',
     verilog:    'Verilog',
     truthtable: 'Table',
+    memory:     'Memory',
+    pla:        'PLA/PAL',
     trivia:     panels.length > 0 ? '✦ Chill' : '✦ Trivia',
   }
 
@@ -187,6 +192,8 @@ export default function InfoPanel() {
         {tab === 'state'      && <StateDiagram />}
         {tab === 'verilog'    && <VerilogPanel />}
         {tab === 'truthtable' && <TruthTablePanel />}
+        {tab === 'memory'     && <MemoryCellPanel />}
+        {tab === 'pla'        && <PlaGrid />}
         {tab === 'trivia'     && (
           <TriviaCard
             item={deck[idx % deck.length]}
