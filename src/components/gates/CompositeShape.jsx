@@ -65,7 +65,7 @@ export default function CompositeShape({
   theme,
   snapPinIndex = -1,
 }) {
-  const geo = getCompositeGeometry(node.ffKind)
+  const geo = getCompositeGeometry(node)
   if (!geo) return null
 
   const scale = node.scale ?? 1

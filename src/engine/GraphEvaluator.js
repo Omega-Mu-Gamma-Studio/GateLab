@@ -22,19 +22,21 @@
  * It can be called from canvasStore, unit tests, or GraphEvaluator workers.
  *
  * COMPOSITE nodes — Block Mode —
- * A COMPOSITE node represents a whole flip-flop (SR latch/FF, JK, D, T) as
- * one black-box unit, simulated behaviorally via FlipFlopModels.nextState()
- * instead of a gate-level netlist. It has no entry in GATE_LOGIC — it's
- * dispatched separately by evaluateComposite() below — but it flows through
- * the exact same topo-sort / wiresByDest machinery as every other node, so
- * a COMPOSITE's Q can feed an ordinary gate, and an ordinary gate's output
- * can feed a COMPOSITE's CLK/data pin, with no special-casing anywhere else
- * in this file. Composite outputs are multi-valued (Q at index 0, Q̄ at
- * index 1 — see COMPOSITE_OUTPUT_PINS), so signals for a COMPOSITE node
- * carry an `outputs` array alongside the legacy single `output` field
- * (which mirrors outputs[0] / Q, for any caller still reading `.output`).
+ * A COMPOSITE node represents any reusable subcircuit — a flip-flop (SR
+ * latch/FF, JK, D, T), a full adder, or whatever BlockDefs.js grows next —
+ * as one black-box unit, simulated behaviorally via that block's own
+ * eval() instead of a gate-level netlist. It has no entry in GATE_LOGIC —
+ * it's dispatched separately by evaluateComposite() below — but it flows
+ * through the exact same topo-sort / wiresByDest machinery as every other
+ * node, so a COMPOSITE's output can feed an ordinary gate, and an ordinary
+ * gate's output can feed a COMPOSITE's input pin, with no special-casing
+ * anywhere else in this file. Composite outputs are multi-valued and
+ * named per-block (see BLOCK_DEFS[kind].outputs), so signals for a
+ * COMPOSITE node carry an `outputs` array alongside the legacy single
+ * `output` field (which mirrors outputs[0], for any caller still reading
+ * `.output` — true for both a flip-flop's Q and an adder's Sum).
  */
-import { nextState, COMPOSITE_INPUT_PINS, hasClkPin } from './FlipFlopModels'
+import { BLOCK_DEFS, getBlockKind } from './BlockDefs'
 
 const GATE_LOGIC = {
   AND:    (ins) => ins.every(Boolean),
@@ -245,7 +247,7 @@ function resolveOutputValue(signal, index = 0) {
 
 function getInputCount(node) {
   const type = node.type
-  if (type === 'COMPOSITE') return (COMPOSITE_INPUT_PINS[node.ffKind] || []).length
+  if (type === 'COMPOSITE') return (BLOCK_DEFS[getBlockKind(node)]?.inputs || []).length
   if (type === 'NOT' || type === 'OUTPUT') return 1
   if (type === 'INPUT' || type === 'CONST' || type === 'CLOCK') return 0
   return 2
@@ -253,41 +255,60 @@ function getInputCount(node) {
 
 /**
  * evaluateComposite(node, resolvedInputs, prevSignals)
- * Behavioral evaluation for a COMPOSITE (Block Mode) flip-flop node — the
- * exact same nextState() that already drives the State Diagram panel,
- * called here as the node's actual simulation instead of a gate netlist.
+ * Behavioral evaluation for any COMPOSITE (Block Mode) node — dispatches
+ * on BLOCK_DEFS[kind].stateful into one of two paths:
  *
- * Edge-triggering: every clocked kind only advances state on a CLK
- * rising edge (prevClk false → clkNow true), held in `_prevClk` on the
- * signal itself so the next evaluate() pass can see what CLK was last
- * time. Between edges — CLK steady high, steady low, or falling — the
- * output holds at its previous Q, matching real edge-triggered flip-flop
- * behavior rather than a level-sensitive latch's. SR_LATCH has no CLK
- * (hasClkPin === false) and recomputes every pass instead, since a latch
- * is level-sensitive by definition.
+ * Combinational (stateful: false — e.g. full_adder): no state, no clock,
+ * recompute fresh from current inputs every pass — identical contract to
+ * an ordinary gate in GATE_LOGIC. Output pins are named/sized per-block
+ * (BLOCK_DEFS[kind].outputs), not hardcoded to two.
+ *
+ * Stateful (stateful: true — every flip-flop kind): exact same
+ * edge-triggering logic as before this file supported non-FF blocks.
+ * A clocked kind only advances state on a CLK rising edge (prevClk false
+ * → clkNow true), held in `_prevClk` on the signal itself so the next
+ * evaluate() pass can see what CLK was last time. Between edges — CLK
+ * steady high, steady low, or falling — output holds at its previous Q.
+ * An unclocked stateful kind (SR_LATCH) is level-sensitive and recomputes
+ * every pass instead, since a latch has no edge to wait for.
+ *
+ * Resettable stateful kinds (resettable: true — e.g. jk_flipflop_clr)
+ * additionally check a 'CLR' pin: when HIGH, Q is asynchronously forced
+ * to false immediately, overriding both the clocked-hold and the normal
+ * eval() path — this models an active-HIGH async clear line exactly like
+ * the NAND+NOT decode gates these lessons already build by hand.
  */
 function evaluateComposite(node, resolvedInputs, prevSignals) {
-  const pinOrder = COMPOSITE_INPUT_PINS[node.ffKind]
-  if (!pinOrder) {
-    return { output: undefined, outputs: [undefined, undefined], inputs: resolvedInputs }
+  const def = BLOCK_DEFS[getBlockKind(node)]
+  if (!def) {
+    return { output: undefined, outputs: [], inputs: resolvedInputs }
   }
 
   const pinVals = {}
-  pinOrder.forEach((name, i) => { pinVals[name] = resolvedInputs[i] })
+  def.inputs.forEach((name, i) => { pinVals[name] = resolvedInputs[i] })
+
+  if (!def.stateful) {
+    const out = def.eval(pinVals)
+    const outputs = def.outputs.map(name => out[name])
+    return { output: outputs[0], outputs, inputs: resolvedInputs }
+  }
 
   const prevSignal = prevSignals[node.id] || {}
   const prevQ = Array.isArray(prevSignal.outputs) ? prevSignal.outputs[0] : undefined
 
   let q = prevQ
-  if (!hasClkPin(node.ffKind)) {
+  const asyncClear = def.resettable && !!pinVals.CLR
+  if (asyncClear) {
+    q = false
+  } else if (!def.clocked) {
     // Level-sensitive (SR latch): no edge to wait for, recompute every pass.
-    q = nextState(node.ffKind, prevQ, pinVals).q
+    q = def.eval(pinVals, prevQ).q
   } else {
-    const clkNow    = !!pinVals.CLK
-    const clkPrev   = !!prevSignal._prevClk
+    const clkNow     = !!pinVals.CLK
+    const clkPrev    = !!prevSignal._prevClk
     const risingEdge = clkNow && !clkPrev
     if (risingEdge) {
-      q = nextState(node.ffKind, prevQ, pinVals).q
+      q = def.eval(pinVals, prevQ).q
     }
     // else: hold — output stays at prevQ (undefined until the first edge)
   }
@@ -296,9 +317,9 @@ function evaluateComposite(node, resolvedInputs, prevSignals) {
 
   return {
     output:   q,          // legacy single-value field = Q, for any reader that ignores `outputs`
-    outputs:  [q, qbar],  // index 0 = Q, index 1 = Qbar — matches COMPOSITE_OUTPUT_PINS order
+    outputs:  [q, qbar],  // index 0 = Q, index 1 = Qbar
     inputs:   resolvedInputs,
-    _prevClk: hasClkPin(node.ffKind) ? !!pinVals.CLK : undefined,
+    _prevClk: def.clocked ? !!pinVals.CLK : undefined,
   }
 }
 

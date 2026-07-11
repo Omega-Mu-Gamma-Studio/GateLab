@@ -26,7 +26,7 @@ const LED_R    = 16
  * shape every other node type has — see compositeGeometry.js.
  */
 function pinForComposite(node, role, index = 0) {
-  const geo = getCompositeGeometry(node.ffKind)
+  const geo = getCompositeGeometry(node)
   if (!geo) return { x: node.x, y: node.y }
 
   const scale = node.scale ?? 1
@@ -98,7 +98,7 @@ export function getPinWorldPos(node, role, index = 0) {
  */
 export function getAllPins(node) {
   if (node.type === 'COMPOSITE') {
-    const geo = getCompositeGeometry(node.ffKind)
+    const geo = getCompositeGeometry(node)
     if (!geo) return { inputs: [], output: null, outputs: [] }
 
     const scale = node.scale ?? 1
