@@ -12,11 +12,29 @@
  * These offsets must match SpecialNodes.jsx exactly.
  */
 import { GATE_GEOMETRY } from './gateGeometry'
+import { getCompositeGeometry } from './compositeGeometry'
 
 // Must match SpecialNodes.jsx constants
 const INPUT_W  = 48
 const INPUT_H  = 32
 const LED_R    = 16
+
+/**
+ * pinForComposite(node, role, index)
+ * COMPOSITE nodes have NAMED, multi-pin edges on both sides (S/R/CLK etc.
+ * on the left, Q/Qbar on the right) rather than the single-output/N-input
+ * shape every other node type has — see compositeGeometry.js.
+ */
+function pinForComposite(node, role, index = 0) {
+  const geo = getCompositeGeometry(node.ffKind)
+  if (!geo) return { x: node.x, y: node.y }
+
+  const scale = node.scale ?? 1
+  const list = role === 'output' ? geo.outputs : geo.inputs
+  const pin = list[index] ?? list[0]
+  if (!pin) return { x: node.x, y: node.y }
+  return { x: node.x + pin.x * scale, y: node.y + pin.y * scale }
+}
 
 function pinForSpecial(node, role, index) {
   const scale = node.scale ?? 1   // special nodes don't scale visually but keep API consistent
@@ -50,6 +68,7 @@ const SPECIAL_TYPES = new Set(['INPUT', 'OUTPUT', 'CONST', 'CLOCK'])
  * Returns { x, y } in canvas coordinates.
  */
 export function getPinWorldPos(node, role, index = 0) {
+  if (node.type === 'COMPOSITE') return pinForComposite(node, role, index)
   if (SPECIAL_TYPES.has(node.type)) return pinForSpecial(node, role, index)
 
   const geo = GATE_GEOMETRY[node.type]
@@ -78,29 +97,54 @@ export function getPinWorldPos(node, role, index = 0) {
  * Used for drag-wire snap hit-testing.
  */
 export function getAllPins(node) {
+  if (node.type === 'COMPOSITE') {
+    const geo = getCompositeGeometry(node.ffKind)
+    if (!geo) return { inputs: [], output: null, outputs: [] }
+
+    const scale = node.scale ?? 1
+    const inputs = geo.inputs.map((pin, i) => ({
+      x: node.x + pin.x * scale,
+      y: node.y + pin.y * scale,
+      index: i,
+      name: pin.name,
+    }))
+    const outputs = geo.outputs.map((pin, i) => ({
+      x: node.x + pin.x * scale,
+      y: node.y + pin.y * scale,
+      index: i,
+      name: pin.name,
+    }))
+    // `output` mirrors outputs[0] (Q) — kept for any caller still expecting
+    // the single-pin shape every other node type has.
+    return { inputs, output: outputs[0] || null, outputs }
+  }
+
   if (SPECIAL_TYPES.has(node.type)) {
     if (node.type === 'INPUT' || node.type === 'CONST') {
-      return { inputs: [], output: pinForSpecial(node, 'output') }
+      const output = pinForSpecial(node, 'output')
+      return { inputs: [], output, outputs: [output] }
     }
     if (node.type === 'OUTPUT') {
-      return { inputs: [pinForSpecial(node, 'input')], output: null }
+      return { inputs: [pinForSpecial(node, 'input')], output: null, outputs: [] }
     }
-    return { inputs: [], output: null }
+    return { inputs: [], output: null, outputs: [] }
   }
 
   const geo = GATE_GEOMETRY[node.type]
-  if (!geo) return { inputs: [], output: null }
+  if (!geo) return { inputs: [], output: null, outputs: [] }
 
   const scale = node.scale ?? 1
+  const output = {
+    x: node.x + geo.output.x * scale,
+    y: node.y + geo.output.y * scale,
+  }
   return {
     inputs: geo.inputs.map((pin, i) => ({
       x: node.x + pin.x * scale,
       y: node.y + pin.y * scale,
       index: i,
     })),
-    output: {
-      x: node.x + geo.output.x * scale,
-      y: node.y + geo.output.y * scale,
-    },
+    output,
+    outputs: [output],
   }
 }

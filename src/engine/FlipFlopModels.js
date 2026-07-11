@@ -40,6 +40,42 @@ export const TYPE_LABELS = {
   [FF_TYPES.UNKNOWN]:     'Unrecognized Circuit',
 }
 
+/**
+ * COMPOSITE_INPUT_PINS[ffKind] — ordered input pin names for a COMPOSITE
+ * node of this kind, CLK first when the kind is clocked. This is the single
+ * source of truth for pin order: GraphEvaluator.js uses it to know which
+ * resolved input index is which named signal before calling nextState(),
+ * and compositeGeometry.js uses this exact same list to lay out and label
+ * pins on the rendered box. Keeping both derived from one array is what
+ * guarantees the wiring the player sees always matches what the engine
+ * actually evaluates — drift here would mean a visually-correct-looking
+ * circuit that silently simulates wrong.
+ *
+ * SR_LATCH has no CLK (level-sensitive); every other kind here is clocked.
+ */
+export const COMPOSITE_INPUT_PINS = {
+  [FF_TYPES.SR_LATCH]:    ['S', 'R'],
+  [FF_TYPES.SR_FLIPFLOP]: ['CLK', 'S', 'R'],
+  [FF_TYPES.JK_FLIPFLOP]: ['CLK', 'J', 'K'],
+  [FF_TYPES.D_FLIPFLOP]:  ['CLK', 'D'],
+  [FF_TYPES.T_FLIPFLOP]:  ['CLK', 'T'],
+}
+
+/**
+ * COMPOSITE_OUTPUT_PINS — every composite kind exposes the same two
+ * outputs, Q then Q̄, in this order. Index 0 = Q, index 1 = Qbar.
+ */
+export const COMPOSITE_OUTPUT_PINS = ['Q', 'Qbar']
+
+/**
+ * hasClkPin(ffKind) — true if this kind is edge-triggered (has a CLK pin).
+ * SR_LATCH is the one kind without it — a latch is level-sensitive, not
+ * edge-triggered, on the real gate-level lesson or the composite box alike.
+ */
+export function hasClkPin(ffKind) {
+  return COMPOSITE_INPUT_PINS[ffKind]?.[0] === 'CLK'
+}
+
 // Matches Q, Q0, Q1, Q2... but NOT Qbar (the trailing digit-or-nothing
 // pattern excludes the "bar" suffix on purpose).
 const Q_OUTPUT_RE = /^Q\d*$/

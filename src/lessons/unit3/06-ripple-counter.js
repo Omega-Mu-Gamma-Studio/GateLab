@@ -17,77 +17,53 @@
  *   Reading Q2 Q1 Q0 gives a 3-bit binary count: 000→001→010→...→111→000.
  *   "Ripple" because the clock signal ripples through the chain — propagation
  *   delay accumulates, unlike a synchronous counter. Simple but can glitch.
+ *
+ * Block Mode note:
+ *   This is a "compose it" lesson — the concept being taught is cascading,
+ *   not flip-flop internals (those were 01-05). Each stage is a COMPOSITE
+ *   T flip-flop: CLK/T in, Q/Q̄ out, simulated behaviorally via
+ *   FlipFlopModels.nextState() (see GraphEvaluator.js). T is tied HIGH on
+ *   all three stages — a T-FF with T=1 toggles every rising CLK edge, which
+ *   is exactly the divide-by-2 behavior this lesson is about. The fault is
+ *   still the Q0→CLK1 cascade wire, now drawn between two labeled boxes
+ *   instead of buried in two four-gate netlists.
  */
 
 const NODES_FULL = [
-  { id: 'CLK',    type: 'INPUT',  x: 40,  y: 200, scale: 1 },
+  { id: 'CLK', type: 'INPUT', x: 40,  y: 190, scale: 1 },
+  { id: 'vcc', type: 'CONST', x: 40,  y: 380, scale: 1, value: true },
 
-  // Stage 0 (LSB)
-  { id: 'vcc0',   type: 'CONST',  x: 40,  y: 80,  scale: 1, value: true },
-  { id: 's0_j',   type: 'NAND',   x: 160, y: 60,  scale: 1.1 },
-  { id: 's0_k',   type: 'NAND',   x: 160, y: 230, scale: 1.1 },
-  { id: 's0_q',   type: 'NAND',   x: 310, y: 80,  scale: 1.1 },
-  { id: 's0_qb',  type: 'NAND',   x: 310, y: 220, scale: 1.1 },
-  { id: 'Q0',     type: 'OUTPUT', x: 470, y: 110, scale: 1 },
+  { id: 'stage0', type: 'COMPOSITE', ffKind: 't_flipflop', x: 160, y: 100, scale: 1, label: 'STAGE 0' },
+  { id: 'Q0',     type: 'OUTPUT',    x: 420, y: 145, scale: 1 },
 
-  // Stage 1
-  { id: 'vcc1',   type: 'CONST',  x: 40,  y: 360, scale: 1, value: true },
-  { id: 's1_j',   type: 'NAND',   x: 160, y: 340, scale: 1.1 },
-  { id: 's1_k',   type: 'NAND',   x: 160, y: 500, scale: 1.1 },
-  { id: 's1_q',   type: 'NAND',   x: 310, y: 355, scale: 1.1 },
-  { id: 's1_qb',  type: 'NAND',   x: 310, y: 490, scale: 1.1 },
-  { id: 'Q1',     type: 'OUTPUT', x: 470, y: 385, scale: 1 },
+  { id: 'stage1', type: 'COMPOSITE', ffKind: 't_flipflop', x: 160, y: 280, scale: 1, label: 'STAGE 1' },
+  { id: 'Q1',     type: 'OUTPUT',    x: 420, y: 325, scale: 1 },
 
-  // Stage 2 (MSB)
-  { id: 'vcc2',   type: 'CONST',  x: 40,  y: 620, scale: 1, value: true },
-  { id: 's2_j',   type: 'NAND',   x: 160, y: 600, scale: 1.1 },
-  { id: 's2_k',   type: 'NAND',   x: 160, y: 740, scale: 1.1 },
-  { id: 's2_q',   type: 'NAND',   x: 310, y: 615, scale: 1.1 },
-  { id: 's2_qb',  type: 'NAND',   x: 310, y: 750, scale: 1.1 },
-  { id: 'Q2',     type: 'OUTPUT', x: 470, y: 645, scale: 1 },
+  { id: 'stage2', type: 'COMPOSITE', ffKind: 't_flipflop', x: 160, y: 460, scale: 1, label: 'STAGE 2' },
+  { id: 'Q2',     type: 'OUTPUT',    x: 420, y: 505, scale: 1 },
 ]
 
+// COMPOSITE input pin order for t_flipflop is ['CLK', 'T'] — index 0 = CLK, index 1 = T.
+// COMPOSITE output pin order is always ['Q', 'Qbar'] — index 0 = Q, index 1 = Qbar.
 const WIRES_FULL = [
-  // Stage 0: T=vcc0, CLK=master CLK, feedback
-  { id: 'a1',  from: { nodeId: 'vcc0',  pin: 'output' }, to: { nodeId: 's0_j',  pin: 'input', index: 0 } },
-  { id: 'a2',  from: { nodeId: 'CLK',   pin: 'output' }, to: { nodeId: 's0_j',  pin: 'input', index: 1 } },
-  { id: 'a3',  from: { nodeId: 's0_qb', pin: 'output' }, to: { nodeId: 's0_j',  pin: 'input', index: 2 } },
-  { id: 'a4',  from: { nodeId: 'vcc0',  pin: 'output' }, to: { nodeId: 's0_k',  pin: 'input', index: 0 } },
-  { id: 'a5',  from: { nodeId: 'CLK',   pin: 'output' }, to: { nodeId: 's0_k',  pin: 'input', index: 1 } },
-  { id: 'a6',  from: { nodeId: 's0_q',  pin: 'output' }, to: { nodeId: 's0_k',  pin: 'input', index: 2 } },
-  { id: 'a7',  from: { nodeId: 's0_j',  pin: 'output' }, to: { nodeId: 's0_q',  pin: 'input', index: 0 } },
-  { id: 'a8',  from: { nodeId: 's0_qb', pin: 'output' }, to: { nodeId: 's0_q',  pin: 'input', index: 1 } },
-  { id: 'a9',  from: { nodeId: 's0_k',  pin: 'output' }, to: { nodeId: 's0_qb', pin: 'input', index: 0 } },
-  { id: 'a10', from: { nodeId: 's0_q',  pin: 'output' }, to: { nodeId: 's0_qb', pin: 'input', index: 1 } },
-  { id: 'a11', from: { nodeId: 's0_q',  pin: 'output' }, to: { nodeId: 'Q0',    pin: 'input', index: 0 } },
+  // Stage 0: master CLK, T tied HIGH
+  { id: 'a1', from: { nodeId: 'CLK', pin: 'output' }, to: { nodeId: 'stage0', pin: 'input', index: 0 } },
+  { id: 'a2', from: { nodeId: 'vcc', pin: 'output' }, to: { nodeId: 'stage0', pin: 'input', index: 1 } },
+  { id: 'a3', from: { nodeId: 'stage0', pin: 'output' }, to: { nodeId: 'Q0', pin: 'input', index: 0 } },
+
   // Cascade: Q0 → CLK of Stage 1
-  { id: 'c1',  from: { nodeId: 's0_q',  pin: 'output' }, to: { nodeId: 's1_j',  pin: 'input', index: 1 } },
-  { id: 'c2',  from: { nodeId: 's0_q',  pin: 'output' }, to: { nodeId: 's1_k',  pin: 'input', index: 1 } },
+  { id: 'c1', from: { nodeId: 'stage0', pin: 'output' }, to: { nodeId: 'stage1', pin: 'input', index: 0 } },
 
-  // Stage 1: T=vcc1, CLK=Q0, feedback
-  { id: 'b1',  from: { nodeId: 'vcc1',  pin: 'output' }, to: { nodeId: 's1_j',  pin: 'input', index: 0 } },
-  { id: 'b2',  from: { nodeId: 's1_qb', pin: 'output' }, to: { nodeId: 's1_j',  pin: 'input', index: 2 } },
-  { id: 'b3',  from: { nodeId: 'vcc1',  pin: 'output' }, to: { nodeId: 's1_k',  pin: 'input', index: 0 } },
-  { id: 'b4',  from: { nodeId: 's1_q',  pin: 'output' }, to: { nodeId: 's1_k',  pin: 'input', index: 2 } },
-  { id: 'b5',  from: { nodeId: 's1_j',  pin: 'output' }, to: { nodeId: 's1_q',  pin: 'input', index: 0 } },
-  { id: 'b6',  from: { nodeId: 's1_qb', pin: 'output' }, to: { nodeId: 's1_q',  pin: 'input', index: 1 } },
-  { id: 'b7',  from: { nodeId: 's1_k',  pin: 'output' }, to: { nodeId: 's1_qb', pin: 'input', index: 0 } },
-  { id: 'b8',  from: { nodeId: 's1_q',  pin: 'output' }, to: { nodeId: 's1_qb', pin: 'input', index: 1 } },
-  { id: 'b9',  from: { nodeId: 's1_q',  pin: 'output' }, to: { nodeId: 'Q1',    pin: 'input', index: 0 } },
+  // Stage 1: T tied HIGH
+  { id: 'b2', from: { nodeId: 'vcc', pin: 'output' }, to: { nodeId: 'stage1', pin: 'input', index: 1 } },
+  { id: 'b3', from: { nodeId: 'stage1', pin: 'output' }, to: { nodeId: 'Q1', pin: 'input', index: 0 } },
+
   // Cascade: Q1 → CLK of Stage 2
-  { id: 'd1',  from: { nodeId: 's1_q',  pin: 'output' }, to: { nodeId: 's2_j',  pin: 'input', index: 1 } },
-  { id: 'd2',  from: { nodeId: 's1_q',  pin: 'output' }, to: { nodeId: 's2_k',  pin: 'input', index: 1 } },
+  { id: 'd1', from: { nodeId: 'stage1', pin: 'output' }, to: { nodeId: 'stage2', pin: 'input', index: 0 } },
 
-  // Stage 2: T=vcc2, CLK=Q1, feedback
-  { id: 'e1',  from: { nodeId: 'vcc2',  pin: 'output' }, to: { nodeId: 's2_j',  pin: 'input', index: 0 } },
-  { id: 'e2',  from: { nodeId: 's2_qb', pin: 'output' }, to: { nodeId: 's2_j',  pin: 'input', index: 2 } },
-  { id: 'e3',  from: { nodeId: 'vcc2',  pin: 'output' }, to: { nodeId: 's2_k',  pin: 'input', index: 0 } },
-  { id: 'e4',  from: { nodeId: 's2_q',  pin: 'output' }, to: { nodeId: 's2_k',  pin: 'input', index: 2 } },
-  { id: 'e5',  from: { nodeId: 's2_j',  pin: 'output' }, to: { nodeId: 's2_q',  pin: 'input', index: 0 } },
-  { id: 'e6',  from: { nodeId: 's2_qb', pin: 'output' }, to: { nodeId: 's2_q',  pin: 'input', index: 1 } },
-  { id: 'e7',  from: { nodeId: 's2_k',  pin: 'output' }, to: { nodeId: 's2_qb', pin: 'input', index: 0 } },
-  { id: 'e8',  from: { nodeId: 's2_q',  pin: 'output' }, to: { nodeId: 's2_qb', pin: 'input', index: 1 } },
-  { id: 'e9',  from: { nodeId: 's2_q',  pin: 'output' }, to: { nodeId: 'Q2',    pin: 'input', index: 0 } },
+  // Stage 2: T tied HIGH
+  { id: 'e2', from: { nodeId: 'vcc', pin: 'output' }, to: { nodeId: 'stage2', pin: 'input', index: 1 } },
+  { id: 'e3', from: { nodeId: 'stage2', pin: 'output' }, to: { nodeId: 'Q2', pin: 'input', index: 0 } },
 ]
 
 export default {
@@ -108,31 +84,30 @@ export default {
     recap:    "Cargo bay access log is stuck — it's only recording event codes 0 and 1. Should be cycling through 0 to 7 on every door-open event.\n\nThe sequencer uses a 3-bit ripple counter: three T flip-flop stages in cascade. Stage 0 takes the master clock. Stage 1 takes Q0. Stage 2 takes Q1. Each stage divides frequency by 2. Reading Q2 Q1 Q0 together gives a 3-bit binary count.\n\nThe cascade link between Stage 0 and Stage 1 is severed. Q0 isn't reaching Stage 1's clock input. Stages 1 and 2 are frozen at zero. The counter wraps at 001 and starts over.\n\nRewire Q0 to Stage 1's clock input.",
     briefing: '3-bit ripple counter: three cascaded T flip-flop stages. Q0 clocks Stage 1, Q1 clocks Stage 2. Cascade wire Q0→CLK1 open-circuit. Stages 1 and 2 frozen. Counter limited to 0–1.',
     fault:    'INCIDENT REPORT: Interconnect at junction RC-1A open-circuit. Q0 (Stage 0 output) not reaching CLK input of Stage 1. Stage 1 and Stage 2 receive no clock — frozen at 0. Counter outputs Q2=0, Q1=0 always. Q0 normal. Log codes 0 and 1 only.',
-    dispatch: 'Reconnect Q0 to Stage 1 CLK (J and K clock pins, index 1). Q1→Stage 2 is intact. After repair, counter sequences 000→001→010→011→100→101→110→111→000. Verify all three output bits cycle.',
+    dispatch: 'Reconnect Q0 to Stage 1\'s CLK pin. Q1→Stage 2 is intact. After repair, counter sequences 000→001→010→011→100→101→110→111→000. Verify all three output bits cycle.',
     success:  'Q0 cascade rewired. Stage 1 and Stage 2 clocking correctly. Full 3-bit count restored: 000 through 111. Access log sequencer nominal. WO-0106 closed.',
-    lore:     "The ripple counter is the most natural counter you can build from flip-flops. Each stage uses the previous stage's Q output as its own clock — the clock signal ripples through the chain. It's asynchronous: the stages don't all update at the same moment. At low frequencies this is fine, but at high speeds, the propagation delay between stages causes brief incorrect states — called ripple glitches or decoding hazards. If you AND or OR the outputs together to decode a specific count, you can get spurious pulses during transitions. The fix is a synchronous counter: all flip-flops share the same clock, and combinational logic precomputes the next state for each bit. More gates, no glitches. The ripple counter trades cleanliness for simplicity. Sometimes the trade is worth it.",
+    lore:     "The ripple counter is the most natural counter you can build from flip-flops. Each stage uses the previous stage's Q output as its own clock — the clock signal ripples through the chain. It's asynchronous: the stages don't all update at the same moment. At low frequencies this is fine, but at high speeds, the propagation delay between stages causes brief incorrect states — called ripple glitches or decoding hazards. If you AND or OR the outputs together to decode a specific count, you can get spurious pulses during transitions. The fix is a synchronous counter: all flip-flops share the same clock, and combinational logic precomputes the next state for each bit. More gates, no glitches. The ripple counter trades cleanliness for simplicity. Sometimes the trade is worth it.\n\nEach STAGE box here behaves exactly like the T flip-flop you wired by hand in Lesson 05 — same characteristic table, same edge-triggered behavior. It's just drawn as a black box now, because at this scale the thing worth seeing is the cascade, not the NAND gates inside each stage.",
   },
 
   phases: {
     work: {
-      hint: 'Three T flip-flop stages. All T inputs (index 0 and 2 feedback) are wired. CLK of each stage feeds both J and K at index 1.',
+      hint: 'Three T flip-flop stages. T is tied HIGH on all three — a T-FF with T=1 toggles on every rising CLK edge. Each stage\'s Q feeds the next stage\'s CLK.',
       nodes: NODES_FULL,
       wires: WIRES_FULL,
       inputs: { CLK: false },
     },
     break: {
-      hint: "The cascade wire from Q0 to Stage 1's clock input is broken. Stage 1 and Stage 2 receive no clock.",
-      faultNodeId: 's1_j',
+      hint: "The cascade wire from Q0 to Stage 1's CLK pin is broken. Stage 1 and Stage 2 receive no clock.",
+      faultNodeId: 'stage1',
       nodes: NODES_FULL,
       inputs: { CLK: false },
       wires: [
-        ...WIRES_FULL.filter(w => w.id !== 'c1' && w.id !== 'c2'),
-        { id: 'c1', from: { nodeId: 's0_q', pin: 'output' }, to: { nodeId: 's1_j', pin: 'input', index: 1 }, broken: true },
-        { id: 'c2', from: { nodeId: 's0_q', pin: 'output' }, to: { nodeId: 's1_k', pin: 'input', index: 1 }, broken: true },
+        ...WIRES_FULL.filter(w => w.id !== 'c1'),
+        { id: 'c1', from: { nodeId: 'stage0', pin: 'output' }, to: { nodeId: 'stage1', pin: 'input', index: 0 }, broken: true },
       ],
     },
     try: {
-      hint: 'Three T flip-flop stages. Each T is held HIGH by a CONST. Q of each stage feeds the CLK (input index 1) of the next. Build the cascade.',
+      hint: 'Three T flip-flop stages, each T held HIGH by a CONST. Wire Q of each stage to the CLK pin of the next to build the cascade.',
       nodes: NODES_FULL.map(n => ({ ...n, locked: false })),
       inputs: { CLK: false },
       wires: [],

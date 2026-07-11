@@ -118,8 +118,12 @@ export const useCanvasStore = create((set, get) => ({
   },
 
   // ── Drag-wire: start, update, commit, cancel ─────────────────────────
-  startDragWire(fromNodeId, fromPos) {
-    set({ dragWire: { fromNodeId, fromPos, currentPos: fromPos } })
+  // fromOutputIndex disambiguates which output pin a wire starts from —
+  // always 0 for single-output nodes (gates, INPUT, CONST), but COMPOSITE
+  // nodes have two (0 = Q, 1 = Qbar), so the click that starts the drag
+  // has to say which one it grabbed.
+  startDragWire(fromNodeId, fromPos, fromOutputIndex = 0) {
+    set({ dragWire: { fromNodeId, fromPos, currentPos: fromPos, fromOutputIndex } })
   },
   updateDragWire(currentPos) {
     const dw = get().dragWire
@@ -141,7 +145,7 @@ export const useCanvasStore = create((set, get) => ({
 
     const newWire = {
       id:   `w_${Date.now()}`,
-      from: { nodeId: dragWire.fromNodeId, pin: 'output' },
+      from: { nodeId: dragWire.fromNodeId, pin: 'output', index: dragWire.fromOutputIndex ?? 0 },
       to:   { nodeId: toNodeId, pin: 'input', index: toPinIndex },
     }
     const nextWires = [...wires, newWire]

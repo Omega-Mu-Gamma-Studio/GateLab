@@ -19,6 +19,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Stage, Layer, Text, Rect } from 'react-konva'
 import GateShape from '../gates/GateShape'
+import CompositeShape from '../gates/CompositeShape'
 import { InputNode, OutputNode, ConstNode } from '../gates/SpecialNodes'
 import WireLayer from './WireLayer'
 import GateGallery from './GateGallery'
@@ -215,12 +216,15 @@ export default function GateCanvas() {
   }
 
   // ── Start drag wire from any output pin ─────────────────────────────────
-  function handleOutputPinClick(nodeId) {
+  // outputIndex defaults to 0 (the only sensible value for gates/INPUT/
+  // CONST, which have a single output). COMPOSITE nodes pass 0 for Q or 1
+  // for Qbar, since CompositeShape's two pins each report their own index.
+  function handleOutputPinClick(nodeId, outputIndex = 0) {
     if (!isTryPhase) return
     const node = nodes.find(n => n.id === nodeId)
     if (!node) return
-    const fromPos = getPinWorldPos(node, 'output')
-    startDragWire(nodeId, fromPos)
+    const fromPos = getPinWorldPos(node, 'output', outputIndex)
+    startDragWire(nodeId, fromPos, outputIndex)
   }
 
   // ── Copy-as-truth-table: sweep every INPUT node, copy markdown ───────────
@@ -323,6 +327,25 @@ export default function GateCanvas() {
           theme={theme}
           onClick={() => selectNode(node.id)}
           onOutputPinClick={isTryPhase && !dragWire ? () => handleOutputPinClick(node.id) : undefined}
+          onDragEnd={({ x, y }) => moveNode(node.id, x, y)}
+          snapPinIndex={dragWire ? getSnapPinIndex(node) : -1}
+        />
+      )
+    }
+
+    if (node.type === 'COMPOSITE') {
+      return (
+        <CompositeShape
+          key={node.id}
+          node={node}
+          inputValues={inVals}
+          outputValues={Array.isArray(sig?.outputs) ? sig.outputs : [outVal, undefined]}
+          error={node.id === faultNodeId}
+          selected={selectedNodeId === node.id}
+          draggable={isTryPhase && !node.locked}
+          theme={theme}
+          onClick={() => selectNode(node.id)}
+          onOutputPinClick={isTryPhase && !dragWire ? (idx) => handleOutputPinClick(node.id, idx) : undefined}
           onDragEnd={({ x, y }) => moveNode(node.id, x, y)}
           snapPinIndex={dragWire ? getSnapPinIndex(node) : -1}
         />

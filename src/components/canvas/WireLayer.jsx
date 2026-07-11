@@ -20,6 +20,7 @@
 import { Line, Circle } from 'react-konva'
 import { routeWire } from '../../engine/WireRouter'
 import { getPinWorldPos } from '../gates/GatePin'
+import { getSignalForWire } from '../../engine/GraphEvaluator'
 
 const SIG_LOW    = '#1a2e1a'
 const SIG_UNDEF  = '#4a5248'
@@ -44,7 +45,7 @@ function resolveWireEndpoints(wire, nodes) {
   const toNode   = nodes.find(n => n.id === wire.to.nodeId)
   if (!fromNode || !toNode) return null
 
-  const fromPos = getPinWorldPos(fromNode, 'output')
+  const fromPos = getPinWorldPos(fromNode, 'output', wire.from.index ?? 0)
   const toPos   = getPinWorldPos(toNode,   'input', wire.to.index ?? 0)
   return { fromPos, toPos }
 }
@@ -60,7 +61,7 @@ export default function WireLayer({ nodes, wires, signals, dragWire, dragValid =
         if (!endpoints) return null
 
         const { fromPos, toPos } = endpoints
-        const sigValue = signals[wire.from.nodeId]?.output
+        const sigValue = getSignalForWire(wire, signals)
         const broken   = !!wire.broken
 
         const color  = getWireColor(sigValue, broken, theme)
